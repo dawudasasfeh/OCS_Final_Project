@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RentalMarketplace.Domain/RentalMarketplaceBackend.Domain.csproj" />
+  <Project Path="RentalMarketplaceBackend.API/RentalMarketplaceBackend.API.csproj" />
+  <Project Path="RentalMarketplaceBackend.Application/RentalMarketplaceBackend.Application.csproj" />
+  <Project Path="RentalMarketplaceBackend.Infrastructure/RentalMarketplaceBackend.Infrastructure.csproj" />
+</Solution>

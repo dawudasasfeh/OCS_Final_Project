@@ -1,0 +1,6 @@
+@RentalMarketplaceBackend.API_HostAddress = http://localhost:5256
+
+GET {{RentalMarketplaceBackend.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
