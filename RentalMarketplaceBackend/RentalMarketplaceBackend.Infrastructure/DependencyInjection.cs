@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RentalMarketplaceBackend.Infrastructure.Persistence;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using RentalMarketplaceBackend.Application.Interfaces.Services;
+using RentalMarketplaceBackend.Domain.Entities;
+using RentalMarketplaceBackend.Infrastructure.Persistence;
+using RentalMarketplaceBackend.Infrastructure.Services;
 
 namespace RentalMarketplaceBackend.Infrastructure
 {
@@ -13,6 +17,11 @@ namespace RentalMarketplaceBackend.Infrastructure
             services.AddDbContext<AppDbContext>(o =>
                 o.UseSqlServer(config.GetConnectionString("DefaultConnection")));
             //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddIdentityCore<ApplicationUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>();
+
+            services.AddScoped<ITokenService, TokenService>();
             return services;
 
         }

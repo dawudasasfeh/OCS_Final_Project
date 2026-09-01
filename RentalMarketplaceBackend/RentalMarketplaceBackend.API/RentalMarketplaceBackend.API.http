@@ -1,6 +1,30 @@
-@RentalMarketplaceBackend.API_HostAddress = http://localhost:5256
+@host = https://localhost:7137
 
-GET {{RentalMarketplaceBackend.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register
+POST {{host}}/api/auth/register
+Content-Type: application/json
 
-###
+{
+  "fullName": "Dawud Asasfeh",
+  "email": "dawud@test.com",
+  "password": "Test123!",
+  "phoneNumber": "0790000000"
+}
+
+### Login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dawud@test.com",
+  "password": "Test123!"
+}
+
+### Login with wrong password (expect 401)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dawud@test.com",
+  "password": "WrongPass1!"
+}
