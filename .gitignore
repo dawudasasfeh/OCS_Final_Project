@@ -489,3 +489,9 @@ dist/
 
 # Local secrets
 appsettings.*.local.json
+
+# React build/tool caches
+.eslintcache
+coverage/
+.vite/
+*.tsbuildinfo
