@@ -2,7 +2,6 @@
 using RentalMarketplaceBackend.Domain.Entities;
 using RentalMarketplaceBackend.Infrastructure.Persistence;
 
-
 namespace RentalMarketplaceBackend.Infrastructure.Repositories;
 
 public class TestimonialRepository : GenericRepository<Testimonial>, ITestimonialRepository

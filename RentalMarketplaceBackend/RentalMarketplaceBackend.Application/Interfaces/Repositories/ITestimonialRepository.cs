@@ -1,9 +1,8 @@
 ﻿using RentalMarketplaceBackend.Domain.Entities;
 using RentalMarketplaceBackend.Domain.Enums;
 
-namespace RentalMarketplaceBackend.Application.Interfaces.Repositories
+namespace RentalMarketplaceBackend.Application.Interfaces.Repositories;
+
+public interface ITestimonialRepository : IGenericRepository<Testimonial>
 {
-    public interface ITestimonialRepository : IGenericRepository<Testimonial>
-    {
-    }
 }
