@@ -40,7 +40,7 @@ Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=Tru
 | 1 | `20260901121729_InitialCreate` | Identity tables and all six application tables, with keys, indexes and delete behaviour |
 | 2 | `20260901122422_AddPropertyType` | `Houses.PropertyType` |
 | 3 | `20260903145918_AddHouseDetails` | Neighbourhood, furnishing, floor, master bedrooms, apartments in building, building age; narrowed `Address` to `nvarchar(250)` |
-| 4 | `AddTurnoverDays` | `Houses.TurnoverDays` — cleaning and inspection period between stays |
+| 4 | `20260903172127_AddTurnoverDays` | `Houses.TurnoverDays` — cleaning and inspection period between stays |
 
 Commands used:
 
