@@ -6,6 +6,8 @@ using RentalMarketplaceBackend.Application.Interfaces.Services;
 using RentalMarketplaceBackend.Domain.Entities;
 using RentalMarketplaceBackend.Infrastructure.Persistence;
 using RentalMarketplaceBackend.Infrastructure.Services;
+using RentalMarketplaceBackend.Application.Interfaces.Repositories; 
+using RentalMarketplaceBackend.Infrastructure.Repositories;
 
 namespace RentalMarketplaceBackend.Infrastructure
 {
@@ -16,7 +18,8 @@ namespace RentalMarketplaceBackend.Infrastructure
         {
             services.AddDbContext<AppDbContext>(o =>
                 o.UseSqlServer(config.GetConnectionString("DefaultConnection")));
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
