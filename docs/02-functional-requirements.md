@@ -81,7 +81,8 @@ implementation status:
 |---|---|---|
 | FR-5.1 | A renter shall submit a payment record against a confirmed booking. | 🟡 |
 | FR-5.2 | A payment shall record amount, purpose, status, an optional reference note and a creation timestamp. | 🟡 |
-| FR-5.3 | A property owner shall confirm or reject a payment made against their own property. | ⬜ |
+| FR-5.3 | A property owner shall confirm or reject a **booking** payment made against their own property. | ⬜ |
+| FR-5.3a | An administrator shall confirm or reject a **subscription** payment. A subscription payment has no associated property and therefore no owner to confirm it. | ⬜ |
 | FR-5.4 | Confirming a payment shall record the confirmation timestamp. | 🟡 |
 | FR-5.5 | A single payment table shall serve both booking payments and subscription payments, distinguished by a purpose discriminator. | 🟡 |
 | FR-5.6 | A booking may carry multiple payment attempts, so a rejected payment can be superseded by a new one. | 🟡 |
@@ -118,12 +119,55 @@ implementation status:
 
 ## FR-9 — Administration
 
+The administrator has oversight of three areas of the platform: **subscriptions**,
+**testimonials** and **listings**.
+
+### FR-9.1 — Subscriptions
+
 | ID | Requirement | Status |
 |---|---|---|
-| FR-9.1 | An administrator shall view all registered users. | ⬜ |
-| FR-9.2 | An administrator shall toggle any user subscription status. | ⬜ |
-| FR-9.3 | An administrator shall moderate testimonials. | ⬜ |
-| FR-9.4 | Administrative endpoints shall be restricted to the `Admin` role and shall return HTTP 403 to all other users. | ⬜ |
+| FR-9.1.1 | An administrator shall view all registered users together with their current subscription status and expiry date. | ⬜ |
+| FR-9.1.2 | An administrator shall view subscription payments awaiting confirmation. | ⬜ |
+| FR-9.1.3 | An administrator shall approve a subscription. Approval shall, in a single transaction, mark the subscription payment confirmed and set the user's subscription flag and expiry date. | ⬜ |
+| FR-9.1.4 | An administrator shall reject a subscription payment without altering the user's subscription status. | ⬜ |
+| FR-9.1.5 | An administrator shall deactivate an active subscription. | ⬜ |
+
+Approving a subscription touches two entities — `Payments` and `AspNetUsers` — and shall
+therefore be committed through a single unit of work, so that a confirmed payment can
+never be recorded against a user whose access was not granted.
+
+### FR-9.2 — Testimonials
+
+| ID | Requirement | Status |
+|---|---|---|
+| FR-9.2.1 | An administrator shall view all submitted testimonials, including those not yet approved. | ⬜ |
+| FR-9.2.2 | An administrator shall approve a testimonial, making it publicly visible. | ⬜ |
+| FR-9.2.3 | An administrator shall reject or unpublish a previously approved testimonial. | ⬜ |
+| FR-9.2.4 | Only approved testimonials shall be returned by public endpoints. | ⬜ |
+
+### FR-9.3 — Listings
+
+| ID | Requirement | Status |
+|---|---|---|
+| FR-9.3.1 | An administrator shall view all published listings across every owner. | ⬜ |
+| FR-9.3.2 | An administrator shall unpublish a listing that breaches platform policy, removing it from public search results. | ⬜ |
+| FR-9.3.3 | Unpublishing a listing shall not delete it, and shall not affect bookings already placed against it. | ⬜ |
+| FR-9.3.4 | An administrator shall not edit the content of a listing belonging to another user. | ⬜ |
+
+Moderation is **reactive**: a listing is published immediately and may be removed
+afterwards. Requiring approval before publication was considered and rejected, because it
+places an administrator in the critical path of every new listing.
+
+FR-9.3.2 is currently expressed through the existing `Houses.IsAvailable` flag. The data
+model does not yet distinguish an owner delisting their own property from an
+administrator removing it — see the known limitations in the database design document.
+
+### FR-9.4 — Access control
+
+| ID | Requirement | Status |
+|---|---|---|
+| FR-9.4.1 | Administrative endpoints shall be restricted to the `Admin` role and shall return HTTP 403 to all other users. | ⬜ |
+| FR-9.4.2 | Administrators shall not participate in bookings; the role exists solely for oversight. | ⬜ |
 
 ## FR-10 — Data Integrity
 
@@ -145,13 +189,13 @@ implementation status:
 | Property Listings | 0 | 6 | 5 |
 | Search and Discovery | 0 | 7 | 0 |
 | Bookings | 1 | 11 | 3 |
-| Payments | 1 | 5 | 1 |
+| Payments | 1 | 5 | 2 |
 | Owner Subscriptions | 2 | 1 | 3 |
 | Wishlist | 1 | 2 | 0 |
 | Testimonials | 1 | 2 | 2 |
-| Administration | 0 | 0 | 4 |
+| Administration | 0 | 0 | 15 |
 | Data Integrity | 5 | 0 | 0 |
-| **Total** | **21** | **34** | **20** |
+| **Total** | **21** | **34** | **32** |
 
 **Phase 1 delivers** the complete domain model, SQL Server database with migrations, the
 repository and unit-of-work data-access layer, and a fully working JWT authentication

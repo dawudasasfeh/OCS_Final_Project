@@ -424,6 +424,8 @@ are enforced in the service layer instead.
 | `EndDate` must be after `StartDate` | Compares two columns of the same row; data annotations evaluate one property at a time |
 | Only one primary image per property | Requires comparing sibling rows |
 | Active subscription required to publish a listing | Requires reading the acting user's current state |
+| Approving a subscription must confirm the payment and activate the user together | Spans two tables; atomicity is provided by the unit of work, not by a constraint |
+| Only approved testimonials are publicly visible | A filter applied by the service; the row exists either way |
 
 Documenting these explicitly is deliberate: they are not schema gaps, they are rules that
 belong in a different layer.
@@ -474,5 +476,6 @@ the comparison still runs against the raw indexed columns, so
 | **`Testimonials.ApprovedAt` is not nullable** | It defaults to the creation time, so an unapproved testimonial already carries an approval timestamp. It should be `datetime2 NULL`. Fix scheduled for Phase 2. |
 | **Pending bookings hold dates indefinitely** | A booking that is never confirmed continues to block its date range, and its turnover window with it. Real platforms expire these; out of scope here. |
 | **Turnover uses the property's current setting** | Availability is evaluated against `Houses.TurnoverDays` as it stands at the time of the query. An owner who raises the value can retroactively invalidate a gap that was acceptable when an earlier booking was made. Storing the window on the booking would avoid this; not done, as owners are not expected to change it often. |
+| **Owner delisting and administrator moderation share one column** | `Houses.IsAvailable` currently serves both — an owner temporarily delisting their property, and an administrator removing one that breaches policy. The two are different acts with different authority, and an owner can presently reverse an administrator's decision by republishing. Separating them requires a second flag, for example `IsSuspended`, or replacing the boolean with a status enum. Recorded here rather than changed, so that the moderation requirements in FR-9.3 are read against what the schema actually supports. |
 | **No `Rating` on testimonials** | Testimonials are free-text platform feedback only, with no numeric score. |
 | **`DurationType` has no daily option** | The current values are Weekly, Monthly and Yearly. Nightly and daily rentals are not supported by the present model. |

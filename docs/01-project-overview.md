@@ -75,8 +75,9 @@ Money changes hands outside the application; Beytak tracks the state of each tra
 
 ### Owner subscriptions
 - Listing properties is gated behind an active subscription flag on the user account.
-- An administrator toggles subscription status manually. As with payments, no billing
-  provider is integrated.
+- An administrator reviews the submitted subscription payment and, on approval, confirms
+  the payment record and activates the subscription as a single operation. As with
+  booking payments, no billing provider is integrated.
 
 ### Supporting features
 - **Wishlist** — renters save properties for later. A database-level unique constraint
@@ -110,8 +111,19 @@ book. This mirrors the real market, where the same person is often a landlord in
 transaction and a tenant in another.
 
 ### Administrators (role: `Admin`)
-Platform operators who activate and deactivate owner subscriptions, approve or reject
-testimonials, and oversee the user base. Administrators do not participate in bookings.
+Platform operators responsible for oversight of three areas:
+
+- **Subscriptions** — reviewing subscription payments, activating and deactivating owner
+  subscriptions, and viewing the user base with each user's current status
+- **Testimonials** — approving submissions before they appear publicly, and unpublishing
+  ones that should no longer be shown
+- **Listings** — reviewing published properties and removing any that breach platform
+  policy
+
+Moderation of listings is reactive rather than gated: a property is published immediately
+and may be removed afterwards, so an administrator is never in the critical path of a new
+listing. Administrators oversee the platform; they do not participate in bookings, and
+they do not edit the content of another user's listing.
 
 ## 5. Scope Boundaries
 
