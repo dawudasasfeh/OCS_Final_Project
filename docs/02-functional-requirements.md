@@ -41,6 +41,7 @@ implementation status:
 | FR-2.8 | An owner shall delist a property by marking it unavailable, without deleting its booking history. | 🟡 |
 | FR-2.9 | Any visitor shall view a listing with its full details, owner name and images. | ⬜ |
 | FR-2.10 | The system shall prevent a user modifying a listing they do not own. | ⬜ |
+| FR-2.11 | An owner shall set the number of turnover days their property requires between stays for cleaning and inspection, defaulting to two. | 🟡 |
 
 ## FR-3 — Search and Discovery
 
@@ -58,12 +59,15 @@ implementation status:
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-4.1 | A registered user shall request a booking with a start date, end date and duration type. | 🟡 |
+| FR-4.1 | A registered user shall request a booking by supplying a start date, a duration count and a duration type — for example "6 months from 1 March". The end date shall be derived by the system, never entered by the user. | 🟡 |
 | FR-4.2 | **The system shall reject any booking whose date range overlaps an existing active booking for the same property.** | 🟡 |
 | FR-4.3 | Cancelled and rejected bookings shall not block new bookings for the same dates. | 🟡 |
-| FR-4.4 | The end date shall be exclusive: a stay ending on a given date shall not conflict with one starting on that date. | 🟡 |
-| FR-4.5 | The system shall reject a booking whose end date is not after its start date. | ⬜ |
-| FR-4.6 | The total price shall be calculated and stored on the booking at creation and shall not change if the property price is later edited. | 🟡 |
+| FR-4.4 | The end date shall be stored exclusively and presented inclusively: a booking stored as 1 March to 1 September shall be displayed to the user as "1 March to 31 August". | 🟡 |
+| FR-4.5 | The system shall reject a booking whose duration count is less than one. | ⬜ |
+| FR-4.13 | **The system shall enforce the property's turnover period between stays.** A new booking shall be rejected if it starts within the turnover window following an existing booking, or ends so close to a later booking that the turnover window would be lost. | 🟡 |
+| FR-4.14 | The turnover window shall be applied when evaluating availability only. It shall not be written into the stored end date, so that the booking record continues to state the period the renter actually agreed to. | 🟡 |
+| FR-4.15 | Days blocked by a turnover window shall be presented to renters as unavailable for turnover, distinctly from days blocked by a booking. | ⬜ |
+| FR-4.6 | The total price shall be calculated by the server as the property price multiplied by the duration count, stored on the booking at creation, and shall not change if the property price is later edited. The client shall never supply a price. | 🟡 |
 | FR-4.7 | A new booking shall be created with status `Pending`. | ✅ |
 | FR-4.8 | A property owner shall confirm or reject a pending booking on their own property. | ⬜ |
 | FR-4.9 | A renter shall cancel their own booking. | ⬜ |
@@ -138,16 +142,16 @@ implementation status:
 | Area | ✅ | 🟡 | ⬜ |
 |---|---|---|---|
 | Authentication and Authorization | 10 | 0 | 1 |
-| Property Listings | 0 | 5 | 5 |
+| Property Listings | 0 | 6 | 5 |
 | Search and Discovery | 0 | 7 | 0 |
-| Bookings | 1 | 8 | 3 |
+| Bookings | 1 | 11 | 3 |
 | Payments | 1 | 5 | 1 |
 | Owner Subscriptions | 2 | 1 | 3 |
 | Wishlist | 1 | 2 | 0 |
 | Testimonials | 1 | 2 | 2 |
 | Administration | 0 | 0 | 4 |
 | Data Integrity | 5 | 0 | 0 |
-| **Total** | **21** | **30** | **19** |
+| **Total** | **21** | **34** | **20** |
 
 **Phase 1 delivers** the complete domain model, SQL Server database with migrations, the
 repository and unit-of-work data-access layer, and a fully working JWT authentication

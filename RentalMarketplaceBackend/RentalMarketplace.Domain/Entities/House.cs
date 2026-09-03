@@ -57,6 +57,11 @@ public class House
 
     public BuildingAge? BuildingAge { get; set; }
 
+    // Days required after a stay ends for cleaning and inspection before the
+    // property can be booked again. Applied when checking booking availability.
+    [Range(0, 30)]
+    public int TurnoverDays { get; set; } = 2;
+
     public bool IsAvailable { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

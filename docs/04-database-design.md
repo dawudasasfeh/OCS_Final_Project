@@ -7,7 +7,7 @@ specification.
 - **Server:** SQL Server Express (`DESKTOP-V69JQA9\SQLEXPRESS`)
 - **Database:** `aspnet-API-FinalProject`
 - **Approach:** Entity Framework Core, Code First with migrations
-- **Migrations applied:** 3
+- **Migrations applied:** 4
 
 ---
 
@@ -40,6 +40,7 @@ Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=Tru
 | 1 | `20260901121729_InitialCreate` | Identity tables and all six application tables, with keys, indexes and delete behaviour |
 | 2 | `20260901122422_AddPropertyType` | `Houses.PropertyType` |
 | 3 | `20260903145918_AddHouseDetails` | Neighbourhood, furnishing, floor, master bedrooms, apartments in building, building age; narrowed `Address` to `nvarchar(250)` |
+| 4 | `AddTurnoverDays` | `Houses.TurnoverDays` — cleaning and inspection period between stays |
 
 Commands used:
 
@@ -95,6 +96,7 @@ erDiagram
         int MasterBedrooms "nullable"
         int ApartmentsInBuilding "nullable"
         int BuildingAge "nullable"
+        int TurnoverDays
         bit IsAvailable
         datetime2 CreatedAt
         nvarchar450 OwnerId FK
@@ -191,6 +193,7 @@ key referencing a user therefore uses that type, not `int`.
 | `MasterBedrooms` | `int` | Yes | |
 | `ApartmentsInBuilding` | `int` | Yes | |
 | `BuildingAge` | `int` | Yes | `BuildingAge` enum |
+| `TurnoverDays` | `int` | No | Cleaning and inspection period required between stays; defaults to 2 |
 | `IsAvailable` | `bit` | No | Delisting flag; preserves history instead of deleting |
 | `CreatedAt` | `datetime2` | No | UTC |
 | `OwnerId` | `nvarchar(450)` | No | FK to `AspNetUsers` |
@@ -198,6 +201,11 @@ key referencing a user therefore uses that type, not `int`.
 **`Price` plus `PriceUnit` is what makes the unified booking model work.** A price alone
 is meaningless across weekly, monthly and yearly rentals; the pair states both the amount
 and the unit it is quoted in.
+
+**`TurnoverDays` is per property, not a platform-wide constant.** A studio may need one
+day between tenants and a furnished villa three. The value defaults to 2 and is set by
+the owner. It affects availability only — see §8.2 — and is never written into a
+booking's stored end date.
 
 ### 3.3 `HouseImages`
 
@@ -214,7 +222,7 @@ and the unit it is quoted in.
 |---|---|---|---|
 | `Id` | `int` IDENTITY | No | PK |
 | `StartDate` | `date` | No | Calendar date, no time component |
-| `EndDate` | `date` | No | **Exclusive** |
+| `EndDate` | `date` | No | **Stored exclusively, displayed inclusively** — see below |
 | `DurationType` | `int` | No | `DurationType` enum |
 | `TotalPrice` | `decimal(18,2)` | No | Snapshot of the agreed price at creation |
 | `Status` | `int` | No | `BookingStatus` enum |
@@ -225,6 +233,27 @@ and the unit it is quoted in.
 `date` rather than `datetime2` for the stay dates is deliberate: a reservation is a range
 of calendar days, and removing the time component eliminates a class of off-by-a-few-hours
 bugs in overlap detection.
+
+#### Date conventions
+
+**Input.** The renter never types an end date. They supply a start date, a count and a
+unit — "6 months from 1 March" — and the server derives the end date with `AddDays`,
+`AddMonths` or `AddYears` according to the duration type. This keeps the price calculation
+exact (`Price × count`) and makes an inconsistent combination, such as a monthly rental
+spanning three days, impossible to express.
+
+**Storage.** `EndDate` is **exclusive** — the first day the property is free again. A
+six-month stay from 1 March is stored as `StartDate = 2026-03-01`,
+`EndDate = 2026-09-01`. Exclusive storage is what makes the overlap test a simple
+comparison, and it falls naturally out of `AddMonths`.
+
+**Display.** The end date is presented **inclusively**, as `EndDate.AddDays(-1)`, so the
+booking above reads "1 March 2026 to 31 August 2026" — how a tenancy is actually
+described. The conversion happens in the DTO mapping; the stored value is untouched.
+
+The three concerns are separated deliberately: the user expresses intent, the database
+stores the form that queries efficiently, and the interface renders the form that reads
+naturally.
 
 ### 3.5 `Payments`
 
@@ -386,15 +415,54 @@ CLR default) is distinguishable from a legitimate one.
 Some rules cannot be expressed by a column type, a constraint or a data annotation, and
 are enforced in the service layer instead.
 
+### 8.1 The rules
+
 | Rule | Why it cannot live in the schema |
 |---|---|
 | No overlapping bookings for one property | Requires comparing the candidate range against other rows; SQL Server has no range-exclusion constraint |
+| Turnover period respected between stays | Same reason, plus the window length varies per property |
 | `EndDate` must be after `StartDate` | Compares two columns of the same row; data annotations evaluate one property at a time |
 | Only one primary image per property | Requires comparing sibling rows |
 | Active subscription required to publish a listing | Requires reading the acting user's current state |
 
 Documenting these explicitly is deliberate: they are not schema gaps, they are rules that
 belong in a different layer.
+
+### 8.2 Availability, including turnover
+
+Two date ranges overlap unless one ends before the other begins. With exclusive end dates
+that is a two-term comparison:
+
+```
+existing.StartDate < requested.End  AND  requested.Start < existing.EndDate
+```
+
+The turnover window is applied by **padding the requested range** before the comparison,
+rather than by altering any stored value:
+
+```csharp
+var paddedStart = start.AddDays(-house.TurnoverDays);
+var paddedEnd   = end.AddDays(house.TurnoverDays);
+
+// existing.StartDate < paddedEnd  AND  paddedStart < existing.EndDate
+```
+
+Both ends are padded because every stay requires turnover after it, whether it is the
+existing booking or the one being requested.
+
+**Worked example** — existing booking 1 March to 1 April (stay 1–31 March),
+`TurnoverDays = 2`:
+
+| Requested start | Outcome |
+|---|---|
+| 2 April | Rejected — falls inside the turnover window |
+| 3 April | Accepted — first available day |
+
+Two properties of this design are worth noting. The stored `EndDate` continues to mean
+exactly what the renter agreed to, so the booking record and the invoice stay truthful.
+And because the arithmetic is performed in application code before the query is issued,
+the comparison still runs against the raw indexed columns, so
+`IX_Bookings_HouseId_StartDate_EndDate` remains usable.
 
 ---
 
@@ -404,6 +472,7 @@ belong in a different layer.
 |---|---|
 | **Overlap check is not atomic** | The availability check and the insert are two separate statements. Two simultaneous requests could both observe "available" and both insert. A serializable transaction would close this; accepted for the current scope. |
 | **`Testimonials.ApprovedAt` is not nullable** | It defaults to the creation time, so an unapproved testimonial already carries an approval timestamp. It should be `datetime2 NULL`. Fix scheduled for Phase 2. |
-| **Pending bookings hold dates indefinitely** | A booking that is never confirmed continues to block its date range. Real platforms expire these; out of scope here. |
+| **Pending bookings hold dates indefinitely** | A booking that is never confirmed continues to block its date range, and its turnover window with it. Real platforms expire these; out of scope here. |
+| **Turnover uses the property's current setting** | Availability is evaluated against `Houses.TurnoverDays` as it stands at the time of the query. An owner who raises the value can retroactively invalidate a gap that was acceptable when an earlier booking was made. Storing the window on the booking would avoid this; not done, as owners are not expected to change it often. |
 | **No `Rating` on testimonials** | Testimonials are free-text platform feedback only, with no numeric score. |
 | **`DurationType` has no daily option** | The current values are Weekly, Monthly and Yearly. Nightly and daily rentals are not supported by the present model. |

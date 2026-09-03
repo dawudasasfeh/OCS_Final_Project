@@ -43,6 +43,8 @@ Money changes hands outside the application; Beytak tracks the state of each tra
 - Owners publish properties with a structured specification: type, city, neighbourhood,
   area, bedrooms, bathrooms, floor number, master bedrooms, furnishing status, building
   age, and number of apartments in the building.
+- Owners set the turnover period their property needs between tenants, so the calendar
+  reflects the real time required to clean and inspect it.
 - Multiple images per property, with one designated as primary.
 - Owners may delist a property without deleting it, preserving its booking history.
 
@@ -52,8 +54,14 @@ Money changes hands outside the application; Beytak tracks the state of each tra
 
 ### Unified booking
 - A single booking model spans weekly, monthly and yearly rental periods.
+- A renter states a start date, a count and a unit — "6 months from 1 March" — and the
+  system derives the end date and the total. The renter never types an end date and never
+  supplies a price.
 - **Booking-conflict prevention**: the system rejects any reservation whose date range
   overlaps an existing active booking for the same property.
+- **Turnover periods**: each property carries a cleaning and inspection window, set by
+  the owner and defaulting to two days, which is enforced between consecutive stays. A
+  property that becomes free on 1 April is not bookable again until 3 April.
 - Bookings carry an explicit lifecycle: Pending → Confirmed / Rejected / Cancelled → Completed.
 - The agreed total price is **snapshotted** onto the booking at creation, so a later
   change to the property's price does not retroactively alter existing reservations.
