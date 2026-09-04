@@ -62,6 +62,8 @@ public class House
     [Range(0, 30)]
     public int TurnoverDays { get; set; } = 2;
 
+    public ListingStatus Status { get; set; } = ListingStatus.Pending;
+
     public bool IsAvailable { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

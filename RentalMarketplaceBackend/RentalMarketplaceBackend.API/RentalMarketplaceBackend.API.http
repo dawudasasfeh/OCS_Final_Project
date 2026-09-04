@@ -1,18 +1,48 @@
-@host = https://localhost:7137
+### =====================================================================
+### Beytak API — manual test suite
+###
+### SETUP  (do this first, it takes 30 seconds)
+###   1. Start the API on the https profile (port 7137).
+###   2. Run A2. Copy the "token" value from the response.
+###      Paste it below as @userToken.
+###   3. Run A3. Copy that token. Paste it below as @adminToken.
+###   4. Run C1. Note the "id" in the response.
+###      Paste it below as @newHouseId.
+###   5. Now run any request. Each one states the status it should return.
+###
+### Tokens expire after 120 minutes — repeat steps 2 and 3 if you start
+### getting 401s on requests that worked before.
+### =====================================================================
 
-### Register
-POST {{host}}/api/auth/register
+@host = https://localhost:7137
+@api = {{host}}/api
+
+### ---- PASTE VALUES HERE ------------------------------------------------
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZWFjMzc0ZC04NDYxLTQ1ZmItYjAyOC00M2FkZWY1NmQ1OGIiLCJuYW1lIjoiVGVzdCBSZW50ZXIiLCJlbWFpbCI6InJlbnRlcjAxQHRlc3QuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzg4NTU0MDEwLCJpc3MiOiJCZXl0YWtBUEkiLCJhdWQiOiJCZXl0YWtDbGllbnQifQ.R9aZmVGyIxBy5g1TEZ3IHquus6IIpwMMeaaZ1HQG4tI
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDY2OGU1ZS0zNmYyLTRmOGItODQ1Yi00ZTE1MTRhNDMxMjYiLCJuYW1lIjoiU3lzdGVtIEFkbWluIiwiZW1haWwiOiJhZG1pbkBiZXl0YWsuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODU1NDA1NiwiaXNzIjoiQmV5dGFrQVBJIiwiYXVkIjoiQmV5dGFrQ2xpZW50In0.JQCQrtpYVYeffkbm1cKiTXpmWyJiy6Yxhft82BUTTFg
+@newHouseId = 1
+@pendingHouseId = 2
+### -----------------------------------------------------------------------
+
+
+### =====================================================================
+### A. AUTHENTICATION
+### =====================================================================
+
+### A1 · Register a new account → 200 with a token.
+### Change the email each time you run it, or it returns 400.
+POST {{api}}/auth/register
 Content-Type: application/json
 
 {
-  "fullName": "Dawud Asasfeh",
-  "email": "dawud@test.com",
-  "password": "Test123!",
-  "phoneNumber": "0790000000"
+  "fullName": "Test Renter",
+  "email": "renter01@test.com",
+  "phoneNumber": "0791234567",
+  "password": "Test123!"
 }
 
-### Login
-POST {{host}}/api/auth/login
+### A2 · Log in as User → 200. COPY THE TOKEN INTO @userToken ABOVE.
+POST {{api}}/auth/login
 Content-Type: application/json
 
 {
@@ -20,11 +50,303 @@ Content-Type: application/json
   "password": "Test123!"
 }
 
-### Login with wrong password (expect 401)
-POST {{host}}/api/auth/login
+### A3 · Log in as Admin → 200. COPY THE TOKEN INTO @adminToken ABOVE.
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@beytak.com",
+  "password": "Admin123!"
+}
+
+### A4 · Wrong password → 401 "Invalid Email or Password."
+POST {{api}}/auth/login
 Content-Type: application/json
 
 {
   "email": "dawud@test.com",
-  "password": "WrongPass1!"
+  "password": "WrongPassword1!"
 }
+
+### A5 · Unknown email → 401 with the SAME message as A4.
+### Identical wording is deliberate: a different message would let an
+### attacker discover which emails have accounts.
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nobody@nowhere.com",
+  "password": "Test123!"
+}
+
+### A6 · Duplicate email → 400 "Email is already registered."
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Duplicate User",
+  "email": "dawud@test.com",
+  "phoneNumber": "0790000000",
+  "password": "Test123!"
+}
+
+### A7 · Weak password → 400 listing Identity's own rules
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Weak Password",
+  "email": "weak01@test.com",
+  "phoneNumber": "0790000000",
+  "password": "abcdef"
+}
+
+### A8 · Invalid model → 400 with field-level errors
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "",
+  "email": "not-an-email",
+  "phoneNumber": "0790000000",
+  "password": "abc"
+}
+
+
+### =====================================================================
+### B. LISTINGS — PUBLIC (no token needed)
+### =====================================================================
+
+### B1 · Search with no filters → 200, approved + available only
+GET {{api}}/houses
+
+### B2 · Filter by city → 200
+GET {{api}}/houses?city=Amman
+
+### B3 · City with no matches → 200 and an empty array, not a 404
+GET {{api}}/houses?city=Zarqa
+
+### B4 · Minimum bedrooms — asking for 2 also returns 3-bed listings
+GET {{api}}/houses?bedrooms=2
+
+### B5 · More bedrooms than any listing has → empty
+GET {{api}}/houses?bedrooms=10
+
+### B6 · Price range
+GET {{api}}/houses?minPrice=100&maxPrice=800
+
+### B7 · Price floor above every listing → empty
+GET {{api}}/houses?minPrice=99999
+
+### B8 · Furnished only
+GET {{api}}/houses?isFurnished=true
+
+### B9 · Property type — 1 Apartment · 2 House · 3 Villa · 4 Studio · 5 Room
+GET {{api}}/houses?propertyType=1
+
+### B10 · Rental period — 1 Weekly · 2 Monthly · 3 Yearly
+GET {{api}}/houses?priceUnit=2
+
+### B11 · Several filters at once, resolved in a single SQL query
+GET {{api}}/houses?city=Amman&propertyType=1&bedrooms=2&isFurnished=true&maxPrice=800
+
+### B12 · SECURITY — a stranger asking for pending listings.
+### HouseService overwrites Status with Approved, so this returns
+### approved listings only. Nothing Pending may appear here.
+GET {{api}}/houses?status=Pending
+
+### B13 · Invalid enum in a filter → 400
+GET {{api}}/houses?propertyType=99
+
+### B14 · Detail of an approved listing → 200
+GET {{api}}/houses/{{newHouseId}}
+
+### B15 · Listing that does not exist → 404
+GET {{api}}/houses/9999
+
+### B16 · SECURITY — detail of a PENDING listing as a stranger → 404
+GET {{api}}/houses/{{pendingHouseId}}
+
+### B17 · Non-numeric id → 404, not a 500.
+### The {id:int} route constraint is what makes "mine" and "pending"
+### reach their own actions instead of being parsed as an id.
+GET {{api}}/houses/abc
+
+
+### =====================================================================
+### C. LISTINGS — OWNER (needs @userToken)
+### =====================================================================
+
+### C1 · Create a listing → 201, status "Pending", Location header set.
+### COPY THE "id" FROM THE RESPONSE INTO @newHouseId ABOVE.
+### Note there is no ownerId in the body — it comes from the token.
+POST {{api}}/houses
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "title": "Renovated 2-bedroom in Jabal Al Weibdeh",
+  "description": "Quiet street close to cafes and the cultural centre. Recently renovated with new kitchen and bathroom fittings.",
+  "propertyType": 1,
+  "address": "Jabal Al Weibdeh, Building 4",
+  "city": "Amman",
+  "neighborhood": "Jabal Al Weibdeh",
+  "price": 400,
+  "priceUnit": 2,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "areaSqM": 110,
+  "isFurnished": false,
+  "floorNumber": 2,
+  "masterBedrooms": 1,
+  "apartmentsInBuilding": 6,
+  "buildingAge": 3,
+  "turnoverDays": 2,
+  "imageUrls": ["/uploads/houses/weibdeh-1.jpg", "/uploads/houses/weibdeh-2.jpg"]
+}
+
+### C2 · The owner CAN see their own pending listing → 200
+GET {{api}}/houses/{{newHouseId}}
+Authorization: Bearer {{userToken}}
+
+### C3 · A stranger CANNOT see the same listing → 404
+GET {{api}}/houses/{{newHouseId}}
+
+### C4 · The owner's listings → 200, every status, newest first
+GET {{api}}/houses/mine
+Authorization: Bearer {{userToken}}
+
+### C5 · Create without a token → 401
+POST {{api}}/houses
+Content-Type: application/json
+
+{
+  "title": "Unauthorised listing",
+  "description": "This must never be created because no token was sent.",
+  "propertyType": 1,
+  "address": "Nowhere",
+  "city": "Amman",
+  "price": 300,
+  "priceUnit": 2,
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "areaSqM": 50
+}
+
+### C6 · Validation — empty title and a price of zero → 400
+POST {{api}}/houses
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "title": "",
+  "description": "An empty title and a zero price should both fail validation.",
+  "propertyType": 1,
+  "address": "Somewhere",
+  "city": "Amman",
+  "price": 0,
+  "priceUnit": 2,
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "areaSqM": 50
+}
+
+### C7 · SECURITY — the client tries to set ownerId and status itself.
+### Neither field exists on HouseCreateDto, so both are discarded.
+### The response must show YOUR user id and status "Pending".
+POST {{api}}/houses
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "title": "Attempted ownership and status override",
+  "description": "The ownerId and status values below must be ignored by the API.",
+  "propertyType": 1,
+  "address": "Test Street",
+  "city": "Amman",
+  "price": 300,
+  "priceUnit": 2,
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "areaSqM": 50,
+  "ownerId": "00000000-0000-0000-0000-000000000000",
+  "status": 2
+}
+
+### C8 · Undefined enum value → 400.
+### C# enums are integers, so 99 deserializes happily. Only the
+### [EnumDataType] attribute on HouseCreateDto rejects it.
+POST {{api}}/houses
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "title": "Invalid property type",
+  "description": "PropertyType 99 is not a defined member of the enum.",
+  "propertyType": 99,
+  "address": "Test Street",
+  "city": "Amman",
+  "price": 300,
+  "priceUnit": 2,
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "areaSqM": 50
+}
+
+
+### =====================================================================
+### D. LISTINGS — ADMIN (needs @adminToken)
+### =====================================================================
+
+### D1 · Review queue → 200, pending listings only
+GET {{api}}/houses/pending
+Authorization: Bearer {{adminToken}}
+
+### D2 · An admin can see any listing whatever its status → 200
+GET {{api}}/houses/{{newHouseId}}
+Authorization: Bearer {{adminToken}}
+
+### D3 · Approve → 200, status becomes "Approved"
+PATCH {{api}}/houses/{{newHouseId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### D4 · Now visible to everyone → 200
+GET {{api}}/houses/{{newHouseId}}
+
+### D5 · Approving twice → 400 "This listing is already approved."
+PATCH {{api}}/houses/{{newHouseId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### D6 · Reject a listing → 200, status becomes "Rejected"
+PATCH {{api}}/houses/{{pendingHouseId}}/reject
+Authorization: Bearer {{adminToken}}
+
+### D7 · A rejected listing is gone from public search
+GET {{api}}/houses
+
+### D8 · Approve something that does not exist → 400 "Listing not found."
+PATCH {{api}}/houses/9999/approve
+Authorization: Bearer {{adminToken}}
+
+
+### =====================================================================
+### E. AUTHORIZATION BOUNDARIES
+### =====================================================================
+
+### E1 · Review queue with no token → 401 (not authenticated)
+GET {{api}}/houses/pending
+
+### E2 · Review queue with a USER token → 403 (authenticated, wrong role)
+GET {{api}}/houses/pending
+Authorization: Bearer {{userToken}}
+
+### E3 · Approve with a USER token → 403
+PATCH {{api}}/houses/{{newHouseId}}/approve
+Authorization: Bearer {{userToken}}
+
+### E4 · Owner's listings with no token → 401
+GET {{api}}/houses/mine
+
+### E5 · Malformed token → 401
+GET {{api}}/houses/mine
+Authorization: Bearer not.a.real.token
