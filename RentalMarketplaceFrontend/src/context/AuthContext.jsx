@@ -26,6 +26,7 @@ export function AuthProvider({ children }){
         return {
             id : c.sub,
             name : c.name,
+            email : c.email,
             role : c["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
             isSubscribed : c.isSubscribed === "true"
         }

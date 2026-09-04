@@ -28,7 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddCors(o => o.AddPolicy("react", p => p
-    .WithOrigins("http://localhost:5173")
+    .WithOrigins("http://localhost:5174")
     .AllowAnyHeader()
     .AllowAnyMethod()));
 

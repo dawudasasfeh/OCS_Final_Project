@@ -18,6 +18,7 @@ namespace RentalMarketplaceBackend.Infrastructure.Services
             var claims = new List<Claim> {
                 new(JwtRegisteredClaimNames.Sub , user.Id),
                 new(JwtRegisteredClaimNames.Name, user.FullName),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new("isSubscribed", user.IsSubscribed.ToString().ToLower()),
                 new(ClaimTypes.Role, role)
             };
