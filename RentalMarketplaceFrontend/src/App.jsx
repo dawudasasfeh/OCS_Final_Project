@@ -5,6 +5,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Houses from "./pages/Houses";
+import HouseDetail from "./pages/HouseDetail";
 // import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/houses" element={<Houses />} />
+          <Route path="/houses/:id" element={<HouseDetail />} />
           {/* <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/> */}
         </Route>
       </Routes>

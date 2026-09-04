@@ -257,7 +257,9 @@ img { max-width: 100%; display: block; }
 .search-row { display: grid; grid-template-columns: 1fr auto; gap: .6rem; }
 
 /* ── House cards ───────────────────────────────────────────────── */
-.grid-houses { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 1.25rem; }
+/* auto-FILL, not auto-fit: empty tracks are kept, so a single result
+   stays one column wide instead of stretching across the whole row. */
+.grid-houses { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 1.25rem; }
 
 .house-card {
   display: flex; flex-direction: column;
@@ -372,8 +374,136 @@ img.house-thumb { object-fit: cover; width: 100%; }
   font-size: .76rem; color: var(--text-light);
 }
 
+/* ── Listing page (filters + results) ──────────────────────────── */
+.listing-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: start; }
+
+.filter-panel {
+  position: sticky; top: calc(var(--nav-h) + 16px);
+  padding: 1.25rem;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+.filter-panel h2 { font-size: 1rem; margin-bottom: 1rem; }
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+
+.results-count { font-size: .88rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+.empty-state {
+  padding: 3rem 1.5rem; text-align: center;
+  background: var(--surface-alt); border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg); color: var(--text-muted);
+}
+.empty-state p { margin-bottom: 1rem; }
+
+/* ── House detail ──────────────────────────────────────────────── */
+.breadcrumb {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+  padding: .85rem 0; font-size: .82rem; color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb .sep { color: var(--text-light); }
+.breadcrumb .current { color: var(--text); font-weight: 500; }
+
+/* align-items: start stops the grid stretching .gallery-main to the row
+   height, which would otherwise override its max-height. */
+.gallery { display: grid; grid-template-columns: 92px 1fr; gap: .6rem; margin: 1.25rem 0; align-items: start; }
+.gallery-thumbs { display: flex; flex-direction: column; gap: .6rem; max-height: 420px; overflow-y: auto; }
+.gallery-thumb {
+  aspect-ratio: 4/3; border: 2px solid transparent; border-radius: var(--radius);
+  background: var(--surface-alt); cursor: pointer; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .6rem; color: var(--text-light); letter-spacing: .1em;
+}
+.gallery-thumb.active { border-color: var(--primary); }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.gallery-main {
+  height: 400px; border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--surface-alt);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-light); font-size: .8rem; letter-spacing: .18em;
+}
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+
+.detail-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: start; }
+
+.detail-title { margin-bottom: .3rem; }
+.detail-location { color: var(--text-muted); font-size: .92rem; margin-bottom: 1rem; }
+
+.spec-bar {
+  display: flex; flex-wrap: wrap; gap: 1.5rem;
+  padding: .9rem 1.1rem; margin-bottom: 1.5rem;
+  background: var(--surface-alt); border-radius: var(--radius-lg);
+}
+.spec { display: flex; flex-direction: column; }
+.spec-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); }
+.spec-value { font-size: .95rem; font-weight: 600; }
+
+.detail-block { margin-bottom: 2rem; }
+.detail-block h2 { font-size: 1.1rem; margin-bottom: .9rem; }
+
+/* multi-column, not grid: rows fill DOWN the first column then down the
+   second, so the list reads in order vertically. It also adapts to any
+   number of rows, which a fixed grid-template-rows could not. */
+.detail-table { columns: 2; column-gap: 1rem; margin: 0; }
+.detail-row {
+  break-inside: avoid;
+  display: flex; justify-content: space-between; gap: 1rem;
+  padding: .6rem .85rem; margin-bottom: .5rem;
+  background: var(--surface-alt); border-radius: var(--radius);
+  font-size: .9rem;
+}
+.detail-row dt { color: var(--text-muted); margin: 0; }
+.detail-row dd { margin: 0; font-weight: 600; text-align: right; }
+
+.detail-description { white-space: pre-line; color: var(--text-muted); }
+
+/* metadata reads quieter than the property facts above it */
+.detail-table-meta .detail-row { background: transparent; border: 1px solid var(--border); font-size: .85rem; }
+.detail-table-meta dd { font-weight: 500; color: var(--text-muted); }
+
+/* sidebar */
+.detail-aside { position: sticky; top: calc(var(--nav-h) + 16px); display: flex; flex-direction: column; gap: 1rem; }
+
+.price-card, .owner-card, .tips-card {
+  padding: 1.25rem; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+
+.price-tag { font-size: 1.7rem; font-weight: 700; color: var(--primary); line-height: 1.1; }
+.price-tag span { font-size: .9rem; font-weight: 400; color: var(--text-muted); }
+.price-note { font-size: .82rem; color: var(--text-muted); margin: .4rem 0 1rem; }
+
+.owner-head { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.owner-avatar {
+  width: 44px; height: 44px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary-soft); color: var(--primary);
+  border-radius: 50%; font-weight: 700;
+}
+.owner-name { font-weight: 600; line-height: 1.2; }
+.owner-role { font-size: .78rem; color: var(--text-muted); }
+
+.phone-btn { width: 100%; font-family: inherit; letter-spacing: .02em; }
+
+.tips-card { background: var(--surface-alt); }
+.tips-card h3 { font-size: .9rem; margin-bottom: .6rem; }
+.tips-card ul { margin: 0; padding-left: 1.1rem; font-size: .84rem; color: var(--text-muted); }
+.tips-card li { margin-bottom: .35rem; }
+
+@media (max-width: 1023px) {
+  .detail-layout { grid-template-columns: 1fr; }
+  .detail-aside { position: static; }
+}
+@media (max-width: 640px) {
+  .gallery { grid-template-columns: 1fr; }
+  .gallery-thumbs { flex-direction: row; max-height: none; overflow-x: auto; }
+  .gallery-thumb { width: 84px; flex: none; }
+  .detail-table { columns: 1; }
+}
+
 /* ── Testimonials ──────────────────────────────────────────────── */
-.grid-testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+.grid-testimonials { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
 
 .testimonial-card {
   display: flex; flex-direction: column;
@@ -475,6 +605,8 @@ img.house-thumb { object-fit: cover; width: 100%; }
 
   .hero { min-height: 460px; padding: 34px 0 96px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
+  .listing-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+  .filter-panel { position: static; }
 }
 
 /* ── Phone ≤767px ──────────────────────────────────────────────── */
