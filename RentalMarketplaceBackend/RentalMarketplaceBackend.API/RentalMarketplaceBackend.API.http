@@ -18,10 +18,20 @@
 @api = {{host}}/api
 
 ### ---- PASTE VALUES HERE ------------------------------------------------
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZWFjMzc0ZC04NDYxLTQ1ZmItYjAyOC00M2FkZWY1NmQ1OGIiLCJuYW1lIjoiVGVzdCBSZW50ZXIiLCJlbWFpbCI6InJlbnRlcjAxQHRlc3QuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzg4NTU0MDEwLCJpc3MiOiJCZXl0YWtBUEkiLCJhdWQiOiJCZXl0YWtDbGllbnQifQ.R9aZmVGyIxBy5g1TEZ3IHquus6IIpwMMeaaZ1HQG4tI
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDY2OGU1ZS0zNmYyLTRmOGItODQ1Yi00ZTE1MTRhNDMxMjYiLCJuYW1lIjoiU3lzdGVtIEFkbWluIiwiZW1haWwiOiJhZG1pbkBiZXl0YWsuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODU1NDA1NiwiaXNzIjoiQmV5dGFrQVBJIiwiYXVkIjoiQmV5dGFrQ2xpZW50In0.JQCQrtpYVYeffkbm1cKiTXpmWyJiy6Yxhft82BUTTFg
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZWFjMzc0ZC04NDYxLTQ1ZmItYjAyOC00M2FkZWY1NmQ1OGIiLCJuYW1lIjoiVGVzdCBSZW50ZXIiLCJlbWFpbCI6InJlbnRlcjAxQHRlc3QuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzg4NjM1MDIxLCJpc3MiOiJCZXl0YWtBUEkiLCJhdWQiOiJCZXl0YWtDbGllbnQifQ.m_xmXOZr4tg3fApK5woZhw8rUIDgxYYYTYqzIm6U5aU
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDY2OGU1ZS0zNmYyLTRmOGItODQ1Yi00ZTE1MTRhNDMxMjYiLCJuYW1lIjoiU3lzdGVtIEFkbWluIiwiZW1haWwiOiJhZG1pbkBiZXl0YWsuY29tIiwiaXNTdWJzY3JpYmVkIjoiZmFsc2UiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODYzNTY4MiwiaXNzIjoiQmV5dGFrQVBJIiwiYXVkIjoiQmV5dGFrQ2xpZW50In0.G6S7vGCTCFEk7NtnEWGViyVdn3HnQTur9QtZTQSx3Ac
 @newHouseId = 1
 @pendingHouseId = 2
+
+### ---- BOOKINGS (section F) ------------------------------------------
+@ownerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZGU5ODk1Mi03MTE4LTQ3YTYtOTA1Zi0zMDVhOTVkOGMwNzEiLCJuYW1lIjoiRGF3dWQgQXNhc2ZlaCIsImVtYWlsIjoiZGF3dWRAdGVzdC5jb20iLCJpc1N1YnNjcmliZWQiOiJmYWxzZSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3ODg2MzQ5OTEsImlzcyI6IkJleXRha0FQSSIsImF1ZCI6IkJleXRha0NsaWVudCJ9.KVkzxe2GqWPQ5A7ZKJ9wB2W1Pir7cTqkefvfVNJR4V4
+@strangerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTE3MDA5NC0zY2QyLTRmMzAtYTQ4ZC04YzIxNjlkYzhmNWUiLCJuYW1lIjoiTm9zeSBTdHJhbmdlciIsImVtYWlsIjoicmVudGVyMDNAdGVzdC5jb20iLCJpc1N1YnNjcmliZWQiOiJmYWxzZSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3ODg2MzUxMDEsImlzcyI6IkJleXRha0FQSSIsImF1ZCI6IkJleXRha0NsaWVudCJ9.IB7hoG4ti3ufcKF-1pHrXrdomfPmOAtCocM_385oO90
+@bookingId = 5
+@booking2Id = 2
+@booking3Id =
+@approvedHouseId = 1
+@approvedHouse2Id = 5
+@pendingListingId = 3
 ### -----------------------------------------------------------------------
 
 
@@ -350,3 +360,365 @@ GET {{api}}/houses/mine
 ### E5 · Malformed token → 401
 GET {{api}}/houses/mine
 Authorization: Bearer not.a.real.token
+
+
+### =====================================================================
+### F. BOOKINGS
+###
+### SETUP for this section (order matters — run F0a to F0d first):
+###   @userToken     must be the RENTER   -> renter01@test.com
+###   @ownerToken    must be the OWNER    -> dawud@test.com
+###   @strangerToken must be a THIRD user -> renter02@test.com
+###
+### House 1 is Approved, 550 JOD Monthly, TurnoverDays = 2, owned by dawud.
+### House 5 is Approved, 400 JOD Monthly, TurnoverDays = 2, owned by dawud.
+### House 3 is Pending.
+###
+### Run F1, F6 and F25 in order and paste the booking ids above as you go.
+### =====================================================================
+
+### F0a · Log in as the RENTER -> 200. COPY TOKEN INTO @userToken.
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "renter01@test.com",
+  "password": "Test123!"
+}
+
+### F0b · Log in as the OWNER -> 200. COPY TOKEN INTO @ownerToken.
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "dawud@test.com",
+  "password": "Test123!"
+}
+
+### F0c · Register a THIRD user -> 200. COPY TOKEN INTO @strangerToken.
+### If it returns 400 the account already exists - use F0d instead.
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Nosy Stranger",
+  "email": "renter03@test.com",
+  "phoneNumber": "0799999999",
+  "password": "Test123!"
+}
+
+### F0d · Log in as the third user -> 200. COPY TOKEN INTO @strangerToken.
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "renter03@test.com",
+  "password": "Test123!"
+}
+
+
+### ---------------------------------------------------------------------
+### F1-F3 · HAPPY PATH
+### ---------------------------------------------------------------------
+
+### F1 · Create a booking -> 201 Created, with a Location header.
+### Expect: status "Pending", totalPrice 550.00 (550 x 1),
+###         startDate 2026-10-01, endDate 2026-11-01, lastNight 2026-10-31,
+###         ownerPhone null and renterPhone null (not confirmed yet).
+### COPY THE "id" INTO @bookingId ABOVE.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2026-10-01",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F2 · Read it back as the renter -> 200.
+### Expect ownerPhone null, because the booking is still Pending.
+GET {{api}}/bookings/{{bookingId}}
+Authorization: Bearer {{userToken}}
+
+### F3 · The renter's own bookings -> 200, array containing F1.
+GET {{api}}/bookings/mine
+Authorization: Bearer {{userToken}}
+
+
+### ---------------------------------------------------------------------
+### F4-F7 · OVERLAP AND THE TURNOVER GAP  (House 1, TurnoverDays = 2)
+###
+### F1 occupies 2026-10-01 -> 2026-11-01 (end exclusive).
+### With a 2-day gap, the next booking may not start before 2026-11-03.
+### ---------------------------------------------------------------------
+
+### F4 · Exactly the same dates -> 400 "Those dates are not available."
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2026-10-01",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F5 · Starts 2026-11-02 - only ONE free day -> 400.
+### This is the turnover rule. Without the padding this would wrongly return 201.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2026-11-02",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F6 · Starts 2026-11-03 - exactly TWO free days -> 201.
+### COPY THE "id" INTO @booking2Id ABOVE.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2026-11-03",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F7 · Overlaps F1 from BEFORE (2026-09-20 -> 2026-10-20) -> 400.
+### Proves the padding applies on both sides, not only after.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2026-09-20",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+
+### ---------------------------------------------------------------------
+### F8-F12 · BUSINESS RULES
+### ---------------------------------------------------------------------
+
+### F8 · The owner books their own property -> 400 "You cannot book your own property."
+POST {{api}}/bookings
+Authorization: Bearer {{ownerToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F9 · Book a Pending (unapproved) listing -> 400 "not available for booking."
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": {{pendingListingId}},
+  "startDate": "2027-01-05",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F10 · Weekly booking on a Monthly-priced house -> 400 "rented Monthly only."
+### Without this check the total would be three months' rent for three weeks.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 3,
+  "durationType": 1
+}
+
+### F11 · Start date in the past -> 400 "Start date cannot be in the past."
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2020-01-01",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F12 · Unknown house -> 400 "Property not found."
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 9999,
+  "startDate": "2027-01-05",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+
+### ---------------------------------------------------------------------
+### F13-F15 · INPUT VALIDATION  (400 from the model binder, before the service)
+### ---------------------------------------------------------------------
+
+### F13 · durationCount 0 -> 400, "DurationCount" listed in the errors object.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 0,
+  "durationType": 2
+}
+
+### F14 · durationCount 99, above the max of 60 -> 400.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 99,
+  "durationType": 2
+}
+
+### F15 · durationType 99, not a defined enum value -> 400.
+### C# enums are ints, so without [EnumDataType] this would be accepted.
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 1,
+  "durationType": 99
+}
+
+
+### ---------------------------------------------------------------------
+### F16-F19 · WHO CAN SEE A BOOKING
+### ---------------------------------------------------------------------
+
+### F16 · A stranger reads someone else's booking -> 404, not 403.
+### 404 hides whether the booking exists at all.
+GET {{api}}/bookings/{{bookingId}}
+Authorization: Bearer {{strangerToken}}
+
+### F17 · The house owner reads it -> 200.
+GET {{api}}/bookings/{{bookingId}}
+Authorization: Bearer {{ownerToken}}
+
+### F18 · An admin reads it -> 200.
+GET {{api}}/bookings/{{bookingId}}
+Authorization: Bearer {{adminToken}}
+
+### F19 · The owner's incoming requests -> 200, contains F1 and F6.
+### Expect renterPhone null on every Pending row.
+GET {{api}}/bookings/requests
+Authorization: Bearer {{ownerToken}}
+
+
+### ---------------------------------------------------------------------
+### F20-F24 · STATUS TRANSITIONS
+### ---------------------------------------------------------------------
+
+### F20 · The RENTER tries to confirm -> 400 "You do not own this property."
+PATCH {{api}}/bookings/{{bookingId}}/confirm
+Authorization: Bearer {{userToken}}
+
+### F21 · The OWNER confirms -> 200.
+### Expect status "Confirmed" AND ownerPhone + renterPhone now populated.
+### This is the contact gate opening.
+PATCH {{api}}/bookings/{{bookingId}}/confirm
+Authorization: Bearer {{ownerToken}}
+
+### F22 · Confirm the same booking again -> 400 "already Confirmed."
+PATCH {{api}}/bookings/{{bookingId}}/confirm
+Authorization: Bearer {{ownerToken}}
+
+### F23 · The renter cancels a CONFIRMED booking -> 400 "already Confirmed."
+### Change this expectation if you decide renters may cancel after confirmation.
+PATCH {{api}}/bookings/{{bookingId}}/cancel
+Authorization: Bearer {{userToken}}
+
+### F24 · The owner rejects the second booking -> 200, status "Rejected".
+### Expect the phone fields back to null.
+PATCH {{api}}/bookings/{{booking2Id}}/reject
+Authorization: Bearer {{ownerToken}}
+
+
+### ---------------------------------------------------------------------
+### F25-F27 · CANCEL PATH
+### ---------------------------------------------------------------------
+
+### F25 · Create a booking on House 5 -> 201. COPY THE "id" INTO @booking3Id.
+### Expect totalPrice 800.00 (400 x 2).
+POST {{api}}/bookings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "houseId": {{approvedHouse2Id}},
+  "startDate": "2026-12-01",
+  "durationCount": 2,
+  "durationType": 2
+}
+
+### F26 · The renter cancels it -> 200, status "Cancelled".
+PATCH {{api}}/bookings/{{booking3Id}}/cancel
+Authorization: Bearer {{userToken}}
+
+### F27 · The dates freed by F26 are bookable again -> 201.
+### Cancelled bookings must not keep holding the calendar.
+POST {{api}}/bookings
+Authorization: Bearer {{strangerToken}}
+Content-Type: application/json
+
+{
+  "houseId": {{approvedHouse2Id}},
+  "startDate": "2026-12-01",
+  "durationCount": 2,
+  "durationType": 2
+}
+
+
+### ---------------------------------------------------------------------
+### F28-F30 · AUTHORIZATION BOUNDARIES
+### ---------------------------------------------------------------------
+
+### F28 · Create with no token -> 401.
+POST {{api}}/bookings
+Content-Type: application/json
+
+{
+  "houseId": 1,
+  "startDate": "2027-01-05",
+  "durationCount": 1,
+  "durationType": 2
+}
+
+### F29 · My bookings with no token -> 401.
+GET {{api}}/bookings/mine
+
+### F30 · A user with no bookings -> 200 and an empty array, not 404.
+GET {{api}}/bookings/mine
+Authorization: Bearer {{ownerToken}}

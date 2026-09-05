@@ -16,16 +16,25 @@ public class BookingRepository : GenericRepository<Booking>, IBookingRepository
             b.Status != BookingStatus.Rejected &&
             b.StartDate < end && start < b.EndDate
             );
+
+    public async Task<Booking?> GetWithDetailsAsync(int id) =>
+         await _dbSet.Include(b => b.House!).ThenInclude(h => h.Owner)
+                     .Include(b => b.House!).ThenInclude(h => h.Images)
+                     .Include(b => b.Renter)
+                     .FirstOrDefaultAsync(b => b.Id == id);
+
     public async Task<IReadOnlyList<Booking>> GetForRenterAsync(string renterId) =>
         await _dbSet.AsNoTracking()
                     .Where(b => b.RenterId == renterId)
-                    .Include(b => b.House)
+                    .Include(b => b.House!).ThenInclude(h => h.Owner)
+                    .Include(b => b.House!).ThenInclude(h => h.Images)
                     .OrderByDescending(b => b.CreatedAt)
                     .ToListAsync();
+
     public async Task<IReadOnlyList<Booking>> GetForOwnerAsync(string ownerId) =>
         await _dbSet.AsNoTracking()
                     .Where(b => b.House!.OwnerId == ownerId)
-                    .Include(b => b.House)
+                    .Include(b => b.House!).ThenInclude(h => h.Images)
                     .Include(b => b.Renter)
                     .OrderByDescending(b => b.CreatedAt)
                     .ToListAsync();

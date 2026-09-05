@@ -10,6 +10,7 @@ public class Booking
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public DurationType DurationType { get; set; }
+    public int DurationCount { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
     public BookingStatus Status { get; set; } = BookingStatus.Pending;
