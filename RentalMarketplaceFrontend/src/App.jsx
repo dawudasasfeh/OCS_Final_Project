@@ -7,7 +7,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Houses from "./pages/Houses";
 import HouseDetail from "./pages/HouseDetail";
-// import ProtectedRoute from "./components/ProtectedRoute";
+import MyBookings from "./pages/MyBookings";
+import BookingRequests from "./pages/BookingRequests";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -21,7 +23,15 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/houses" element={<Houses />} />
           <Route path="/houses/:id" element={<HouseDetail />} />
-          {/* <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/> */}
+
+          <Route
+            path="/my-bookings"
+            element={<ProtectedRoute><MyBookings /></ProtectedRoute>}
+          />
+          <Route
+            path="/requests"
+            element={<ProtectedRoute><BookingRequests /></ProtectedRoute>}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

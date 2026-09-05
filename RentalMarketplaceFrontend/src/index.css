@@ -106,6 +106,7 @@ img { max-width: 100%; display: block; }
 .badge-confirmed { color: var(--confirmed); background: var(--confirmed-bg); }
 .badge-rejected  { color: var(--rejected);  background: var(--rejected-bg); }
 .badge-completed { color: var(--completed); background: var(--completed-bg); }
+.badge-cancelled { color: var(--completed); background: var(--completed-bg); }
 
 /* ── Navbar ────────────────────────────────────────────────────── */
 .navbar { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
@@ -484,7 +485,92 @@ img.house-thumb { object-fit: cover; width: 100%; }
 .owner-name { font-weight: 600; line-height: 1.2; }
 .owner-role { font-size: .78rem; color: var(--text-muted); }
 
-.phone-btn { width: 100%; font-family: inherit; letter-spacing: .02em; }
+.action-stack { display: flex; flex-direction: column; gap: .5rem; }
+
+.phone-btn {
+  width: 100%; font-family: inherit; letter-spacing: .02em;
+  display: flex; align-items: center; justify-content: center; gap: .65rem;
+}
+.phone-icon { font-size: 1.65rem; line-height: 1; flex: none; }
+.phone-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; }
+.phone-text strong { font-weight: 600; }
+.phone-text small { font-size: .72rem; font-weight: 400; opacity: .85; letter-spacing: 0; }
+
+.phone-empty {
+  padding: .7rem 1rem; text-align: center;
+  font-size: .84rem; color: var(--text-muted);
+  background: var(--surface-alt); border-radius: var(--radius);
+}
+
+/* booking form, inline under Book now */
+.booking-form, .booking-done {
+  display: flex; flex-direction: column;
+  padding-top: .9rem; border-top: 1px solid var(--border);
+}
+.booking-form .field { margin-bottom: .7rem; }
+
+.booking-done { gap: .5rem; }
+.booking-done-title { font-weight: 600; margin: 0; color: var(--confirmed); }
+
+.booking-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: .5rem; margin: .2rem 0 .8rem;
+  font-size: .82rem; color: var(--text-muted);
+}
+.booking-total strong { font-size: 1.05rem; color: var(--text); }
+
+.booking-note { font-size: .75rem; line-height: 1.45; margin: .7rem 0 0; }
+
+/* ── booking list pages (My bookings · Booking requests) ───────────── */
+.page-title { font-size: 1.7rem; margin: 0 0 .25rem; }
+.page-sub { margin: 0 0 1.5rem; font-size: .9rem; }
+
+.booking-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.booking-card {
+  display: grid; grid-template-columns: 160px 1fr; gap: 1.1rem;
+  padding: 1rem; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+
+.booking-thumb {
+  display: flex; align-items: center; justify-content: center;
+  height: 118px; overflow: hidden;
+  background: var(--surface-alt); border-radius: var(--radius);
+  font-size: .7rem; letter-spacing: .06em; color: var(--text-light);
+}
+.booking-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.booking-body { display: flex; flex-direction: column; min-width: 0; }
+
+.booking-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem; margin-bottom: .15rem;
+}
+.booking-title { font-size: 1.02rem; font-weight: 600; color: var(--text); }
+.booking-title:hover { color: var(--primary); }
+.booking-sub { margin: 0 0 .7rem; font-size: .82rem; color: var(--text-muted); }
+
+.booking-facts {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .6rem 1.2rem; margin: 0;
+}
+.booking-facts dt {
+  font-size: .7rem; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text-light);
+}
+.booking-facts dd { margin: .15rem 0 0; font-size: .86rem; }
+.booking-facts a { color: var(--primary); font-weight: 600; }
+
+.booking-actions { display: flex; gap: .5rem; margin-top: .9rem; }
+.booking-actions .btn { padding: .45rem .95rem; font-size: .84rem; }
+
+@media (max-width: 767px) {
+  .booking-card { grid-template-columns: 1fr; }
+  .booking-thumb { height: 150px; }
+  .booking-facts { grid-template-columns: 1fr; gap: .5rem; }
+  .booking-actions .btn { flex: 1; }
+}
 
 .tips-card { background: var(--surface-alt); }
 .tips-card h3 { font-size: .9rem; margin-bottom: .6rem; }
@@ -563,6 +649,26 @@ img.house-thumb { object-fit: cover; width: 100%; }
 .auth-submit:disabled { opacity: .65; cursor: not-allowed; }
 .auth-foot { margin: 1.1rem 0 0; text-align: center; font-size: .88rem; color: var(--text-muted); }
 .auth-foot a { color: var(--primary); font-weight: 600; }
+
+/* dev-only demo account shortcuts */
+.quick-cred {
+  margin-bottom: 1.1rem; padding: .7rem .8rem;
+  background: var(--surface-alt); border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+.quick-cred-label {
+  display: block; margin-bottom: .5rem;
+  font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text-light);
+}
+.quick-cred-row { display: flex; gap: .4rem; flex-wrap: wrap; }
+.quick-cred-btn {
+  flex: 1 1 0; min-width: 80px; padding: .4rem .6rem;
+  font: inherit; font-size: .82rem; font-weight: 600;
+  color: var(--text); background: #fff; cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+}
+.quick-cred-btn:hover { border-color: var(--primary); color: var(--primary); }
 
 /* register has more fields, so it gets a wider card */
 .auth-card:has(.auth-row) { max-width: 480px; }

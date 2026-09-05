@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { getHouse } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
+import BookingForm from "../components/BookingForm";
+
 
 const initials = (name = "") =>
   name.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -22,8 +24,8 @@ export default function HouseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState(0);
-  const [phoneShown, setPhoneShown] = useState(false);
   const [broken, setBroken] = useState(() => new Set());
+  const [booking, setBooking] = useState(false);
 
   const markBroken = (i) => setBroken((prev) => new Set(prev).add(i));
 
@@ -38,7 +40,6 @@ export default function HouseDetail() {
         if (!cancelled) {
           setHouse(data);
           setActiveImage(0);
-          setPhoneShown(false);
         }
       } catch (err) {
         if (!cancelled) {
@@ -78,9 +79,10 @@ export default function HouseDetail() {
 
   const images = house.imageUrls ?? [];
   const isOwner = user?.id === house.ownerId;
-  const maskedPhone = house.ownerPhone
-    ? `${house.ownerPhone.slice(0, -3)}XXX`
-    : "Not provided";
+
+  // The API decides what this string is: a guest receives 079048XXXX,
+  // a signed-in caller receives the whole number. Nothing is masked here.
+  const phone = house.ownerPhone;
 
   // Ordered building-level first, then the property, then room counts —
   // the convention Jordanian listing sites use.
@@ -227,13 +229,55 @@ export default function HouseDetail() {
               </p>
 
               {isOwner ? (
-                <Link to="/my-listings" className="btn btn-outline" style={{ width: "100%" }}>
+                <Link to="/my-listings" className="btn btn-outline phone-btn">
                   Manage this listing
                 </Link>
               ) : (
-                <button className="btn btn-primary" style={{ width: "100%" }} disabled>
-                  Request booking
-                </button>
+                <div className="action-stack">
+                  {!phone ? (
+                    <div className="phone-btn phone-empty">No phone number provided</div>
+                  ) : user ? (
+                    <a href={`tel:${phone}`} className="btn btn-primary phone-btn">
+                      <span className="phone-icon" aria-hidden="true">&#9742;</span>
+                      <span className="phone-text">
+                        <strong>{phone}</strong>
+                      </span>
+                    </a>
+                  ) : (
+                    <Link
+                      to={`/login?returnTo=/houses/${house.id}`}
+                      className="btn btn-primary phone-btn"
+                    >
+                      <span className="phone-icon" aria-hidden="true">&#9742;</span>
+                      <span className="phone-text">
+                        <strong>{phone}</strong>
+                        <small>Sign in to see the full number</small>
+                      </span>
+                    </Link>
+                  )}
+
+                  {user ? (
+                      booking ? (
+                        <BookingForm key={house.id} house={house} />
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-outline phone-btn"
+                          onClick={() => setBooking(true)}
+                          disabled={!house.isAvailable}
+                        >
+                          Book now
+                        </button>
+                      )
+                    ) : (
+                      <Link
+                        to={`/login?returnTo=/houses/${house.id}`}
+                        className="btn btn-outline phone-btn"
+                      >
+                        Book now
+                      </Link>
+                    )}
+                </div>
               )}
             </div>
 
@@ -245,21 +289,6 @@ export default function HouseDetail() {
                   <div className="owner-role">Property owner</div>
                 </div>
               </div>
-
-              {phoneShown ? (
-                <a href={`tel:${house.ownerPhone}`} className="btn btn-primary phone-btn">
-                  {house.ownerPhone}
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-outline phone-btn"
-                  onClick={() => setPhoneShown(true)}
-                  disabled={!house.ownerPhone}
-                >
-                  {maskedPhone} · Show
-                </button>
-              )}
             </div>
 
             <div className="tips-card">

@@ -37,7 +37,6 @@ public class BookingService : IBookingService
 
         DateOnly? endDate = dto.DurationType switch
         {
-            DurationType.Day => dto.StartDate.AddDays(dto.DurationCount),
             DurationType.Weekly => dto.StartDate.AddDays(dto.DurationCount * 7),
             DurationType.Monthly => dto.StartDate.AddMonths(dto.DurationCount),
             DurationType.Yearly => dto.StartDate.AddYears(dto.DurationCount),

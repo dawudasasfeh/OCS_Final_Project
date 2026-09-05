@@ -36,7 +36,7 @@ public class HouseService : IHouseService
 
         if (!canSee) return null;
 
-        return Map(house, includeContent: true);
+        return Map(house, includeContent: requesterId is not null);
     }
 
     public async Task<IReadOnlyList<HouseDto>> GetMineAsync(string ownerId){
@@ -113,6 +113,11 @@ public class HouseService : IHouseService
         return Result<HouseDto>.Ok(Map(house, includeContent: true));
     }
 
+    private static string? MaskPhone(string? phone) =>
+        string.IsNullOrEmpty(phone) ? null
+        : phone.Length <= 4 ? new string('X', phone.Length)
+        : phone[..^4] + "XXXX";
+
     private static HouseDto Map(House h, bool includeContent = false) => new()
     {
         Id = h.Id,
@@ -138,7 +143,7 @@ public class HouseService : IHouseService
         CreatedAt = h.CreatedAt,
         OwnerId = h.OwnerId,
         OwnerName = h.Owner?.FullName ?? string.Empty,
-        OwnerPhone = includeContent ? h.Owner?.PhoneNumber : null,
+        OwnerPhone = includeContent ? h.Owner?.PhoneNumber : MaskPhone(h.Owner?.PhoneNumber),
         ImageUrls = h.Images.Select(i => i.ImageUrl).ToList()
     };
 
