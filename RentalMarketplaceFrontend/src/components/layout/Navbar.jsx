@@ -49,6 +49,12 @@ export default function Navbar() {
         </Link>
 
         <div className="nav-actions">
+          {user && (
+            <Link to="/houses/new" className="btn btn-outline nav-cta">
+              List a property
+            </Link>
+          )}
+
           {user ? (
             <div className="account" ref={menuRef}>
               <button
@@ -75,6 +81,7 @@ export default function Navbar() {
                   </div>
 
                   <div className="account-menu-list">
+                    <Link to="/houses/new" role="menuitem">List a property</Link>
                     <Link to="/my-listings" role="menuitem">My listings</Link>
                     <Link to="/my-bookings" role="menuitem">My bookings</Link>
                     <Link to="/requests" role="menuitem">Booking requests</Link>
