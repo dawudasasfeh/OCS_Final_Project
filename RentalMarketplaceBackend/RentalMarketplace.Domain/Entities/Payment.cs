@@ -11,6 +11,7 @@ public class Payment
     [Range(0.01, 9999999)]
     public decimal Amount { get; set; }
     public PaymentPurpose Purpose { get; set; }
+    public PaymentMethod Method { get; set; }
     public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
     [MaxLength(250)]
     public string? ReferenceNote { get; set; }

@@ -3,6 +3,7 @@ using RentalMarketplaceBackend.Application.Common;
 using RentalMarketplaceBackend.Application.DTOs.Houses;
 using RentalMarketplaceBackend.Application.Interfaces.Repositories;
 using RentalMarketplaceBackend.Application.Interfaces.Services;
+using RentalMarketplaceBackend.Application.Mapping;
 using RentalMarketplaceBackend.Domain.Entities;
 using RentalMarketplaceBackend.Domain.Enums;
 
@@ -15,21 +16,20 @@ public class HouseService : IHouseService
     private readonly IUnitOfWork _uow;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IFileStorageService _files;
+    private readonly ISubscriptionService _subscriptions;
 
-    public HouseService(
-        IUnitOfWork uow,
-        UserManager<ApplicationUser> userManager,
-        IFileStorageService files)
+    public HouseService(IUnitOfWork uow, UserManager<ApplicationUser> userManager, IFileStorageService files, ISubscriptionService subscriptions)
     {
         _uow = uow;
         _userManager = userManager;
         _files = files;
+        _subscriptions = subscriptions;
     }
 
     public async Task<IReadOnlyList<HouseDto>> SearchAsync(HouseSearchDto filter) {
         filter.Status = ListingStatus.Approved;
         var houses = await _uow.Houses.SearchAsync(filter);
-        return houses.Select(h => Map(h)).ToList();
+        return houses.Select(h => HouseMapper.Map(h)).ToList();
     }
 
     public async Task<HouseDto?> GetByIdAsync(int id, string? requesterId = null, bool isAdmin = false){
@@ -41,12 +41,12 @@ public class HouseService : IHouseService
 
         if (!canSee) return null;
 
-        return Map(house, includeContent: requesterId is not null);
+        return HouseMapper.Map(house, includeContent: requesterId is not null);
     }
 
     public async Task<IReadOnlyList<HouseDto>> GetMineAsync(string ownerId){
         var houses = await _uow.Houses.GetByOwnerAsync(ownerId);
-        return houses.Select(h => Map(h, includeContent: true)).ToList();
+        return houses.Select(h => HouseMapper.Map(h, includeContent: true)).ToList();
     }
 
     public async Task<Result<HouseDto>> CreateAsync(HouseCreateDto dto, string ownerId){
@@ -54,9 +54,9 @@ public class HouseService : IHouseService
         if (owner is null)
             return Result<HouseDto>.Fail("Account not found.");
 
-        // TODO: enable once the admin subscription toggle exists
-        // if (!owner.IsSubscribed)
-        //     return Result<HouseDto>.Fail("An active subscription is required to publish a listing.");
+
+        if (!await _subscriptions.IsActiveAsync(ownerId))
+            return Result<HouseDto>.Fail("An active subscription is required to publish a listing.");
 
         var house = new House
         {
@@ -91,14 +91,14 @@ public class HouseService : IHouseService
         await _uow.SaveChangesAsync();
 
         house.Owner = owner;
-        return Result<HouseDto>.Ok(Map(house, includeContent: true));
+        return Result<HouseDto>.Ok(HouseMapper.Map(house, includeContent: true));
 
     }
 
     public async Task<IReadOnlyList<HouseDto>> GetPendingAsync(){
         var houses = await _uow.Houses.SearchAsync(
             new HouseSearchDto { Status = ListingStatus.Pending });
-        return houses.Select(h => Map(h, includeContent: true)).ToList();
+        return houses.Select(h => HouseMapper.Map(h, includeContent: true)).ToList();
     }
 
     public async Task<Result<string>> AddImageAsync(
@@ -146,41 +146,6 @@ public class HouseService : IHouseService
         house.Status = status;
         await _uow.SaveChangesAsync();
 
-        return Result<HouseDto>.Ok(Map(house, includeContent: true));
+        return Result<HouseDto>.Ok(HouseMapper.Map(house, includeContent: true));
     }
-
-    private static string? MaskPhone(string? phone) =>
-        string.IsNullOrEmpty(phone) ? null
-        : phone.Length <= 4 ? new string('X', phone.Length)
-        : phone[..^4] + "XXXX";
-
-    private static HouseDto Map(House h, bool includeContent = false) => new()
-    {
-        Id = h.Id,
-        Title = h.Title,
-        Description = h.Description,
-        PropertyType = h.PropertyType.ToString(),
-        Address = h.Address,
-        City = h.City,
-        Neighborhood = h.Neighborhood,
-        Price = h.Price,
-        PriceUnit = h.PriceUnit.ToString(),
-        Bedrooms = h.Bedrooms,
-        Bathrooms = h.Bathrooms,
-        AreaSqM = h.AreaSqM,
-        IsFurnished = h.IsFurnished,
-        FloorNumber = h.FloorNumber,
-        MasterBedrooms = h.MasterBedrooms,
-        ApartmentsInBuilding = h.ApartmentsInBuilding,
-        BuildingAge = h.BuildingAge?.ToString(),
-        TurnoverDays = h.TurnoverDays,
-        Status = h.Status.ToString(),
-        IsAvailable = h.IsAvailable,
-        CreatedAt = h.CreatedAt,
-        OwnerId = h.OwnerId,
-        OwnerName = h.Owner?.FullName ?? string.Empty,
-        OwnerPhone = includeContent ? h.Owner?.PhoneNumber : MaskPhone(h.Owner?.PhoneNumber),
-        ImageUrls = h.Images.Select(i => i.ImageUrl).ToList()
-    };
-
 }
