@@ -11,6 +11,8 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IHouseService, HouseService>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<ITestimonialService, TestimonialService>();
+
         return services;
     }
 }
