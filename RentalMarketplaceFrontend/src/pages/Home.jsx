@@ -1,20 +1,22 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { searchHouses } from "../api/houses";
+import HouseCard from "../components/HouseCard";
 import heroImg from "../assets/hero-amman.jpg";
 
-const PROPERTY_TYPES = ["Apartment", "House", "Villa", "Studio", "Room"];
-const DURATIONS = ["Weekly", "Monthly", "Yearly"];
+// Labels shown to the user, paired with the enum integers the API filters on.
+const PROPERTY_TYPES = [
+  { value: "1", label: "Apartment" },
+  { value: "2", label: "House" },
+  { value: "3", label: "Villa" },
+  { value: "4", label: "Studio" },
+  { value: "5", label: "Room" },
+];
 
-/* Replaced by GET /api/houses?sort=newest once the listings endpoint exists. */
-const LATEST = [
-  { id: 1, city: "Amman", area: "Abdoun", title: "Bright 3-bedroom with balcony",
-    beds: 3, baths: 2, size: 165, price: 550, unit: "month", tag: "Furnished" },
-  { id: 2, city: "Irbid", area: "Al Rahebat Al Wardiah", title: "Studio near Yarmouk University",
-    beds: 1, baths: 1, size: 60, price: 180, unit: "month", tag: "New" },
-  { id: 3, city: "Aqaba", area: "Al Sakaneyya", title: "Sea-view villa with garden",
-    beds: 5, baths: 4, size: 320, price: 1400, unit: "month", tag: "Villa" },
-  { id: 4, city: "Amman", area: "Jabal Al Weibdeh", title: "Renovated 2-bedroom in a quiet street",
-    beds: 2, baths: 1, size: 110, price: 400, unit: "month", tag: "Furnished" },
+const DURATIONS = [
+  { value: "1", label: "Weekly" },
+  { value: "2", label: "Monthly" },
+  { value: "3", label: "Yearly" },
 ];
 
 /* Replaced by GET /api/testimonials (approved only). */
@@ -30,13 +32,30 @@ const TESTIMONIALS = [
 const initials = (name) => name.split(" ").map((w) => w[0]).join("").slice(0, 2);
 
 export default function Home() {
-  const [duration, setDuration] = useState("Monthly");
-  const [type, setType] = useState("Apartment");
+  const [duration, setDuration] = useState("2");
+  const [type, setType] = useState("1");
   const [city, setCity] = useState("");
+  const [latest, setLatest] = useState([]);
+  const navigate = useNavigate();
+
+  // searchHouses only ever returns approved, available listings, so every card
+  // here is guaranteed to open. A failure leaves the section empty rather than
+  // breaking the page — the home page is not the place to report an outage.
+  useEffect(() => {
+    let cancelled = false;
+
+    searchHouses()
+      .then((data) => { if (!cancelled) setLatest(data.slice(0, 4)); })
+      .catch(() => { if (!cancelled) setLatest([]); });
+
+    return () => { cancelled = true; };
+  }, []);
 
   function handleSearch(e) {
     e.preventDefault();
-    console.log({ duration, type, city });
+    const params = new URLSearchParams({ propertyType: type, priceUnit: duration });
+    if (city.trim()) params.set("city", city.trim());
+    navigate(`/houses?${params}`);
   }
 
   return (
@@ -49,12 +68,12 @@ export default function Home() {
           <div className="search-tabs">
             {DURATIONS.map((d) => (
               <button
-                key={d}
+                key={d.value}
                 type="button"
-                className={d === duration ? "search-tab active" : "search-tab"}
-                onClick={() => setDuration(d)}
+                className={d.value === duration ? "search-tab active" : "search-tab"}
+                onClick={() => setDuration(d.value)}
               >
-                {d}
+                {d.label}
               </button>
             ))}
           </div>
@@ -62,15 +81,18 @@ export default function Home() {
           <form className="search-card" onSubmit={handleSearch}>
             <div className="search-types">
               {PROPERTY_TYPES.map((t) => (
-                <label key={t} className={t === type ? "type-chip selected" : "type-chip"}>
+                <label
+                  key={t.value}
+                  className={t.value === type ? "type-chip selected" : "type-chip"}
+                >
                   <input
                     type="radio"
                     name="type"
-                    value={t}
-                    checked={t === type}
+                    value={t.value}
+                    checked={t.value === type}
                     onChange={(e) => setType(e.target.value)}
                   />
-                  {t}
+                  {t.label}
                 </label>
               ))}
             </div>
@@ -96,29 +118,13 @@ export default function Home() {
             <p className="muted">The most recently published properties.</p>
           </div>
 
-          <div className="grid-houses">
-            {LATEST.map((h) => (
-              <Link to={`/houses/${h.id}`} key={h.id} className="house-card">
-                <div className="house-thumb">
-                  <span className="house-tag">{h.tag}</span>
-                  Photo
-                </div>
-                <div className="house-body">
-                  <p className="house-city">{h.city} · {h.area}</p>
-                  <h3 className="house-title">{h.title}</h3>
-                  <div className="house-meta">
-                    <span>{h.beds} beds</span>
-                    <span>{h.baths} baths</span>
-                    <span>{h.size} m²</span>
-                  </div>
-                  <div className="house-foot">
-                    <span className="house-price">{h.price} JOD <span>/ {h.unit}</span></span>
-                    <span className="house-link">View details</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {latest.length === 0 ? (
+            <p className="muted">No properties published yet.</p>
+          ) : (
+            <div className="grid-houses">
+              {latest.map((h) => <HouseCard key={h.id} house={h} />)}
+            </div>
+          )}
 
           <div style={{ textAlign: "center", marginTop: "1.75rem" }}>
             <Link to="/houses" className="btn btn-outline">Browse all properties</Link>

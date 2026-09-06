@@ -5,7 +5,7 @@ using RentalMarketplaceBackend.Application.Interfaces.Repositories;
 using RentalMarketplaceBackend.Application.Interfaces.Services;
 using RentalMarketplaceBackend.Domain.Entities;
 using RentalMarketplaceBackend.Domain.Enums;
-using static System.Net.WebRequestMethods;
+
 
 
 namespace RentalMarketplaceBackend.Application.Services;
@@ -14,11 +14,16 @@ public class HouseService : IHouseService
 {
     private readonly IUnitOfWork _uow;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IFileStorageService _files;
 
-    public HouseService(IUnitOfWork uow, UserManager<ApplicationUser> userManager)
+    public HouseService(
+        IUnitOfWork uow,
+        UserManager<ApplicationUser> userManager,
+        IFileStorageService files)
     {
         _uow = uow;
         _userManager = userManager;
+        _files = files;
     }
 
     public async Task<IReadOnlyList<HouseDto>> SearchAsync(HouseSearchDto filter) {
@@ -94,6 +99,37 @@ public class HouseService : IHouseService
         var houses = await _uow.Houses.SearchAsync(
             new HouseSearchDto { Status = ListingStatus.Pending });
         return houses.Select(h => Map(h, includeContent: true)).ToList();
+    }
+
+    public async Task<Result<string>> AddImageAsync(
+        int houseId, string requesterId,
+        Stream content, string fileName, string contentType, long lengthInBytes)
+    {
+        var house = await _uow.Houses.GetWithDetailsAsync(houseId);
+
+        if (house is null)
+            return Result<string>.Fail("Listing not found.");
+
+        if (house.OwnerId != requesterId)
+            return Result<string>.Fail("You do not own this listing.");
+
+        var saved = await _files.SaveHouseImageAsync(
+            houseId, content, fileName, contentType, lengthInBytes);
+
+        if (!saved.Succeeded)
+            return saved;
+
+        // The first image a listing gets is its main photo. Reordering later is
+        // the client's business; the server only records which one is primary.
+        house.Images.Add(new HouseImage
+        {
+            ImageUrl = saved.Data!,
+            IsPrimary = house.Images.Count == 0
+        });
+
+        await _uow.SaveChangesAsync();
+
+        return saved;
     }
 
     public Task<Result<HouseDto>> ApproveAsync(int id) => ReviewAsync(id, ListingStatus.Approved);

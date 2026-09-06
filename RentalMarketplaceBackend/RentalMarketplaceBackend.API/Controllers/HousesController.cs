@@ -53,6 +53,29 @@ public class HousesController : ControllerBase
             : BadRequest(result.Error);
     }
 
+    /// <summary>
+    /// Adds one photo to a listing the caller owns. Images are uploaded after the
+    /// listing exists so each one has a house folder to live in, and so a form
+    /// that is abandoned leaves nothing behind on disk.
+    /// </summary>
+    [HttpPost("{id:int}/images")]
+    [Authorize]
+    [RequestSizeLimit(6 * 1024 * 1024)]
+    public async Task<IActionResult> AddImage(int id, IFormFile file)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("No file was uploaded.");
+
+        await using var stream = file.OpenReadStream();
+
+        var result = await _houseService.AddImageAsync(
+            id, CurrentUserId!, stream, file.FileName, file.ContentType, file.Length);
+
+        return result.Succeeded
+            ? Ok(new { url = result.Data })
+            : BadRequest(result.Error);
+    }
+
     [HttpPatch("{id:int}/approve")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Approve(int id)

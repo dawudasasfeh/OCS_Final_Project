@@ -25,6 +25,7 @@ namespace RentalMarketplaceBackend.Infrastructure
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IFileStorageService, FileStorageService>();
             return services;
 
         }

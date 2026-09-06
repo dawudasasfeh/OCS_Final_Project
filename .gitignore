@@ -495,3 +495,6 @@ appsettings.*.local.json
 coverage/
 .vite/
 *.tsbuildinfo
+
+# personal working notes, not part of the project
+TODO.md

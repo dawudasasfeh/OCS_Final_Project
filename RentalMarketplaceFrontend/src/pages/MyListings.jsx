@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getMyHouses } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import { formatDay } from "../utils/date";
+import { imageUrl } from "../utils/images";
 
 const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
@@ -20,7 +21,7 @@ function ListingCard({ house: h }) {
     <article className="listing-card">
       <Link to={`/houses/${h.id}`} className="booking-thumb">
         {image && !broken ? (
-          <img src={image} alt="" onError={() => setBroken(true)} />
+          <img src={imageUrl(image)} alt="" onError={() => setBroken(true)} />
         ) : (
           <span>NO PHOTO</span>
         )}

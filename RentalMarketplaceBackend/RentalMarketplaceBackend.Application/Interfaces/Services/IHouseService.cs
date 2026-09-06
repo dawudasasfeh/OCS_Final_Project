@@ -11,6 +11,10 @@ public interface IHouseService
     Task<IReadOnlyList<HouseDto>> GetMineAsync(string ownerId);
     Task<Result<HouseDto>> CreateAsync(HouseCreateDto dto, string ownerId);
 
+    Task<Result<string>> AddImageAsync(
+        int houseId, string requesterId,
+        Stream content, string fileName, string contentType, long lengthInBytes);
+
     Task<IReadOnlyList<HouseDto>> GetPendingAsync();
     Task<Result<HouseDto>> ApproveAsync(int id);
     Task<Result<HouseDto>> RejectAsync(int id);

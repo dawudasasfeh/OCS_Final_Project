@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDay } from "../utils/date";
 import { periodLabel } from "../utils/duration";
+import { imageUrl } from "../utils/images";
 
 /**
  * One booking, shown from either side of the deal.
@@ -23,7 +24,7 @@ export default function BookingCard({ booking: b, side = "renter", children }) {
     <article className="booking-card">
       <Link to={`/houses/${b.houseId}`} className="booking-thumb">
         {b.houseImageUrl && !broken ? (
-          <img src={b.houseImageUrl} alt="" onError={() => setBroken(true)} />
+          <img src={imageUrl(b.houseImageUrl)} alt="" onError={() => setBroken(true)} />
         ) : (
           <span>NO PHOTO</span>
         )}

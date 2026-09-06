@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createHouse } from "../api/houses";
+import { createHouse, uploadHouseImage } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 
 // These integers are the Domain enums. If any of them is renumbered,
@@ -48,7 +48,6 @@ const EMPTY = {
   apartmentsInBuilding: "",
   buildingAge: "",
   turnoverDays: 2,
-  imageUrls: "",
 };
 
 /** "" for an optional number means "not provided", which the API wants as null. */
@@ -56,12 +55,43 @@ const optionalNumber = (v) => (v === "" ? null : Number(v));
 
 export default function CreateListing() {
   const [form, setForm] = useState(EMPTY);
+  // { file, preview } — nothing is uploaded until the listing exists, so an
+  // abandoned form leaves nothing on the server.
+  const [photos, setPhotos] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Every createObjectURL holds a blob in memory until it is revoked.
+  useEffect(() => {
+    return () => photos.forEach((p) => URL.revokeObjectURL(p.preview));
+  }, [photos]);
+
   function set(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleFiles(e) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";                          // so the same file can be picked again
+    if (files.length === 0) return;
+
+    setPhotos((prev) => [
+      ...prev,
+      ...files.map((file) => ({ file, preview: URL.createObjectURL(file) })),
+    ]);
+  }
+
+  function removePhoto(preview) {
+    setPhotos((prev) => prev.filter((p) => p.preview !== preview));
+    URL.revokeObjectURL(preview);
+  }
+
+  function makePrimary(preview) {
+    setPhotos((prev) => [
+      ...prev.filter((p) => p.preview === preview),
+      ...prev.filter((p) => p.preview !== preview),
+    ]);
   }
 
   async function handleSubmit(e) {
@@ -88,11 +118,20 @@ export default function CreateListing() {
         apartmentsInBuilding: optionalNumber(form.apartmentsInBuilding),
         buildingAge: optionalNumber(form.buildingAge),
         turnoverDays: Number(form.turnoverDays),
-        imageUrls: form.imageUrls
-          .split("\n")
-          .map((u) => u.trim())
-          .filter(Boolean),
+        imageUrls: [],
       });
+
+      // Photos go up after the listing exists, so each one has a house folder
+      // to live in. Sequential, so the order chosen is the order stored and the
+      // first upload becomes the main photo.
+      for (const { file } of photos) {
+        try {
+          await uploadHouseImage(created.id, file);
+        } catch {
+          // The listing is already saved; a failed photo should not lose it.
+          setError(`The listing was published, but ${file.name} could not be uploaded.`);
+        }
+      }
 
       navigate(`/houses/${created.id}`, { replace: true });
     } catch (err) {
@@ -318,16 +357,48 @@ export default function CreateListing() {
 
         <fieldset className="form-block">
           <legend>Photos</legend>
-          <div className="field">
-            <label className="label" htmlFor="imageUrls">Image URLs, one per line</label>
-            <textarea
-              id="imageUrls" className="input" rows={3}
-              placeholder={"/uploads/houses/abdoun-1.jpg\n/uploads/houses/abdoun-2.jpg"}
-              value={form.imageUrls}
-              onChange={(e) => set("imageUrls", e.target.value)}
+
+          <label className="upload-drop">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={handleFiles}
+              disabled={busy}
             />
-            <p className="field-hint">The first one is used as the main photo.</p>
-          </div>
+            <span className="upload-drop-title">Choose photos</span>
+            <span className="upload-drop-hint">JPG, PNG or WEBP · up to 5 MB each</span>
+          </label>
+
+          {photos.length > 0 && (
+            <>
+              <div className="upload-grid">
+                {photos.map((p, i) => (
+                  <div
+                    key={p.preview}
+                    className={i === 0 ? "upload-item primary" : "upload-item"}
+                  >
+                    <img src={p.preview} alt="" />
+                    {i === 0 && <span className="upload-badge">Main photo</span>}
+                    <div className="upload-item-actions">
+                      {i !== 0 && (
+                        <button type="button" onClick={() => makePrimary(p.preview)}>
+                          Make main
+                        </button>
+                      )}
+                      <button type="button" onClick={() => removePhoto(p.preview)}>
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="field-hint">
+                The first photo is used on search results and booking cards.
+                Photos upload when you publish.
+              </p>
+            </>
+          )}
         </fieldset>
 
         <div className="form-actions">

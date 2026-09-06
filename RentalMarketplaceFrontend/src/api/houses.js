@@ -32,4 +32,18 @@ export function rejectHouse(id){
     return client.patch(`/houses/${id}/reject`).then((r) => r.data);
 }
 
+/**
+ * Adds one photo to an existing listing and resolves to its stored path.
+ * Content-Type is cleared so the browser sets it, including the multipart
+ * boundary that the client's default "application/json" would otherwise hide.
+ */
+export function uploadHouseImage(houseId, file){
+    const body = new FormData();
+    body.append("file", file);
+
+    return client
+        .post(`/houses/${houseId}/images`, body, { headers: { "Content-Type": undefined } })
+        .then((r) => r.data.url);
+}
+
 

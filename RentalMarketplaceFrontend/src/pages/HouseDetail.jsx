@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getHouse } from "../api/houses";
+import { imageUrl } from "../utils/images";
 import { getErrorMessage } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
 import BookingForm from "../components/BookingForm";
@@ -133,7 +134,7 @@ export default function HouseDetail() {
               >
                 {broken.has(i)
                   ? <span>{i + 1}</span>
-                  : <img src={url} alt="" onError={() => markBroken(i)} />}
+                  : <img src={imageUrl(url)} alt="" onError={() => markBroken(i)} />}
               </button>
             ))}
           </div>
@@ -142,7 +143,7 @@ export default function HouseDetail() {
             {images.length === 0 || broken.has(activeImage) ? (
               "PHOTO NOT AVAILABLE"
             ) : (
-              <img src={images[activeImage]} alt={house.title}
+              <img src={imageUrl(images[activeImage])} alt={house.title}
                    onError={() => markBroken(activeImage)} />
             )}
           </div>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { searchHouses } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
+import HouseCard from "../components/HouseCard";
 
 const TYPES = [
   { value: "", label: "Any type" },
@@ -175,29 +176,7 @@ export default function Houses () {
                 ) : (
                   <div className="grid-houses">
                     {houses.map((h) => (
-                      <Link to={`/houses/${h.id}`} key={h.id} className="house-card">
-                        <div className="house-thumb">
-                          {h.isFurnished && <span className="house-tag">Furnished</span>}
-                          Photo
-                        </div>
-                        <div className="house-body">
-                          <p className="house-city">
-                            {h.city}{h.neighborhood ? ` · ${h.neighborhood}` : ""}
-                          </p>
-                          <h3 className="house-title">{h.title}</h3>
-                          <div className="house-meta">
-                            <span>{h.bedrooms} beds</span>
-                            <span>{h.bathrooms} baths</span>
-                            <span>{h.areaSqM} m²</span>
-                          </div>
-                          <div className="house-foot">
-                            <span className="house-price">
-                              {h.price} JOD <span>/ {h.priceUnit.toLowerCase()}</span>
-                            </span>
-                            <span className="house-link">View details</span>
-                          </div>
-                        </div>
-                      </Link>
+                      <HouseCard key={h.id} house={h} />
                     ))}
                   </div>
                 )}

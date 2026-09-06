@@ -49,6 +49,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Serves wwwroot, which is where uploaded listing images land. It sits before
+// authentication because a listing photo is public once the listing is approved.
+app.UseStaticFiles();
+
 app.UseCors("react");
 
 app.UseAuthentication();
