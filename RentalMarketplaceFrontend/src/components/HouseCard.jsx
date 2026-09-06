@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { imageUrl } from "../utils/images";
+import WishlistButton from "./WishlistButton";
 
 /** One listing in a grid. Shared by the home page and the search results. */
 export default function HouseCard({ house: h }) {
@@ -11,6 +12,7 @@ export default function HouseCard({ house: h }) {
     <Link to={`/houses/${h.id}`} className="house-card">
       <div className="house-thumb">
         {h.isFurnished && <span className="house-tag">Furnished</span>}
+        <WishlistButton houseId={h.id} ownerId={h.ownerId} />
         {image && !broken ? (
           <img src={imageUrl(image)} alt="" onError={() => setBroken(true)} />
         ) : (

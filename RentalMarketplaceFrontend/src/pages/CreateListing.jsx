@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createHouse, uploadHouseImage } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
+import { getMySubscription } from "../api/subscription";
 
 // These integers are the Domain enums. If any of them is renumbered,
 // these lists have to change with it.
@@ -60,7 +61,16 @@ export default function CreateListing() {
   const [photos, setPhotos] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [sub, setSub] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    getMySubscription()
+      .then((s) => { if (!cancelled) setSub(s); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Every createObjectURL holds a blob in memory until it is revoked.
   useEffect(() => {
@@ -147,6 +157,18 @@ export default function CreateListing() {
         An administrator reviews every listing before renters can see it. You can
         follow its status on <Link to="/my-listings">My listings</Link>.
       </p>
+
+      {/* The API refuses without a subscription, so say so before the form is
+          filled in rather than after it is submitted. */}
+      {sub && !sub.isActive && (
+        <div className="sub-status">
+          <span className="badge badge-rejected">Not active</span>
+          <p className="muted">
+            Publishing needs an active subscription — {sub.pricePerMonth} JOD a
+            month. <Link to="/subscribe">Subscribe</Link>.
+          </p>
+        </div>
+      )}
 
       <form className="listing-form" onSubmit={handleSubmit} noValidate>
         {error && <p className="error-text">{error}</p>}

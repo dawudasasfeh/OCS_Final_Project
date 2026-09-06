@@ -64,7 +64,10 @@ export default function BookingCard({ booking: b, side = "renter", children }) {
           </div>
         </dl>
 
-        {children && <div className="booking-actions">{children}</div>}
+        {/* Rendered bare rather than wrapped in .booking-actions: a page may
+            pass buttons, a payments block, or both, and only the buttons want
+            to sit in a row. */}
+        {children}
       </div>
     </article>
   );

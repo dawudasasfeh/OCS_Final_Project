@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getMyBookings, cancelBooking } from "../api/bookings";
 import { getErrorMessage } from "../api/errors";
 import BookingCard from "../components/BookingCard";
+import BookingPayments from "../components/BookingPayments";
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -62,15 +63,18 @@ export default function MyBookings() {
         <div className="booking-list">
           {bookings.map((b) => (
             <BookingCard key={b.id} booking={b} side="renter">
+              {b.status === "Confirmed" && <BookingPayments booking={b} side="renter" />}
               {b.status === "Pending" && (
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => handleCancel(b.id)}
-                  disabled={busyId === b.id}
-                >
-                  {busyId === b.id ? "Cancelling…" : "Cancel request"}
-                </button>
+                <div className="booking-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => handleCancel(b.id)}
+                    disabled={busyId === b.id}
+                  >
+                    {busyId === b.id ? "Cancelling…" : "Cancel request"}
+                  </button>
+                </div>
               )}
             </BookingCard>
           ))}

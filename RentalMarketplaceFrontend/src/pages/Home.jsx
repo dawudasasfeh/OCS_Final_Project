@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { searchHouses } from "../api/houses";
+import { getApprovedTestimonials } from "../api/testimonials";
+import { formatDay } from "../utils/date";
 import HouseCard from "../components/HouseCard";
 import heroImg from "../assets/hero-amman.jpg";
 
@@ -19,16 +21,6 @@ const DURATIONS = [
   { value: "3", label: "Yearly" },
 ];
 
-/* Replaced by GET /api/testimonials (approved only). */
-const TESTIMONIALS = [
-  { id: 1, name: "Lina Haddad", city: "Amman",
-    text: "I found a furnished flat in Weibdeh in two days. Booking the dates and getting the owner to confirm took one afternoon." },
-  { id: 2, name: "Omar Zayd", city: "Irbid",
-    text: "I list two studios near the university here. Requests arrive with the dates already set, so there is no back and forth over WhatsApp." },
-  { id: 3, name: "Sara Nimri", city: "Aqaba",
-    text: "Renting for a full year was straightforward. The price I agreed to is the price on the booking, and nothing changed later." },
-];
-
 const initials = (name) => name.split(" ").map((w) => w[0]).join("").slice(0, 2);
 
 export default function Home() {
@@ -36,6 +28,7 @@ export default function Home() {
   const [type, setType] = useState("1");
   const [city, setCity] = useState("");
   const [latest, setLatest] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const navigate = useNavigate();
 
   // searchHouses only ever returns approved, available listings, so every card
@@ -47,6 +40,10 @@ export default function Home() {
     searchHouses()
       .then((data) => { if (!cancelled) setLatest(data.slice(0, 4)); })
       .catch(() => { if (!cancelled) setLatest([]); });
+
+    getApprovedTestimonials()
+      .then((data) => { if (!cancelled) setTestimonials(data.slice(0, 3)); })
+      .catch(() => { if (!cancelled) setTestimonials([]); });
 
     return () => { cancelled = true; };
   }, []);
@@ -140,16 +137,24 @@ export default function Home() {
             <p className="muted">Feedback from renters and owners using Beytak.</p>
           </div>
 
+          {testimonials.length === 0 && (
+            <p className="muted">
+              No testimonials yet. <Link to="/contact">Share yours</Link>.
+            </p>
+          )}
+
           <div className="grid-testimonials">
-            {TESTIMONIALS.map((t) => (
+            {testimonials.map((t) => (
               <article className="testimonial-card" key={t.id}>
                 <div className="testimonial-mark">&ldquo;</div>
-                <p className="testimonial-text">{t.text}</p>
+                <p className="testimonial-text">{t.content}</p>
                 <div className="testimonial-author">
-                  <span className="testimonial-avatar">{initials(t.name)}</span>
+                  <span className="testimonial-avatar">{initials(t.userName)}</span>
                   <span>
-                    <span className="testimonial-name">{t.name}</span><br />
-                    <span className="testimonial-meta">{t.city}</span>
+                    <span className="testimonial-name">{t.userName}</span><br />
+                    <span className="testimonial-meta">
+                      {formatDay(t.createdAt.slice(0, 10))}
+                    </span>
                   </span>
                 </div>
               </article>

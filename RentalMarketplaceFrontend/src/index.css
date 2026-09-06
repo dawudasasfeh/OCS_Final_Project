@@ -650,6 +650,112 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .form-actions .btn { flex: 1; }
 }
 
+/* ── booking payments ──────────────────────────────────────────── */
+.pay-block {
+  margin-top: .9rem; padding-top: .8rem;
+  border-top: 1px solid var(--border);
+}
+.pay-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: .6rem; font-size: .82rem; margin-bottom: .5rem;
+}
+.pay-title {
+  font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  font-size: .7rem; color: var(--text-light);
+}
+
+.pay-list { list-style: none; margin: 0 0 .6rem; padding: 0; }
+.pay-row {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  padding: .4rem 0; border-bottom: 1px solid var(--border);
+  font-size: .84rem;
+}
+.pay-row:last-child { border-bottom: none; }
+.pay-amount { font-weight: 600; min-width: 82px; }
+
+.pay-actions { display: flex; gap: .3rem; margin-left: auto; }
+.pay-actions button {
+  padding: .18rem .55rem; cursor: pointer;
+  background: #fff; border: 1px solid var(--border-strong); border-radius: 4px;
+  font: inherit; font-size: .74rem; font-weight: 600;
+}
+.pay-actions button:hover { border-color: var(--primary); color: var(--primary); }
+
+.pay-form { display: flex; flex-direction: column; gap: .5rem; }
+.pay-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.pay-add { padding: .35rem .8rem; font-size: .82rem; }
+
+/* ── subscribe ─────────────────────────────────────────────────── */
+.sub-status {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  margin-bottom: 1.2rem; padding: .85rem 1rem;
+  background: var(--surface-alt); border-radius: var(--radius);
+}
+.sub-status p { margin: 0; font-size: .88rem; }
+.sub-pending { border-color: var(--confirmed); }
+
+@media (max-width: 767px) {
+  .pay-form-row { grid-template-columns: 1fr; }
+}
+
+/* ── wishlist heart ────────────────────────────────────────────── */
+.wish-btn {
+  position: absolute; top: .5rem; right: .5rem; z-index: 2;
+  width: 32px; height: 32px; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .92); color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 50%;
+  font-size: 1rem; line-height: 1;
+  transition: color .15s, border-color .15s, transform .1s;
+}
+.wish-btn:hover { color: var(--primary); border-color: var(--primary); }
+.wish-btn:active { transform: scale(.9); }
+.wish-btn.saved { color: var(--primary); border-color: var(--primary); }
+
+/* On the detail page the heart sits beside the title, not over an image. */
+.wish-btn-lg {
+  position: static; width: 40px; height: 40px; flex: none; font-size: 1.25rem;
+}
+
+.detail-title-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ── admin dashboard ───────────────────────────────────────────── */
+.admin-tabs {
+  display: flex; gap: .3rem; margin-bottom: 1.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.admin-tab {
+  padding: .6rem 1rem; cursor: pointer;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  font: inherit; font-size: .9rem; font-weight: 600; color: var(--text-muted);
+  transition: color .15s, border-color .15s;
+}
+.admin-tab:hover { color: var(--text); }
+.admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.admin-card {
+  padding: 1rem 1.15rem; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+
+.admin-excerpt {
+  margin: .8rem 0 0; font-size: .86rem; line-height: 1.5; color: var(--text-muted);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.admin-quote {
+  margin: .8rem 0 0; padding: .7rem .9rem;
+  background: var(--surface-alt); border-left: 3px solid var(--border-strong);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: .9rem; line-height: 1.55;
+}
+
+.admin-note { margin: .8rem 0 0; }
+
 .listing-note {
   margin: .8rem 0 0; padding: .5rem .7rem;
   background: var(--surface-alt); border-radius: var(--radius);

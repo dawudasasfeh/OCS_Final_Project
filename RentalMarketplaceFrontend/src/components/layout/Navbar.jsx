@@ -83,7 +83,9 @@ export default function Navbar() {
                   <div className="account-menu-list">
                     <Link to="/houses/new" role="menuitem">List a property</Link>
                     <Link to="/my-listings" role="menuitem">My listings</Link>
+                    <Link to="/subscribe" role="menuitem">Subscription</Link>
                     <Link to="/my-bookings" role="menuitem">My bookings</Link>
+                    <Link to="/wishlist" role="menuitem">Saved properties</Link>
                     <Link to="/requests" role="menuitem">Booking requests</Link>
                     {user.role === "Admin" && (
                       <Link to="/admin" role="menuitem">Admin dashboard</Link>

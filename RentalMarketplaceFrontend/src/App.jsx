@@ -11,6 +11,9 @@ import MyBookings from "./pages/MyBookings";
 import BookingRequests from "./pages/BookingRequests";
 import MyListings from "./pages/MyListings";
 import CreateListing from "./pages/CreateListing";
+import Admin from "./pages/Admin";
+import Wishlist from "./pages/Wishlist";
+import Subscribe from "./pages/Subscribe";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -42,6 +45,18 @@ function App() {
           <Route
             path="/my-listings"
             element={<ProtectedRoute><MyListings /></ProtectedRoute>}
+          />
+          <Route
+            path="/subscribe"
+            element={<ProtectedRoute><Subscribe /></ProtectedRoute>}
+          />
+          <Route
+            path="/wishlist"
+            element={<ProtectedRoute><Wishlist /></ProtectedRoute>}
+          />
+          <Route
+            path="/admin"
+            element={<ProtectedRoute role="Admin"><Admin /></ProtectedRoute>}
           />
         </Route>
       </Routes>

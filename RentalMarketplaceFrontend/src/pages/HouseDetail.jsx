@@ -4,6 +4,7 @@ import { getHouse } from "../api/houses";
 import { imageUrl } from "../utils/images";
 import { getErrorMessage } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
+import WishlistButton from "../components/WishlistButton";
 import BookingForm from "../components/BookingForm";
 
 
@@ -161,7 +162,14 @@ export default function HouseDetail() {
               </p>
             )}
 
-            <h1 className="detail-title">{house.title}</h1>
+            <div className="detail-title-row">
+              <h1 className="detail-title">{house.title}</h1>
+              <WishlistButton
+                houseId={house.id}
+                ownerId={house.ownerId}
+                className="wish-btn-lg"
+              />
+            </div>
             <p className="detail-location">
               {house.address}
               {house.neighborhood ? `, ${house.neighborhood}` : ""}, {house.city}

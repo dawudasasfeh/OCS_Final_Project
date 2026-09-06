@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { createTestimonial } from "../api/testimonials";
+import { getErrorMessage } from "../api/errors";
 
 const DETAILS = [
   { icon: "✉", label: "Email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
@@ -32,12 +34,11 @@ export default function Contact() {
 
     setBusy(true);
     try {
-      // TODO: await client.post("/testimonials", { content: text })
-      console.log("Testimonial:", text);
+      await createTestimonial(text);
       setContent("");
       setSent(true);
-    } catch {
-      setError("Could not submit your testimonial. Please try again.");
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not submit your testimonial. Please try again."));
     } finally {
       setBusy(false);
     }
