@@ -1,77 +1,188 @@
 import { Link } from "react-router-dom";
 
 const STATS = [
-  { value: "4", label: "Cities covered" },
-  { value: "4", label: "Property types" },
-  { value: "3", label: "Rental periods" },
+  { value: "4", label: "Jordanian regions" },
   { value: "0%", label: "Commission on rent" },
+  { value: "3", label: "Flexible rental periods" },
+  { value: "100%", label: "Direct owner contact" },
+];
+
+const JORDAN_REGIONS = [
+  {
+    city: "Amman",
+    tag: "Capital & Urban Living",
+    img: "/about/amman-apartments.jpg",
+    desc: "From modern apartments in Abdoun, Dabouq, and Jubaiha to artistic studios in Jabal Al Weibdeh and 7th Circle.",
+    link: "/houses?city=Amman",
+  },
+  {
+    city: "As-Salt & Jerash",
+    tag: "Heritage & Hills",
+    img: "/about/salt-heritage.jpg",
+    desc: "Characterful yellow stone houses, panoramic hillside terraces, and peaceful countryside village living.",
+    link: "/houses?city=Salt",
+  },
+  {
+    city: "Aqaba & The Red Sea",
+    tag: "Coastal Living",
+    img: "/about/aqaba-coastal.jpg",
+    desc: "Sunny seaside apartments, marina chalets, and vacation homes along Jordan's southern Red Sea coast.",
+    link: "/houses?city=Aqaba",
+  },
 ];
 
 const STEPS = [
-  { n: "1", h: "Search", p: "Filter by city, neighbourhood, property type and rental period." },
-  { n: "2", h: "Request", p: "Choose a start date and a duration. We work out the end date and the total." },
-  { n: "3", h: "Confirm", p: "The owner reviews the request and confirms it. Payment is settled directly." },
-  { n: "4", h: "Move in", p: "Collect the keys. The booking stays on record for both sides." },
+  {
+    n: "1",
+    h: "Search Jordan with Confidence",
+    p: "Filter by city, neighborhood, furnishing, bedrooms, and lease period without wading through unverified social media posts.",
+  },
+  {
+    n: "2",
+    h: "Request Available Dates",
+    p: "Pick your start date and stay duration. Our availability engine calculates exact checkout dates and protects turnover cleaning gaps.",
+  },
+  {
+    n: "3",
+    h: "Direct Owner Confirmation",
+    p: "The property owner reviews your request. Once confirmed, you receive verified direct contact details via phone or WhatsApp.",
+  },
+  {
+    n: "4",
+    h: "Move In & Pay Directly",
+    p: "Inspect the property, collect your keys, and settle rent directly via Cash, CliQ, or Bank Transfer — with zero commission.",
+  },
 ];
 
 const VALUES = [
-  { h: "One listing, one truth",
-    p: "Every property carries the same structured details — area, floor, furnishing, building age — so listings can actually be compared." },
-  { h: "No double bookings",
-    p: "Availability is enforced by the server, including the turnover days an owner needs between tenants." },
-  { h: "The agreed price stays agreed",
-    p: "The total is fixed on the booking when it is made. Later changes to a property's price never rewrite it." },
-  { h: "Owners stay in control",
-    p: "Every booking request is reviewed and confirmed by the owner. Nothing is booked automatically." },
+  {
+    icon: "⚖",
+    h: "One standard, full transparency",
+    p: "Every property in Jordan carries structured specs — area in m², floor number, building age, and furnishing — making listings truly comparable.",
+  },
+  {
+    icon: "🛡",
+    h: "Zero double-bookings",
+    p: "Server-side availability tracking enforces real-time booking locks, automatically guarding turnover cleaning days between stays.",
+  },
+  {
+    icon: "🏷",
+    h: "Agreed prices stay agreed",
+    p: "Your total price snapshot is locked the moment a request is created. Subsequent price changes by an owner never alter existing bookings.",
+  },
+  {
+    icon: "🤝",
+    h: "Direct relationships, 0% fees",
+    p: "Beytak charges tenants zero commission. We empower Jordanian owners and renters to communicate directly without broker markups.",
+  },
 ];
 
 export default function About() {
   return (
     <>
+      {/* 1 ── Header ────────────────────────────────────────────── */}
       <section className="page-head">
         <div className="container">
-          <h1>About Beytak</h1>
+          <h1>About Beytak · بيتك</h1>
           <p>
-            A rental marketplace built for Jordan — where finding a home, agreeing the
-            dates and keeping a record of it all happen in one place.
+            A rental marketplace built specifically for Jordan — where finding a home,
+            transparent pricing, and direct relationships come together.
           </p>
         </div>
       </section>
 
+      {/* 2 ── Story & Mission (Image Split) ──────────────────────── */}
       <section className="section">
         <div className="container">
-          <div className="prose">
-            <h2>Why we built it</h2>
-            <p>
-              Renting in Jordan happens across classifieds sites, Facebook groups and
-              word of mouth. Listings are inconsistent, availability is impossible to
-              verify without a phone call, and once a place is agreed there is rarely
-              any record of what was actually agreed.
-            </p>
-            <p>
-              <strong>Beytak brings those three things together.</strong> Owners publish
-              properties with a consistent set of details. Renters search, compare and
-              request specific dates. Both sides keep a record of the booking, its status
-              and the price that was agreed.
-            </p>
+          <div className="about-hero-grid">
+            <div>
+              <span className="badge badge-approved" style={{ marginBottom: ".8rem" }}>
+                Our Mission in Jordan
+              </span>
+              <h2>Renting in Jordan, Reimagined</h2>
+              <p className="muted">
+                For years, finding a home in Jordan has meant scrolling endlessly
+                through disorganized Facebook groups, deciphering vague classified ads,
+                paying hefty broker commissions, and relying on informal verbal agreements
+                that offer zero certainty.
+              </p>
+              <p className="muted">
+                <strong>Beytak (بيتك — "Your Home")</strong> was created to bring order,
+                clarity, and transparency to the Jordanian rental market. Whether you are
+                renting a furnished studio in Amman for two weeks or leasing a family villa
+                in Abdoun for a year, Beytak provides one unified, trusted platform.
+              </p>
 
-            <h2>One model for every rental</h2>
-            <p>
-              A stay of one week and a lease of one year are the same thing here: a
-              booking with a start date, an end date and a duration. There is no separate
-              short-term and long-term system, so a property owner manages everything in
-              one place — and a renter searching for a month sees only what is genuinely
-              available for that month.
-            </p>
+              <div className="about-pills">
+                <span className="about-pill">
+                  <span className="dot" /> 0% Broker Fees
+                </span>
+                <span className="about-pill">
+                  <span className="dot" /> Verified Photos
+                </span>
+                <span className="about-pill">
+                  <span className="dot" /> Server-Guaranteed Dates
+                </span>
+                <span className="about-pill">
+                  <span className="dot" /> Cash &amp; CliQ Friendly
+                </span>
+              </div>
+
+              <Link to="/houses" className="btn btn-primary">
+                Explore Available Homes
+              </Link>
+            </div>
+
+            <div className="about-img-frame">
+              <img
+                src="/about/amman-living.jpg"
+                alt="Modern furnished apartment in Amman overlooking the city"
+              />
+              <div className="about-img-badge">
+                <strong>Contemporary Jordanian Living</strong>
+                Curated homes across Amman, As-Salt, Irbid, and Aqaba.
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* 3 ── Destinations Across Jordan ────────────────────────── */}
       <section className="section section-alt">
         <div className="container">
           <div className="section-head">
-            <h2>How it works</h2>
-            <p className="muted">Four steps from search to keys.</p>
+            <h2>Homes Across the Kingdom</h2>
+            <p className="muted">
+              Explore rentals tailored to Jordan's unique cities and landscapes.
+            </p>
+          </div>
+
+          <div className="about-cities-grid">
+            {JORDAN_REGIONS.map((region) => (
+              <article className="city-card" key={region.city}>
+                <div className="city-card-thumb">
+                  <img src={region.img} alt={`${region.city}, Jordan`} />
+                  <span className="city-card-tag">{region.tag}</span>
+                </div>
+                <div className="city-card-body">
+                  <h3>{region.city}</h3>
+                  <p>{region.desc}</p>
+                  <Link to={region.link} className="city-card-link">
+                    Explore properties in {region.city} →
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4 ── How It Works ──────────────────────────────────────── */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <h2>How It Works</h2>
+            <p className="muted">Four straightforward steps from search to keys in hand.</p>
           </div>
           <div className="grid-features">
             {STEPS.map((s) => (
@@ -85,10 +196,12 @@ export default function About() {
         </div>
       </section>
 
-      <section className="section">
+      {/* 5 ── Stats At A Glance ─────────────────────────────────── */}
+      <section className="section section-alt">
         <div className="container">
           <div className="section-head">
-            <h2>At a glance</h2>
+            <h2>At a Glance</h2>
+            <p className="muted">The numbers behind the platform.</p>
           </div>
           <div className="grid-stats">
             {STATS.map((s) => (
@@ -101,26 +214,46 @@ export default function About() {
         </div>
       </section>
 
-      <section className="section section-alt">
+      {/* 6 ── What We Care About (Values) ───────────────────────── */}
+      <section className="section">
         <div className="container">
           <div className="section-head">
-            <h2>What we care about</h2>
-            <p className="muted">The rules the platform actually enforces.</p>
+            <h2>Our Core Principles</h2>
+            <p className="muted">The rules the platform actually enforces for everyone.</p>
           </div>
-          <div className="grid-features">
+          <div className="values-grid">
             {VALUES.map((v) => (
-              <div className="feature" key={v.h}>
+              <div className="value-card" key={v.h}>
+                <div className="value-icon">{v.icon}</div>
                 <h3>{v.h}</h3>
                 <p>{v.p}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div style={{ textAlign: "center", marginTop: "2rem" }}>
-            <Link to="/houses" className="btn btn-primary">Browse properties</Link>
+      {/* 7 ── Amman Panoramic Banner & Call To Action ──────────── */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <div className="about-banner">
+            <h2>Ready to find your next home in Jordan?</h2>
+            <p>
+              Browse hundreds of apartments, villas, and studios across Amman,
+              Irbid, and Aqaba — or list your property today with zero commission.
+            </p>
+            <div className="about-banner-actions">
+              <Link to="/houses" className="btn btn-primary">
+                Browse Properties
+              </Link>
+              <Link to="/my-listings" className="btn btn-outline">
+                List a Property
+              </Link>
+            </div>
           </div>
         </div>
       </section>
     </>
   );
 }
+
