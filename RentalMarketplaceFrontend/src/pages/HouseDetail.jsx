@@ -86,6 +86,15 @@ export default function HouseDetail() {
   // a signed-in caller receives the whole number. Nothing is masked here.
   const phone = house.ownerPhone;
 
+  // wa.me needs the number in international form with no punctuation: a local
+  // 0790000000 becomes 962790000000. Only built for a signed-in caller — a
+  // guest holds the masked number, and 079048XXXX would make a dead link.
+  const whatsapp = user && phone && /^\d+$/.test(phone)
+    ? `https://wa.me/962${phone.replace(/^0/, "")}?text=${encodeURIComponent(
+        `Hello, I saw your listing "${house.title}" (ref BYT${String(house.id).padStart(6, "0")}) on Beytak and would like to ask about it.`
+      )}`
+    : null;
+
   // Ordered building-level first, then the property, then room counts —
   // the convention Jordanian listing sites use.
   // Optional fields are filtered out rather than shown as "—".
@@ -263,6 +272,21 @@ export default function HouseDetail() {
                         <small>Sign in to see the full number</small>
                       </span>
                     </Link>
+                  )}
+
+                  {/* In Jordan most enquiries start on WhatsApp rather than a
+                      call, and the prefilled message saves the owner asking
+                      which listing this is about. */}
+                  {whatsapp && (
+                    <a
+                      href={whatsapp}
+                      className="btn btn-whatsapp phone-btn"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="phone-icon" aria-hidden="true">&#128172;</span>
+                      <span className="phone-text"><strong>Chat on WhatsApp</strong></span>
+                    </a>
                   )}
 
                   {user ? (

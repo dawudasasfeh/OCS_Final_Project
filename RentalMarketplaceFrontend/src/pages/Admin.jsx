@@ -34,7 +34,7 @@ const TABS = [
  * drop that row. Only the loader, the actions and the body differ, so they are
  * passed in rather than written three times.
  */
-function useQueue(load) {
+function useQueue(load, onChanged) {
   const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +66,7 @@ function useQueue(load) {
       // The row vanishing is the only other feedback, and on a queue of one
       // that just looks like the list emptied for no reason.
       toast.success(success);
+      onChanged?.();
     } catch (err) {
       const message = getErrorMessage(err, failure);
       setError(message);
@@ -91,8 +92,8 @@ function QueueSection({ queue, empty, children }) {
   );
 }
 
-function Listings() {
-  const queue = useQueue(getPendingHouses);
+function Listings({ onChanged }) {
+  const queue = useQueue(getPendingHouses, onChanged);
 
   return (
     <QueueSection queue={queue} empty="No listings waiting for review.">
@@ -145,8 +146,8 @@ function Listings() {
   );
 }
 
-function Testimonials() {
-  const queue = useQueue(getPendingTestimonials);
+function Testimonials({ onChanged }) {
+  const queue = useQueue(getPendingTestimonials, onChanged);
 
   return (
     <QueueSection queue={queue} empty="No testimonials waiting for review.">
@@ -182,8 +183,8 @@ function Testimonials() {
   );
 }
 
-function Payments() {
-  const queue = useQueue(getPendingPayments);
+function Payments({ onChanged }) {
+  const queue = useQueue(getPendingPayments, onChanged);
 
   return (
     <QueueSection queue={queue} empty="No subscription payments waiting.">
@@ -230,6 +231,21 @@ function Payments() {
 
 export default function Admin() {
   const [tab, setTab] = useState("listings");
+  const [counts, setCounts] = useState({});
+
+  // Counted at this level rather than inside each tab, because a badge has to
+  // show what is waiting on the tabs you are NOT looking at — that is the whole
+  // point of it. A failed count is left absent rather than shown as zero.
+  const refreshCounts = useCallback(async () => {
+    const [listings, testimonials, payments] = await Promise.all([
+      getPendingHouses().then((r) => r.length).catch(() => null),
+      getPendingTestimonials().then((r) => r.length).catch(() => null),
+      getPendingPayments().then((r) => r.length).catch(() => null),
+    ]);
+    setCounts({ listings, testimonials, payments });
+  }, []);
+
+  useEffect(() => { refreshCounts(); }, [refreshCounts]);
 
   return (
     <div className="container section">
@@ -248,15 +264,16 @@ export default function Admin() {
             onClick={() => setTab(t.key)}
           >
             {t.label}
+            {counts[t.key] > 0 && <span className="admin-tab-count">{counts[t.key]}</span>}
           </button>
         ))}
       </div>
 
       {/* Mounted one at a time, so switching tabs refetches rather than showing
           a queue that another admin may already have emptied. */}
-      {tab === "listings" && <Listings />}
-      {tab === "testimonials" && <Testimonials />}
-      {tab === "payments" && <Payments />}
+      {tab === "listings" && <Listings onChanged={refreshCounts} />}
+      {tab === "testimonials" && <Testimonials onChanged={refreshCounts} />}
+      {tab === "payments" && <Payments onChanged={refreshCounts} />}
     </div>
   );
 }

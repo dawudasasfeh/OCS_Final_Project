@@ -9,6 +9,7 @@ const initials = (name = "") =>
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const menuRef = useRef(null);
   const { pathname } = useLocation();
 
@@ -20,7 +21,7 @@ export default function Navbar() {
       if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
     }
     function onEscape(e) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") { setOpen(false); setNavOpen(false); }
     }
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onEscape);
@@ -31,18 +32,40 @@ export default function Navbar() {
   }, []);
 
   // close it whenever the route changes
-  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => { setOpen(false); setNavOpen(false); }, [pathname]);
 
   return (
     <header className="navbar">
       <div className="container nav-inner">
 
-        <ul className="nav-links">
+        {/* Below 1024px the links move into a drawer. They used to sit in a
+            horizontally scrolling strip with the scrollbar hidden, so there was
+            nothing to tell anyone the later links existed. */}
+        <button
+          type="button"
+          className="nav-burger"
+          aria-label={navOpen ? "Close menu" : "Open menu"}
+          aria-expanded={navOpen}
+          onClick={() => setNavOpen((v) => !v)}
+        >
+          <span /><span /><span />
+        </button>
+
+        <ul className={navOpen ? "nav-links open" : "nav-links"}>
           <li><NavLink to="/" end className={linkClass}>Home</NavLink></li>
           <li><NavLink to="/houses" className={linkClass}>Properties</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
           <li><NavLink to="/contact" className={linkClass}>Contact</NavLink></li>
         </ul>
+
+        {navOpen && (
+          <button
+            type="button"
+            className="nav-backdrop"
+            aria-label="Close menu"
+            onClick={() => setNavOpen(false)}
+          />
+        )}
 
         <Link to="/" className="nav-logo">
           <span className="nav-logo-mark">Beytak</span>
