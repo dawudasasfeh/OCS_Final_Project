@@ -11,10 +11,12 @@ namespace RentalMarketplaceBackend.API.Controllers;
 public class HousesController : ControllerBase
 {
     private readonly IHouseService _houseService;
+    private readonly IBookingService _bookingService;
 
-    public HousesController(IHouseService houseService)
+    public HousesController(IHouseService houseService, IBookingService bookingService)
     {
         _houseService = houseService;
+        _bookingService = bookingService;
     }
 
     private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -23,6 +25,14 @@ public class HousesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Search([FromQuery] HouseSearchDto filter)
         => Ok(await _houseService.SearchAsync(filter));
+
+    [HttpGet("{id:int}/availability")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Availability(int id)
+    {
+        var result = await _bookingService.GetAvailabilityAsync(id);
+        return result.Succeeded ? Ok(result.Data) : NotFound(result.Error);
+    }
 
     [HttpGet("mine")]
     [Authorize]

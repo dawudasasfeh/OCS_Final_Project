@@ -23,6 +23,21 @@ public class BookingRepository : GenericRepository<Booking>, IBookingRepository
                      .Include(b => b.Renter)
                      .FirstOrDefaultAsync(b => b.Id == id);
 
+    public async Task<IReadOnlyList<Booking>> GetBlockingForHouseAsync(int houseId)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        return await _dbSet
+            .AsNoTracking()
+            .Where(b =>
+                b.HouseId == houseId &&
+                b.Status != BookingStatus.Cancelled &&
+                b.Status != BookingStatus.Rejected &&
+                b.EndDate >= today)
+            .OrderBy(b => b.StartDate)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<Booking>> GetForRenterAsync(string renterId) =>
         await _dbSet.AsNoTracking()
                     .Where(b => b.RenterId == renterId)

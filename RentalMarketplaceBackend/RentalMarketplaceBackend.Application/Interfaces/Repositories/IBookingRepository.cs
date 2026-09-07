@@ -7,6 +7,7 @@ public interface IBookingRepository : IGenericRepository<Booking>
 {
     Task<bool> HasOverlapAsync(int houseId, DateOnly start, DateOnly end);
     Task<Booking?> GetWithDetailsAsync(int id);
+    Task<IReadOnlyList<Booking>> GetBlockingForHouseAsync(int houseId);
     Task<IReadOnlyList<Booking>> GetForRenterAsync(string renterId);
     Task<IReadOnlyList<Booking>> GetForOwnerAsync(string ownerId);
 }

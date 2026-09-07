@@ -8,7 +8,7 @@ public interface IBookingService
     Task<Result<BookingDto>> CreateAsync(BookingCreateDto dto, string renterId);
 
     Task<BookingDto?> GetByIdAsync(int id, string requesterId, bool isAdmin = false);
-
+    Task<Result<AvailabilityDto>> GetAvailabilityAsync(int houseId);
     Task<IReadOnlyList<BookingDto>> GetMineAsync(string renterId);
     Task<IReadOnlyList<BookingDto>> GetRequestsAsync(string ownerId);
 
