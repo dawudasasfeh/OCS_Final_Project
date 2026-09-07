@@ -15,11 +15,16 @@ namespace RentalMarketplaceBackend.Infrastructure.Services
         public TokenService(IConfiguration config) => _config = config;
 
         public (string Token, DateTime ExpiresAt) CreateToken(ApplicationUser user, string role) {
+            // Subscription state is deliberately NOT a claim. A token is stamped
+            // at sign-in and lives for its whole lifetime, so an "isSubscribed"
+            // claim goes stale the moment an admin confirms a payment — the user
+            // has paid, the database agrees, and the token still says no until
+            // they sign out and back in. Callers read GET /subscription/me,
+            // which is always current.
             var claims = new List<Claim> {
                 new(JwtRegisteredClaimNames.Sub , user.Id),
                 new(JwtRegisteredClaimNames.Name, user.FullName),
                 new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new("isSubscribed", user.IsSubscribed.ToString().ToLower()),
                 new(ClaimTypes.Role, role)
             };
 

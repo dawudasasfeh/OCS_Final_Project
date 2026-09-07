@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createHouse, uploadHouseImage } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
 import { getMySubscription } from "../api/subscription";
 
 // These integers are the Domain enums. If any of them is renumbered,
@@ -55,6 +56,7 @@ const EMPTY = {
 const optionalNumber = (v) => (v === "" ? null : Number(v));
 
 export default function CreateListing() {
+  const toast = useToast();
   const [form, setForm] = useState(EMPTY);
   // { file, preview } — nothing is uploaded until the listing exists, so an
   // abandoned form leaves nothing on the server.
@@ -143,9 +145,12 @@ export default function CreateListing() {
         }
       }
 
+      toast.success("Listing created. It is pending review before renters can see it.");
       navigate(`/houses/${created.id}`, { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, "Could not create the listing."));
+      const message = getErrorMessage(err, "Could not create the listing.");
+      setError(message);
+      toast.error(message);
       setBusy(false);
     }
   }

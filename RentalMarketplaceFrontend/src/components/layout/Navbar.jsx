@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import ListPropertyLink from "../ListPropertyLink";
 
 const initials = (name = "") =>
   name.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -49,11 +50,9 @@ export default function Navbar() {
         </Link>
 
         <div className="nav-actions">
-          {user && (
-            <Link to="/houses/new" className="btn btn-outline nav-cta">
-              List a property
-            </Link>
-          )}
+          {/* Shown to guests too — the click is what explains the requirement,
+              and sending them to login is more use than hiding the button. */}
+          <ListPropertyLink className="btn btn-outline nav-cta" />
 
           {user ? (
             <div className="account" ref={menuRef}>
@@ -81,7 +80,7 @@ export default function Navbar() {
                   </div>
 
                   <div className="account-menu-list">
-                    <Link to="/houses/new" role="menuitem">List a property</Link>
+                    <ListPropertyLink role="menuitem" />
                     <Link to="/my-listings" role="menuitem">My listings</Link>
                     <Link to="/subscribe" role="menuitem">Subscription</Link>
                     <Link to="/my-bookings" role="menuitem">My bookings</Link>

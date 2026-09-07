@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { getWishlist, addToWishlist, removeFromWishlist } from "../api/wishlist";
 import { useAuth } from "./AuthContext";
+import { useToast } from "./ToastContext";
 
 const WishlistContext = createContext(null);
 
@@ -13,6 +14,7 @@ const WishlistContext = createContext(null);
  */
 export function WishlistProvider({ children }) {
     const { user } = useAuth();
+    const toast = useToast();
     const [ids, setIds] = useState(() => new Set());
 
     useEffect(() => {
@@ -37,6 +39,11 @@ export function WishlistProvider({ children }) {
 
     const toggle = useCallback(async (houseId) => {
         const saved = ids.has(houseId);
+        const undo = () => setIds((prev) => {
+            const next = new Set(prev);
+            saved ? next.add(houseId) : next.delete(houseId);
+            return next;
+        });
 
         // Move first, reconcile after: a heart that waits for the network feels
         // broken. If the call fails the change is rolled back.
@@ -48,14 +55,16 @@ export function WishlistProvider({ children }) {
 
         try {
             await (saved ? removeFromWishlist(houseId) : addToWishlist(houseId));
+            toast.success(saved ? "Removed from saved properties." : "Saved.");
         } catch {
-            setIds((prev) => {
-                const next = new Set(prev);
-                saved ? next.add(houseId) : next.delete(houseId);
-                return next;
-            });
+            // The heart springing back is easy to miss, so say what happened.
+            undo();
+            toast.error(
+                saved ? "Could not remove that. Please try again."
+                      : "Could not save that. Please try again."
+            );
         }
-    }, [ids]);
+    }, [ids, toast]);
 
     return (
         <WishlistContext.Provider value={{ ids, toggle }}>

@@ -2,16 +2,31 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
 
 // Development convenience only — the block that renders these is wrapped in
 // import.meta.env.DEV, so Vite strips it from a production build.
+//
+// These mirror seed-data.json. Each one is here because it puts the app in a
+// state worth looking at, not just because it can log in — between them they
+// cover both sides of the subscription gate and every moderation queue.
 const DEMO_ACCOUNTS = [
-  { label: "Renter", email: "renter01@test.com", password: "Test123!" },
-  { label: "Owner", email: "dawud@test.com", password: "Test123!" },
-  { label: "Admin", email: "admin@beytak.com", password: "Admin123!" },
+  { label: "Admin", email: "admin@beytak.com", password: "Admin123!",
+    hint: "Moderation queues: 4 pending listings, 2 testimonials, 2 subscriptions" },
+  { label: "Owner", email: "layla.haddad@gmail.com", password: "Test123!",
+    hint: "Subscribed · 5 listings · can create a new one" },
+  { label: "Owner (lapsed)", email: "ziad.khatib@yahoo.com", password: "Test123!",
+    hint: "Subscription expired a month ago · blocked from listing · 3 listings" },
+  { label: "Owner (no sub)", email: "hakam.zoubi@gmail.com", password: "Test123!",
+    hint: "Never subscribed · payment still pending admin confirmation · 3 listings" },
+  { label: "Renter", email: "yazan.husseini@gmail.com", password: "Test123!",
+    hint: "3 bookings incl. a 35,000 JOD villa · 3 saved properties" },
+  { label: "Renter 2", email: "lina.sawalha@outlook.com", password: "Test123!",
+    hint: "4 bookings across weekly, monthly and cancelled · 2 saved" },
 ];
 
 export default function Login() {
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,7 +50,9 @@ export default function Login() {
       await login(email, password);
       navigate(returnTo, { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, "Invalid email or password."));
+      const message = getErrorMessage(err, "Invalid email or password.");
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -60,6 +77,7 @@ export default function Login() {
                   key={a.email}
                   type="button"
                   className="quick-cred-btn"
+                  title={`${a.email} — ${a.hint}`}
                   onClick={() => { setEmail(a.email); setPassword(a.password); }}
                 >
                   {a.label}

@@ -522,6 +522,143 @@ img { max-width: 100%; display: block; }
 
 .booking-note { font-size: .75rem; line-height: 1.45; margin: .7rem 0 0; }
 
+/* ── toasts ────────────────────────────────────────────────────────── */
+.toast-stack {
+  position: fixed; z-index: 100;
+  top: 1rem; right: 1rem;
+  display: flex; flex-direction: column; gap: .5rem;
+  width: min(360px, calc(100vw - 2rem));
+  /* The stack spans the width of the widest toast, so it would otherwise sit
+     over the page and swallow clicks where there is nothing to see. */
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .7rem .8rem;
+  font-size: .85rem; line-height: 1.4;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-strong); border-left-width: 3px;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
+  animation: toast-in .18s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+}
+
+.toast-success { border-left-color: var(--confirmed); background: var(--confirmed-bg); }
+.toast-error   { border-left-color: var(--rejected);  background: var(--rejected-bg); }
+.toast-info    { border-left-color: var(--primary);   background: var(--primary-soft); }
+
+.toast-text { flex: 1; }
+
+.toast-close {
+  flex: none; padding: 0 .1rem; margin: -.1rem 0 0;
+  font: inherit; font-size: 1.05rem; line-height: 1;
+  color: var(--text-muted); background: none; border: none; cursor: pointer;
+}
+.toast-close:hover { color: var(--text); }
+
+@media (max-width: 640px) {
+  .toast-stack { top: auto; bottom: 1rem; left: 1rem; right: 1rem; width: auto; }
+}
+
+/* ── not found ─────────────────────────────────────────────────────── */
+.notfound { max-width: 520px; text-align: center; }
+.notfound-code {
+  margin: 0 0 .2rem; font-size: 3.4rem; font-weight: 700; line-height: 1;
+  color: var(--primary-soft);
+}
+.notfound h1 { margin-bottom: .4rem; }
+.notfound-actions {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: .6rem; margin-top: 1.4rem;
+}
+
+/* ── availability calendar ─────────────────────────────────────────── */
+.cal { margin-bottom: .9rem; }
+
+.cal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .4rem; margin-bottom: .5rem;
+}
+.cal-month { font-size: .82rem; font-weight: 600; }
+
+.cal-nav {
+  width: 26px; height: 26px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 1rem; line-height: 1;
+  color: var(--text); background: var(--surface); cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+}
+.cal-nav:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.cal-nav:disabled { opacity: .35; cursor: default; }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+
+.cal-weekdays { margin-bottom: 2px; }
+.cal-weekday {
+  text-align: center; font-size: .62rem; font-weight: 600;
+  letter-spacing: .03em; text-transform: uppercase; color: var(--text-light);
+}
+
+.cal-day {
+  aspect-ratio: 1; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: .74rem;
+  color: var(--text); background: var(--surface); cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.cal-day:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.cal-day:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.cal-day:disabled { cursor: default; }
+
+.cal-blank { border-color: transparent; background: none; }
+
+.cal-past { color: var(--text-light); background: var(--surface-alt); opacity: .5; }
+
+.cal-confirmed { color: var(--confirmed); background: var(--confirmed-bg); border-color: var(--confirmed-bg); }
+.cal-pending   { color: var(--pending);   background: var(--pending-bg);   border-color: var(--pending-bg); }
+
+/* Hatched rather than a flat fill, so a turnover gap never reads as somebody
+   actually being in the property. */
+.cal-turnover {
+  color: var(--text-light); border-color: var(--border);
+  background: repeating-linear-gradient(
+    45deg, var(--surface-alt), var(--surface-alt) 3px, var(--surface) 3px, var(--surface) 6px);
+}
+
+.cal-selected {
+  color: #fff; background: var(--primary); border-color: var(--primary);
+  font-weight: 600;
+}
+.cal-selected:hover:not(:disabled) { color: #fff; }
+
+.cal-legend {
+  display: flex; flex-wrap: wrap; gap: .3rem .8rem; margin-top: .55rem;
+  font-size: .68rem; color: var(--text-muted);
+}
+.cal-legend span { display: inline-flex; align-items: center; gap: .3rem; }
+/* The day cells use pale tints so the numbers stay readable, but at 10px on a
+   white card those tints are invisible. The legend keys take the solid colour
+   instead — same meaning, actually legible. */
+.cal-key {
+  width: 10px; height: 10px; flex: none;
+  border: 1px solid var(--border-strong); border-radius: 2px;
+}
+.cal-key.cal-confirmed { background: var(--confirmed); border-color: var(--confirmed); }
+.cal-key.cal-pending   { background: var(--pending);   border-color: var(--pending); }
+.cal-key.cal-turnover  {
+  background: repeating-linear-gradient(
+    45deg, var(--border-strong), var(--border-strong) 2px, #fff 2px, #fff 4px);
+}
+
 /* ── booking list pages (My bookings · Booking requests) ───────────── */
 .page-title { font-size: 1.7rem; margin: 0 0 .25rem; }
 .page-sub { margin: 0 0 1.5rem; font-size: .9rem; }
@@ -780,6 +917,9 @@ textarea.input { resize: vertical; line-height: 1.5; }
 @media (max-width: 1023px) {
   .detail-layout { grid-template-columns: 1fr; }
   .detail-aside { position: static; }
+  /* The aside goes full width here, and the day cells are square — without a
+     cap a month grid stretches to enormous tiles on a tablet. */
+  .cal { max-width: 340px; }
 }
 @media (max-width: 640px) {
   .gallery { grid-template-columns: 1fr; }
@@ -863,8 +1003,8 @@ textarea.input { resize: vertical; line-height: 1.5; }
 }
 .quick-cred-row { display: flex; gap: .4rem; flex-wrap: wrap; }
 .quick-cred-btn {
-  flex: 1 1 0; min-width: 80px; padding: .4rem .6rem;
-  font: inherit; font-size: .82rem; font-weight: 600;
+  flex: 1 1 auto; min-width: 104px; padding: .4rem .6rem;
+  font: inherit; font-size: .82rem; font-weight: 600; white-space: nowrap;
   color: var(--text); background: #fff; cursor: pointer;
   border: 1px solid var(--border-strong); border-radius: var(--radius);
 }

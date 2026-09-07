@@ -10,6 +10,7 @@ import { getPendingPayments, confirmPayment, rejectPayment } from "../api/paymen
 import { getErrorMessage } from "../api/errors";
 import { imageUrl } from "../utils/images";
 import { formatDay } from "../utils/date";
+import { useToast } from "../context/ToastContext";
 
 const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
@@ -34,6 +35,7 @@ const TABS = [
  * passed in rather than written three times.
  */
 function useQueue(load) {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -55,14 +57,19 @@ function useQueue(load) {
 
   // Acting on a row always removes it from a pending queue, whichever way the
   // decision went — it is no longer pending.
-  async function decide(id, action, failure) {
+  async function decide(id, action, failure, success) {
     setError("");
     setBusyId(id);
     try {
       await action(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
+      // The row vanishing is the only other feedback, and on a queue of one
+      // that just looks like the list emptied for no reason.
+      toast.success(success);
     } catch (err) {
-      setError(getErrorMessage(err, failure));
+      const message = getErrorMessage(err, failure);
+      setError(message);
+      toast.error(message);
     } finally {
       setBusyId(null);
     }
@@ -119,14 +126,14 @@ function Listings() {
               <button
                 type="button" className="btn btn-primary"
                 disabled={queue.busyId === h.id}
-                onClick={() => queue.decide(h.id, approveHouse, "Could not approve this listing.")}
+                onClick={() => queue.decide(h.id, approveHouse, "Could not approve this listing.", "Listing approved and visible to renters.")}
               >
                 Approve
               </button>
               <button
                 type="button" className="btn btn-outline"
                 disabled={queue.busyId === h.id}
-                onClick={() => queue.decide(h.id, rejectHouse, "Could not reject this listing.")}
+                onClick={() => queue.decide(h.id, rejectHouse, "Could not reject this listing.", "Listing rejected.")}
               >
                 Reject
               </button>
@@ -157,14 +164,14 @@ function Testimonials() {
             <button
               type="button" className="btn btn-primary"
               disabled={queue.busyId === t.id}
-              onClick={() => queue.decide(t.id, approveTestimonial, "Could not approve this testimonial.")}
+              onClick={() => queue.decide(t.id, approveTestimonial, "Could not approve this testimonial.", "Testimonial published.")}
             >
               Approve
             </button>
             <button
               type="button" className="btn btn-outline"
               disabled={queue.busyId === t.id}
-              onClick={() => queue.decide(t.id, rejectTestimonial, "Could not reject this testimonial.")}
+              onClick={() => queue.decide(t.id, rejectTestimonial, "Could not reject this testimonial.", "Testimonial rejected.")}
             >
               Reject
             </button>
@@ -203,14 +210,14 @@ function Payments() {
             <button
               type="button" className="btn btn-primary"
               disabled={queue.busyId === p.id}
-              onClick={() => queue.decide(p.id, confirmPayment, "Could not confirm this payment.")}
+              onClick={() => queue.decide(p.id, confirmPayment, "Could not confirm this payment.", "Payment confirmed and subscription granted.")}
             >
               Confirm
             </button>
             <button
               type="button" className="btn btn-outline"
               disabled={queue.busyId === p.id}
-              onClick={() => queue.decide(p.id, rejectPayment, "Could not reject this payment.")}
+              onClick={() => queue.decide(p.id, rejectPayment, "Could not reject this payment.", "Payment rejected.")}
             >
               Reject
             </button>

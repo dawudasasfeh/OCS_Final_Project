@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createTestimonial } from "../api/testimonials";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
 
 const DETAILS = [
   { icon: "✉", label: "Email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
@@ -17,6 +18,7 @@ const MAX = 1000;
 export default function Contact() {
   const { user } = useAuth();
 
+  const toast = useToast();
   const [content, setContent] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -37,8 +39,11 @@ export default function Contact() {
       await createTestimonial(text);
       setContent("");
       setSent(true);
+      toast.success("Thank you. Your testimonial is waiting for review.");
     } catch (err) {
-      setError(getErrorMessage(err, "Could not submit your testimonial. Please try again."));
+      const message = getErrorMessage(err, "Could not submit your testimonial. Please try again.");
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }

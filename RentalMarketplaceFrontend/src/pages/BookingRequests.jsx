@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getBookingRequests, confirmBooking, rejectBooking } from "../api/bookings";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
 
 export default function BookingRequests() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState(null);
 
@@ -29,14 +31,17 @@ export default function BookingRequests() {
     return () => { cancelled = true; };
   }, []);
 
-  async function decide(id, action, failure) {
+  async function decide(id, action, failure, success) {
     setError("");
     setBusyId(id);
     try {
       const updated = await action(id);
       setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
+      toast.success(success);
     } catch (err) {
-      setError(getErrorMessage(err, failure));
+      const message = getErrorMessage(err, failure);
+      setError(message);
+      toast.error(message);
     } finally {
       setBusyId(null);
     }
@@ -74,7 +79,7 @@ export default function BookingRequests() {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onClick={() => decide(b.id, confirmBooking, "Could not confirm this booking.")}
+                    onClick={() => decide(b.id, confirmBooking, "Could not confirm this booking.", "Booking confirmed. The renter can now see your phone number.")}
                     disabled={busyId === b.id}
                   >
                     {busyId === b.id ? "Working…" : "Confirm"}
@@ -82,7 +87,7 @@ export default function BookingRequests() {
                   <button
                     type="button"
                     className="btn btn-outline"
-                    onClick={() => decide(b.id, rejectBooking, "Could not reject this booking.")}
+                    onClick={() => decide(b.id, rejectBooking, "Could not reject this booking.", "Booking request declined.")}
                     disabled={busyId === b.id}
                   >
                     Reject

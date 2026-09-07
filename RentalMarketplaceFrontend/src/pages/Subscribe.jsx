@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { getMySubscription } from "../api/subscription";
 import { createSubscriptionPayment, getMyPayments } from "../api/payments";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
+import { useSubscription } from "../context/SubscriptionContext";
 import { formatDay } from "../utils/date";
 
 // Values are Domain/Enums/PaymentMethod.cs.
@@ -21,6 +23,8 @@ export default function Subscribe() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const toast = useToast();
+  const { refresh: refreshSubscription } = useSubscription();
 
   async function load() {
     // Read the subscription from the API, never from user.isSubscribed: that
@@ -51,9 +55,14 @@ export default function Subscribe() {
         referenceNote: note.trim() || null,
       });
       setSent(true);
+      toast.success("Payment recorded. An administrator will confirm it shortly.");
+      // The gate reads the API, so ask again in case this completed the flow.
+      refreshSubscription();
       await load();
     } catch (err) {
-      setError(getErrorMessage(err, "Could not record your payment."));
+      const message = getErrorMessage(err, "Could not record your payment.");
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }

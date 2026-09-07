@@ -4,6 +4,7 @@ import { getMyHouses } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import { formatDay } from "../utils/date";
 import { imageUrl } from "../utils/images";
+import ListPropertyLink from "../components/ListPropertyLink";
 
 const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
@@ -98,7 +99,7 @@ export default function MyListings() {
               : `${houses.length} propert${houses.length === 1 ? "y" : "ies"}, ${live} visible to renters.`}
           </p>
         </div>
-        <Link to="/houses/new" className="btn btn-primary">List a property</Link>
+        <ListPropertyLink className="btn btn-primary" />
       </div>
 
       {error && <p className="error-text">{error}</p>}
@@ -108,7 +109,7 @@ export default function MyListings() {
       ) : houses.length === 0 ? (
         <div className="empty-state">
           <p>You have not listed a property yet.</p>
-          <Link to="/houses/new" className="btn btn-primary">List your first property</Link>
+          <ListPropertyLink className="btn btn-primary">List your first property</ListPropertyLink>
         </div>
       ) : (
         <div className="booking-list">

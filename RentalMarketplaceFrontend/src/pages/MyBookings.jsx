@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyBookings, cancelBooking } from "../api/bookings";
 import { getErrorMessage } from "../api/errors";
+import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState(null);
 
@@ -35,8 +37,11 @@ export default function MyBookings() {
     try {
       const updated = await cancelBooking(id);
       setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
+      toast.success("Booking cancelled.");
     } catch (err) {
-      setError(getErrorMessage(err, "Could not cancel this booking."));
+      const message = getErrorMessage(err, "Could not cancel this booking.");
+      setError(message);
+      toast.error(message);
     } finally {
       setBusyId(null);
     }

@@ -14,6 +14,7 @@ import CreateListing from "./pages/CreateListing";
 import Admin from "./pages/Admin";
 import Wishlist from "./pages/Wishlist";
 import Subscribe from "./pages/Subscribe";
+import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -28,9 +29,12 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/houses" element={<Houses />} />
           {/* static segment ranks above /houses/:id, so "new" is never an id */}
+          {/* Listing is the paid feature, so the gate lives on the route, not
+              just on the button that reaches it — typing the URL must not get
+              past it either. HouseService enforces the same rule server-side. */}
           <Route
             path="/houses/new"
-            element={<ProtectedRoute><CreateListing /></ProtectedRoute>}
+            element={<ProtectedRoute requireSubscription><CreateListing /></ProtectedRoute>}
           />
           <Route path="/houses/:id" element={<HouseDetail />} />
 
@@ -58,6 +62,11 @@ function App() {
             path="/admin"
             element={<ProtectedRoute role="Admin"><Admin /></ProtectedRoute>}
           />
+
+          {/* Last, and inside Layout so a wrong URL still gets the nav bar to
+              escape with. Without this an unmatched path renders nothing at
+              all, which reads as the app having crashed. */}
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
