@@ -10,7 +10,6 @@ const TYPES = [
   { value: "2", label: "House" },
   { value: "3", label: "Villa" },
   { value: "4", label: "Studio" },
-  { value: "5", label: "Room" },
 ];
 
 const PERIODS = [

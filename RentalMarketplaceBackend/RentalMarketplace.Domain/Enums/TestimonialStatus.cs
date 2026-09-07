@@ -1,4 +1,6 @@
-﻿public enum TestimonialStatus
+﻿namespace RentalMarketplaceBackend.Domain.Enums;
+
+public enum TestimonialStatus
 {
     Pending = 1,
     Approved = 2,

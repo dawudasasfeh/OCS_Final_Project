@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using RentalMarketplaceBackend.Domain.Enums;
 
 namespace RentalMarketplaceBackend.Domain.Entities;
 

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const STATS = [
   { value: "4", label: "Cities covered" },
-  { value: "5", label: "Property types" },
+  { value: "4", label: "Property types" },
   { value: "3", label: "Rental periods" },
   { value: "0%", label: "Commission on rent" },
 ];

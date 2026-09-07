@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RentalMarketplaceBackend.Application.Interfaces.Repositories;
 using RentalMarketplaceBackend.Domain.Entities;
+using RentalMarketplaceBackend.Domain.Enums;
 using RentalMarketplaceBackend.Infrastructure.Persistence;
 
 namespace RentalMarketplaceBackend.Infrastructure.Repositories;
