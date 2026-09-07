@@ -6,6 +6,8 @@ import {
   rejectPayment,
 } from "../api/payments";
 import { getErrorMessage } from "../api/errors";
+import { useFieldErrors } from "../utils/validation";
+import FieldError from "./FieldError";
 import { formatDay } from "../utils/date";
 
 // Values are Domain/Enums/PaymentMethod.cs.
@@ -30,6 +32,7 @@ export default function BookingPayments({ booking, side }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { errors, validate, clearError } = useFieldErrors();
   const [busyId, setBusyId] = useState(null);
 
   const [open, setOpen] = useState(false);
@@ -58,6 +61,9 @@ export default function BookingPayments({ booking, side }) {
   async function handleRecord(e) {
     e.preventDefault();
     setError("");
+
+    if (!validate(e.currentTarget)) return;
+
     setSaving(true);
 
     try {
@@ -137,13 +143,14 @@ export default function BookingPayments({ booking, side }) {
 
       {side === "renter" && booking.status === "Confirmed" && (
         open ? (
-          <form className="pay-form" onSubmit={handleRecord}>
+          <form className="pay-form" onSubmit={handleRecord} noValidate>
             <div className="pay-form-row">
               <input
+                id="payAmount" aria-label="Amount"
                 className="input" type="number" min="1" step="1" required
                 placeholder="Amount in JOD"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => { setAmount(e.target.value); clearError("payAmount"); }}
               />
               <select
                 className="input"
@@ -154,12 +161,16 @@ export default function BookingPayments({ booking, side }) {
               </select>
             </div>
 
+            <FieldError>{errors.payAmount}</FieldError>
+
             <input
+              id="payNote" aria-label="Reference"
               className="input" maxLength={250}
               placeholder="Reference, optional"
               value={note}
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(e) => { setNote(e.target.value); clearError("payNote"); }}
             />
+            <FieldError>{errors.payNote}</FieldError>
 
             <div className="booking-actions">
               <button className="btn btn-primary" type="submit" disabled={saving}>

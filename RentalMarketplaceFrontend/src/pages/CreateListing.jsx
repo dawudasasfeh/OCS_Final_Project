@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { createHouse, uploadHouseImage } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
+import { useFieldErrors } from "../utils/validation";
+import FieldError from "../components/FieldError";
 import { getMySubscription } from "../api/subscription";
 
 // These integers are the Domain enums. If any of them is renumbered,
@@ -64,6 +66,7 @@ export default function CreateListing() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sub, setSub] = useState(null);
+  const { errors, validate, clearError } = useFieldErrors();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function CreateListing() {
 
   function set(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    clearError(field);
   }
 
   function handleFiles(e) {
@@ -109,6 +113,9 @@ export default function CreateListing() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (!validate(e.currentTarget)) return;
+
     setBusy(true);
 
     try {
@@ -189,6 +196,7 @@ export default function CreateListing() {
               value={form.title}
               onChange={(e) => set("title", e.target.value)}
             />
+            <FieldError>{errors.title}</FieldError>
           </div>
 
           <div className="field">
@@ -199,6 +207,7 @@ export default function CreateListing() {
               value={form.description}
               onChange={(e) => set("description", e.target.value)}
             />
+            <FieldError>{errors.description}</FieldError>
           </div>
 
           <div className="form-row">
@@ -241,6 +250,7 @@ export default function CreateListing() {
               value={form.address}
               onChange={(e) => set("address", e.target.value)}
             />
+            <FieldError>{errors.address}</FieldError>
           </div>
 
           <div className="form-row">
@@ -263,6 +273,7 @@ export default function CreateListing() {
                 value={form.neighborhood}
                 onChange={(e) => set("neighborhood", e.target.value)}
               />
+              <FieldError>{errors.neighborhood}</FieldError>
             </div>
           </div>
         </fieldset>
@@ -279,6 +290,7 @@ export default function CreateListing() {
                 value={form.price}
                 onChange={(e) => set("price", e.target.value)}
               />
+              <FieldError>{errors.price}</FieldError>
             </div>
 
             <div className="field">
@@ -307,6 +319,7 @@ export default function CreateListing() {
               value={form.turnoverDays}
               onChange={(e) => set("turnoverDays", e.target.value)}
             />
+            <FieldError>{errors.turnoverDays}</FieldError>
             <p className="field-hint">
               Cleaning and handover. Bookings closer together than this are refused
               automatically.
@@ -325,6 +338,7 @@ export default function CreateListing() {
                 value={form.bedrooms}
                 onChange={(e) => set("bedrooms", e.target.value)}
               />
+              <FieldError>{errors.bedrooms}</FieldError>
             </div>
             <div className="field">
               <label className="label" htmlFor="bathrooms">Bathrooms</label>
@@ -333,6 +347,7 @@ export default function CreateListing() {
                 value={form.bathrooms}
                 onChange={(e) => set("bathrooms", e.target.value)}
               />
+              <FieldError>{errors.bathrooms}</FieldError>
             </div>
             <div className="field">
               <label className="label" htmlFor="areaSqM">Area (m²)</label>
@@ -342,6 +357,7 @@ export default function CreateListing() {
                 value={form.areaSqM}
                 onChange={(e) => set("areaSqM", e.target.value)}
               />
+              <FieldError>{errors.areaSqM}</FieldError>
             </div>
           </div>
 
@@ -353,6 +369,7 @@ export default function CreateListing() {
                 value={form.masterBedrooms}
                 onChange={(e) => set("masterBedrooms", e.target.value)}
               />
+              <FieldError>{errors.masterBedrooms}</FieldError>
             </div>
             <div className="field">
               <label className="label" htmlFor="floorNumber">Floor <span className="optional">optional</span></label>
@@ -361,6 +378,7 @@ export default function CreateListing() {
                 value={form.floorNumber}
                 onChange={(e) => set("floorNumber", e.target.value)}
               />
+              <FieldError>{errors.floorNumber}</FieldError>
             </div>
             <div className="field">
               <label className="label" htmlFor="apartmentsInBuilding">Flats in building <span className="optional">optional</span></label>
@@ -369,6 +387,7 @@ export default function CreateListing() {
                 value={form.apartmentsInBuilding}
                 onChange={(e) => set("apartmentsInBuilding", e.target.value)}
               />
+              <FieldError>{errors.apartmentsInBuilding}</FieldError>
             </div>
           </div>
 

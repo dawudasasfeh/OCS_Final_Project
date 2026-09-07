@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
+import { useFieldErrors } from "../utils/validation";
+import FieldError from "../components/FieldError";
 
 // Development convenience only — the block that renders these is wrapped in
 // import.meta.env.DEV, so Vite strips it from a production build.
@@ -27,6 +29,7 @@ const DEMO_ACCOUNTS = [
 
 export default function Login() {
   const toast = useToast();
+  const { errors, validate, clearError } = useFieldErrors();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -44,6 +47,9 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (!validate(e.currentTarget)) return;
+
     setBusy(true);
 
     try {
@@ -96,9 +102,10 @@ export default function Login() {
             autoComplete="email"
             placeholder="you@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); clearError("email"); }}
             required
           />
+          <FieldError>{errors.email}</FieldError>
         </div>
 
         <div className="field">
@@ -110,9 +117,10 @@ export default function Login() {
             autoComplete="current-password"
             placeholder="Your password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); clearError("password"); }}
             required
           />
+          <FieldError>{errors.password}</FieldError>
         </div>
 
         <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../api/errors";
+import { useFieldErrors } from "../utils/validation";
+import FieldError from "../components/FieldError";
 
 const EMPTY = {
   fullName: "",
@@ -15,6 +17,7 @@ export default function Register() {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const { errors, validate, clearError, setFieldError } = useFieldErrors();
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -22,14 +25,17 @@ export default function Register() {
   function update(e) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    clearError(name);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
+    if (!validate(e.currentTarget)) return;
+
     if (form.password !== form.confirmPassword) {
-      setError("The two passwords do not match.");
+      setFieldError("confirmPassword", "The two passwords do not match.");
       return;
     }
 
@@ -69,6 +75,7 @@ export default function Register() {
             onChange={update}
             required
           />
+          <FieldError>{errors.fullName}</FieldError>
         </div>
 
         <div className="field">
@@ -84,21 +91,29 @@ export default function Register() {
             onChange={update}
             required
           />
+          <FieldError>{errors.email}</FieldError>
         </div>
 
         <div className="field">
           <label className="label" htmlFor="phoneNumber">Phone number</label>
+          {/* type="tel" validates nothing on its own — it only hints at a phone
+              keypad on mobile. Jordanian mobiles are ten digits beginning 077,
+              078 or 079, so the pattern is what actually refuses a bad one. */}
           <input
             id="phoneNumber"
             name="phoneNumber"
             className="input"
             type="tel"
             autoComplete="tel"
-            placeholder="079 000 0000"
+            placeholder="0790000000"
+            pattern="07[789][0-9]{7}"
+            title="A Jordanian mobile number: ten digits starting 077, 078 or 079."
+            maxLength={10}
             value={form.phoneNumber}
             onChange={update}
             required
           />
+          <FieldError>{errors.phoneNumber}</FieldError>
         </div>
 
         <div className="auth-row">
@@ -112,10 +127,13 @@ export default function Register() {
               autoComplete="new-password"
               placeholder="At least 6 characters"
               minLength={6}
+              pattern=".{6,}"
+              title="At least 6 characters."
               value={form.password}
               onChange={update}
               required
             />
+            <FieldError>{errors.password}</FieldError>
           </div>
 
           <div className="field">
@@ -131,6 +149,7 @@ export default function Register() {
               onChange={update}
               required
             />
+            <FieldError>{errors.confirmPassword}</FieldError>
           </div>
         </div>
 

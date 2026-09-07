@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { createTestimonial } from "../api/testimonials";
 import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
+import { useFieldErrors } from "../utils/validation";
+import FieldError from "../components/FieldError";
 
 const DETAILS = [
   { icon: "✉", label: "Email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
@@ -19,6 +21,7 @@ export default function Contact() {
   const { user } = useAuth();
 
   const toast = useToast();
+  const { errors, validate, clearError, setFieldError } = useFieldErrors();
   const [content, setContent] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -28,9 +31,11 @@ export default function Contact() {
     e.preventDefault();
     setError("");
 
+    if (!validate(e.currentTarget)) return;
+
     const text = content.trim();
     if (text.length < MIN) {
-      setError(`Please write at least ${MIN} characters.`);
+      setFieldError("content", `Please write at least ${MIN} characters.`);
       return;
     }
 
@@ -102,10 +107,11 @@ export default function Contact() {
                     maxLength={MAX}
                     placeholder="What did you use Beytak for, and how did it go?"
                     value={content}
-                    onChange={(e) => { setContent(e.target.value); setSent(false); }}
+                    onChange={(e) => { setContent(e.target.value); setSent(false); clearError("content"); }}
                     required
                   />
                   <span className="char-count">{content.length} / {MAX}</span>
+                  <FieldError>{errors.content}</FieldError>
                 </div>
 
                 <p className="muted" style={{ fontSize: ".82rem" }}>

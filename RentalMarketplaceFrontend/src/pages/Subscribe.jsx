@@ -110,7 +110,7 @@ export default function Subscribe() {
           </p>
         </div>
       ) : (
-        <form className="listing-form" onSubmit={handleSubmit} noValidate>
+        <form className="listing-form" onSubmit={handleSubmit}>
           <fieldset className="form-block">
             <legend>{sub.isActive ? "Renew" : "Subscribe"}</legend>
 
