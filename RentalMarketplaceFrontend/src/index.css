@@ -94,6 +94,22 @@ img { max-width: 100%; display: block; }
 .input:focus { outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); }
 .input::placeholder { color: var(--text-light); }
 
+/* Selects were rendering with the OS default arrow, which differs on every
+   platform and ignores the rest of the design. Reset it and draw our own so a
+   select reads as the same control as a text input beside it. The extra right
+   padding keeps long option text off the chevron. */
+select.input {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 2.1rem; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%236B7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .75rem center;
+  background-size: 11px;
+}
+select.input:focus { border-color: var(--primary); }
+/* Firefox keeps a focus ring on the text itself inside a select. */
+select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text); }
+
 .error-text {
   color: var(--rejected); background: var(--rejected-bg);
   border: 1px solid #FECACA; padding: .55rem .8rem;
@@ -119,6 +135,19 @@ img { max-width: 100%; display: block; }
 }
 
 .nav-links { display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
+
+/* Both are desktop no-ops; the mobile block below turns them on. */
+.nav-burger, .nav-backdrop { display: none; }
+
+.nav-burger {
+  width: 40px; height: 40px; padding: 0;
+  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: none; border: none; cursor: pointer;
+}
+.nav-burger span {
+  display: block; width: 20px; height: 2px;
+  background: var(--text); border-radius: 2px;
+}
 
 .nav-link {
   display: inline-block; white-space: nowrap;
@@ -337,6 +366,238 @@ img { max-width: 100%; display: block; }
 .feature h3 { margin-bottom: .25rem; }
 .feature p { margin: 0; color: var(--text-muted); font-size: .88rem; }
 
+/* ── About Us page styling ─────────────────────────────────────── */
+.about-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.about-img-frame {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.about-img-frame img {
+  width: 100%;
+  height: 100%;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+.about-img-badge {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  padding: .75rem 1rem;
+  background: rgba(255, 255, 255, .94);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: .84rem;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.about-img-badge strong {
+  display: block;
+  font-size: .9rem;
+  color: var(--primary);
+}
+
+.about-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1.25rem 0 1.5rem;
+}
+
+.about-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem .75rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.about-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* Cities Showcase Grid */
+.about-cities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.city-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.city-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
+}
+
+.city-card-thumb {
+  position: relative;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: var(--surface-alt);
+}
+.city-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.city-card:hover .city-card-thumb img {
+  transform: scale(1.05);
+}
+
+.city-card-tag {
+  position: absolute;
+  top: .75rem;
+  left: .75rem;
+  padding: .25rem .6rem;
+  background: rgba(20, 22, 25, .75);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.city-card-body {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.city-card-body h3 {
+  font-size: 1.15rem;
+  margin-bottom: .35rem;
+}
+.city-card-body p {
+  color: var(--text-muted);
+  font-size: .88rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.city-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: auto;
+}
+.city-card-link:hover {
+  text-decoration: underline;
+}
+
+/* Full Amman Banner Section */
+.about-banner {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 3.8rem 2rem;
+  color: #fff;
+  background: linear-gradient(rgba(20, 22, 25, .62), rgba(20, 22, 25, .75)),
+              url('/about/amman-city.jpg') center/cover no-repeat;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.about-banner h2 {
+  color: #fff;
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  margin-bottom: .6rem;
+}
+.about-banner p {
+  color: rgba(255, 255, 255, .9);
+  max-width: 650px;
+  margin: 0 auto 1.6rem;
+  font-size: 1rem;
+}
+.about-banner-actions {
+  display: flex;
+  justify-content: center;
+  gap: .8rem;
+  flex-wrap: wrap;
+}
+.about-banner-actions .btn-outline {
+  background: rgba(255, 255, 255, .15);
+  border-color: rgba(255, 255, 255, .6);
+  color: #fff;
+}
+.about-banner-actions .btn-outline:hover {
+  background: #fff;
+  color: var(--text);
+}
+
+/* Values Grid Upgrade */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.4rem;
+}
+.value-card {
+  padding: 1.4rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.value-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: .8rem;
+}
+.value-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: .4rem;
+}
+.value-card p {
+  font-size: .88rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .about-hero-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+  .about-cities-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+}
+
 /* ── Contact ───────────────────────────────────────────────────── */
 .contact-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 2rem; align-items: start; }
 
@@ -377,17 +638,132 @@ img { max-width: 100%; display: block; }
 }
 
 /* ── Listing page (filters + results) ──────────────────────────── */
-.listing-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: start; }
 
-.filter-panel {
-  position: sticky; top: calc(var(--nav-h) + 16px);
-  padding: 1.25rem;
+/* One compact row of controls above the results. No labels — each control
+   names itself through its placeholder or first option, which is what keeps it
+   to a single line instead of the two-row block it was. */
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: .45rem;
+  padding: .5rem; margin-bottom: 1.25rem;
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
 }
-.filter-panel h2 { font-size: 1rem; margin-bottom: 1rem; }
-.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.filter-field { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
 
-.results-count { font-size: .88rem; color: var(--text-muted); margin-bottom: 1rem; }
+/* Small and quiet: enough to scan the row by, not enough to compete with the
+   values or to cost the row of height the stacked layout needed. */
+.filter-label {
+  font-size: .68rem; font-weight: 600; letter-spacing: .03em;
+  text-transform: uppercase; color: var(--text-light);
+  padding-left: .15rem;
+}
+
+.filter-bar .input {
+  min-height: 36px; padding: .35rem .6rem; font-size: .86rem;
+}
+
+/* ── FilterSelect: a dropdown we draw ourselves ─────────────────────
+   Native select and datalist popups are painted by the browser and ignore
+   everything here — Chrome was rendering the datalist dark next to light
+   selects, and no CSS could reconcile them. This one is a plain element, so
+   every filter finally looks the same. */
+.fs { position: relative; display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+
+/* Deliberately identical to .input, so a dropdown and a number box in the same
+   row read as the same family of control. */
+.fs-btn {
+  display: flex; align-items: center; gap: .5rem;
+  width: 100%; min-height: 36px; padding: .35rem .6rem;
+  font: inherit; font-size: .86rem; text-align: left;
+  color: var(--text-light); background: #fff; cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+  transition: border-color .15s, box-shadow .15s;
+}
+.fs-btn.has-value { color: var(--text); font-weight: 600; }
+.fs-btn:hover { border-color: var(--text-light); }
+.fs-btn:focus-visible { outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); }
+
+.fs-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.fs-caret {
+  flex: none; width: 9px; height: 9px; margin-right: .1rem;
+  border-right: 1.6px solid var(--text-light); border-bottom: 1.6px solid var(--text-light);
+  transform: translateY(-2px) rotate(45deg);
+}
+.fs-btn[aria-expanded="true"] .fs-caret { transform: translateY(2px) rotate(-135deg); }
+
+.fs-pop {
+  position: absolute; z-index: 40; top: calc(100% + 4px); left: 0;
+  min-width: 100%; width: max-content; max-width: 260px;
+  background: #fff; border: 1px solid var(--border-strong);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+/* Flipped above the control when there is no room below it. */
+.fs-pop.up { top: auto; bottom: calc(100% + 4px); }
+
+.fs-search {
+  width: 100%; padding: .5rem .6rem; font: inherit; font-size: .85rem;
+  border: none; border-bottom: 1px solid var(--border); outline: none;
+}
+
+.fs-list { max-height: 240px; overflow-y: auto; margin: 0; padding: .25rem; list-style: none; }
+
+/* One line per option. The datalist put the hint on a second row, which is how
+   twelve cities became taller than the window. */
+.fs-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  width: 100%; padding: .42rem .55rem;
+  font: inherit; font-size: .86rem; text-align: left; white-space: nowrap;
+  color: var(--text); background: none; cursor: pointer;
+  border: none; border-radius: var(--radius);
+}
+.fs-opt.active { background: var(--surface-alt); }
+.fs-opt.selected { color: var(--primary); font-weight: 600; }
+.fs-opt.selected.active { background: var(--primary-soft); }
+
+.fs-hint { flex: none; font-size: .72rem; color: var(--text-light); }
+.fs-empty { padding: .6rem .55rem; font-size: .84rem; color: var(--text-light); }
+
+.link-btn {
+  padding: 0; font: inherit; font-size: .8rem;
+  color: var(--primary); background: none; border: none; cursor: pointer;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* Applied filters, shown with the results rather than only in the panel — on
+   mobile the panel is closed, so otherwise nothing says why the list is short. */
+.chip-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .5rem .3rem .65rem;
+  font: inherit; font-size: .78rem; font-weight: 600;
+  color: var(--text); background: var(--surface-alt); cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+}
+.chip:hover { color: var(--primary); border-color: var(--primary); }
+.chip span { font-size: .95rem; line-height: 1; color: var(--text-light); }
+.chip:hover span { color: var(--primary); }
+
+/* Desktop shows the panel permanently, so the toggle is mobile-only. */
+.filter-toggle { display: none; }
+
+.results-head {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: .6rem; margin-bottom: 1rem;
+}
+.results-count { font-size: .88rem; color: var(--text-muted); margin: 0; }
+
+/* Narrow, because it sits on the results row rather than in the filter bar —
+   a full-width control there would read as another filter. Its popup opens
+   from the right so it cannot run off the edge of the page. */
+.results-sort { min-width: 168px; }
+.results-sort .fs-pop { left: auto; right: 0; }
+
+@media (max-width: 480px) {
+  .results-sort { width: 100%; }
+}
 
 .empty-state {
   padding: 3rem 1.5rem; text-align: center;
@@ -521,6 +897,13 @@ img { max-width: 100%; display: block; }
 .booking-total strong { font-size: 1.05rem; color: var(--text); }
 
 .booking-note { font-size: .75rem; line-height: 1.45; margin: .7rem 0 0; }
+
+/* WhatsApp keeps its own green rather than the brand red — people recognise
+   the colour, and it also stops a second red button competing with Call. */
+.btn-whatsapp {
+  color: #fff; background: #25D366; border: 1px solid #25D366;
+}
+.btn-whatsapp:hover { background: #1DA851; border-color: #1DA851; color: #fff; }
 
 /* ── toasts ────────────────────────────────────────────────────────── */
 .toast-stack {
@@ -727,6 +1110,21 @@ img { max-width: 100%; display: block; }
 .optional { font-weight: 400; color: var(--text-light); text-transform: none; }
 .field-hint { margin: -.5rem 0 .9rem; font-size: .78rem; color: var(--text-muted); }
 
+/* Sits tight under the field it belongs to, in the same slot .field-hint uses,
+   so adding a message does not shift the rest of the form. */
+.field-error {
+  display: flex; align-items: flex-start; gap: .3rem;
+  margin: .3rem 0 0;
+  font-size: .78rem; line-height: 1.4; color: var(--rejected);
+}
+.field-error::before { content: "!"; font-weight: 700; }
+
+/* The field itself is marked too — the message alone is easy to miss on a long
+   form, and colour alone would not be enough on its own either. */
+.field:has(.field-error) .input,
+.field:has(.field-error) select,
+.field:has(.field-error) textarea { border-color: var(--rejected); }
+
 textarea.input { resize: vertical; line-height: 1.5; }
 
 .check { display: flex; align-items: center; gap: .5rem; font-size: .9rem; cursor: pointer; }
@@ -873,6 +1271,15 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .admin-tab:hover { color: var(--text); }
 .admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
+/* The count is the reason to look at a tab you are not on, so it keeps its
+   colour whether or not the tab is active. */
+.admin-tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; margin-left: .4rem; padding: 0 .35rem;
+  font-size: .7rem; font-weight: 700; line-height: 1;
+  color: #fff; background: var(--primary); border-radius: 999px;
+}
+
 .admin-card {
   padding: 1rem 1.15rem; background: #fff;
   border: 1px solid var(--border); border-radius: var(--radius-lg);
@@ -977,6 +1384,15 @@ textarea.input { resize: vertical; line-height: 1.5; }
   font-size: .82rem; color: var(--text-light);
 }
 
+/* The separator is drawn between items rather than typed into the markup, so
+   changing the city list cannot leave a stray dot at either end. */
+.footer-cities { display: inline-flex; flex-wrap: wrap; gap: .5rem; }
+.footer-cities a { color: inherit; }
+.footer-cities a:hover { color: var(--primary); }
+.footer-cities a + a::before {
+  content: "·"; margin-right: .5rem; color: var(--border-strong);
+}
+
 /* ── Auth pages ────────────────────────────────────────────────── */
 .auth-wrap { display: flex; justify-content: center; padding: 52px var(--gutter); background: var(--surface-alt); min-height: 70vh; }
 .auth-card { width: 100%; max-width: 400px; padding: 1.75rem; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
@@ -1040,19 +1456,52 @@ textarea.input { resize: vertical; line-height: 1.5; }
     grid-template-columns: auto 1fr;
     grid-template-rows: var(--nav-h) auto;
   }
-  .nav-logo    { grid-column: 1; grid-row: 1; justify-self: start; }
-  .nav-actions { grid-column: 2; grid-row: 1; }
+  .nav-inner { grid-template-columns: auto 1fr auto; }
+  .nav-burger  { display: flex; grid-column: 1; justify-self: start; }
+  .nav-logo    { grid-column: 2; justify-self: center; }
+  .nav-actions { grid-column: 3; justify-self: end; }
+
+  /* Off-canvas rather than hidden, so it slides and can be animated. The links
+     stay in the DOM and keep their tab order. */
   .nav-links {
-    grid-column: 1 / -1; grid-row: 2;
-    gap: 1.35rem; padding-bottom: .6rem;
-    overflow-x: auto; scrollbar-width: none;
+    position: fixed; top: var(--nav-h); left: 0; bottom: 0; z-index: 60;
+    width: min(74vw, 280px);
+    flex-direction: column; align-items: stretch; gap: 0;
+    padding: .5rem 0;
+    background: #fff; border-right: 1px solid var(--border);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, .08);
+    transform: translateX(-100%);
+    transition: transform .2s ease-out;
   }
-  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links.open { transform: none; }
+
+  .nav-links li { display: block; }
+  .nav-link {
+    display: block; padding: .85rem 1.2rem;
+    border-bottom: none; border-left: 3px solid transparent;
+    font-size: .95rem;
+  }
+  .nav-link.active { border-bottom-color: transparent; border-left-color: var(--primary); }
+
+  .nav-backdrop {
+    display: block; position: fixed; inset: var(--nav-h) 0 0; z-index: 55;
+    background: rgba(0, 0, 0, .35); border: none; cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-links { transition: none; }
+  }
 
   .hero { min-height: 460px; padding: 34px 0 96px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
-  .listing-layout { grid-template-columns: 1fr; gap: 1.5rem; }
-  .filter-panel { position: static; }
+  /* Even as a bar, six controls stacked on a phone push the listings off the
+     first screen, so it collapses behind a button. The applied filters stay
+     visible as chips beside the results whether it is open or shut. */
+  .filter-toggle { display: block; width: 100%; margin-bottom: 1rem; }
+  .filter-bar { display: none; }
+  .filter-bar.open { display: grid; }
+  /* Two per row on a phone rather than one long column of seven. */
+  .filter-bar { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── Phone ≤767px ──────────────────────────────────────────────── */
