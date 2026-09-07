@@ -498,3 +498,6 @@ coverage/
 
 # personal working notes, not part of the project
 TODO.md
+
+# image generation working files (holds ~158 generated photos)
+temp/
