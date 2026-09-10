@@ -26,11 +26,21 @@ public class HouseService : IHouseService
         _subscriptions = subscriptions;
     }
 
-    public async Task<IReadOnlyList<HouseDto>> SearchAsync(HouseSearchDto filter) {
+    public async Task<PagedResult<HouseDto>> SearchAsync(HouseSearchDto filter)
+    {
+        // Forced, not defaulted: the public search shows approved listings and
+        // nothing else, so a caller cannot ask for pending ones by adding
+        // ?status=1 to the query string.
         filter.Status = ListingStatus.Approved;
-        var houses = await _uow.Houses.SearchAsync(filter);
-        return houses.Select(h => HouseMapper.Map(h)).ToList();
+
+        var (houses, total) = await _uow.Houses.SearchAsync(filter);
+        var items = houses.Select(h => HouseMapper.Map(h)).ToList();
+
+        return new PagedResult<HouseDto>(items, filter.SafePage, filter.SafePageSize, total);
     }
+
+    public Task<IReadOnlyDictionary<string, int>> GetCityCountsAsync() =>
+        _uow.Houses.CityCountsAsync();
 
     public async Task<HouseDto?> GetByIdAsync(int id, string? requesterId = null, bool isAdmin = false){
         var house = await _uow.Houses.GetWithDetailsAsync(id);
@@ -181,9 +191,9 @@ public class HouseService : IHouseService
         return Result<HouseDto>.Ok(HouseMapper.Map(house, includeContent: true));
     }
 
-    public async Task<IReadOnlyList<HouseDto>> GetPendingAsync(){
-        var houses = await _uow.Houses.SearchAsync(
-            new HouseSearchDto { Status = ListingStatus.Pending });
+    public async Task<IReadOnlyList<HouseDto>> GetPendingAsync()
+    {
+        var houses = await _uow.Houses.GetByStatusAsync(ListingStatus.Pending);
         return houses.Select(h => HouseMapper.Map(h, includeContent: true)).ToList();
     }
 

@@ -21,10 +21,27 @@ public class HousesController : ControllerBase
 
     private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+    /// <summary>
+    /// FR-1.4 — browse and filter approved listings, one page at a time.
+    ///
+    /// The response is a page object rather than a bare array. It has to be:
+    /// twelve listings tell a client nothing about whether there are thirty
+    /// more behind them, and a pager cannot be drawn without the total.
+    /// </summary>
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> Search([FromQuery] HouseSearchDto filter)
         => Ok(await _houseService.SearchAsync(filter));
+
+    /// <summary>
+    /// Listing counts per city. Its own endpoint because the search is paged
+    /// now: the suggestions used to be counted from a full download of every
+    /// listing, which page one no longer contains.
+    /// </summary>
+    [HttpGet("city-counts")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CityCounts()
+        => Ok(await _houseService.GetCityCountsAsync());
 
     [HttpGet("{id:int}/availability")]
     [AllowAnonymous]

@@ -5,7 +5,10 @@ namespace RentalMarketplaceBackend.Application.Interfaces.Services;
 
 public interface IHouseService
 {
-    Task<IReadOnlyList<HouseDto>> SearchAsync(HouseSearchDto filter);
+    Task<PagedResult<HouseDto>> SearchAsync(HouseSearchDto filter);
+
+    /// <summary>Counts for the city suggestions, without downloading listings.</summary>
+    Task<IReadOnlyDictionary<string, int>> GetCityCountsAsync();
     Task<HouseDto?> GetByIdAsync(int id, string? requesterId = null, bool isAdmin = false);
 
     Task<IReadOnlyList<HouseDto>> GetMineAsync(string ownerId);
