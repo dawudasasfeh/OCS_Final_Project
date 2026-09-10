@@ -126,7 +126,7 @@ The administrator has oversight of three areas of the platform: **subscriptions*
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-9.1.1 | An administrator shall view all registered users together with their current subscription status and expiry date. | ⬜ |
+| FR-9.1.1 | An administrator shall view all registered users together with their current subscription status and expiry date. | ✅ |
 | FR-9.1.2 | An administrator shall view subscription payments awaiting confirmation. | ✅ |
 | FR-9.1.3 | An administrator shall approve a subscription. Approval shall, in a single transaction, mark the subscription payment confirmed and set the user's subscription flag and expiry date. | ✅ |
 | FR-9.1.4 | An administrator shall reject a subscription payment without altering the user's subscription status. | ✅ |
