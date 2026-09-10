@@ -2,6 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+// Sets <html lang> and <html dir> as a side effect of loading, before the
+// first render, so the page never flashes in the wrong direction.
+import './i18n'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { SubscriptionProvider } from './context/SubscriptionContext.jsx'
 import { WishlistProvider } from './context/WishlistContext.jsx'

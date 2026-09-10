@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../api/errors";
+import { useTranslation } from "react-i18next";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "../components/FieldError";
+import AuthLayout from "../components/AuthLayout";
+import Logo from "../components/Logo";
 
 const EMPTY = {
   fullName: "",
@@ -14,6 +17,7 @@ const EMPTY = {
 };
 
 export default function Register() {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -35,7 +39,7 @@ export default function Register() {
     if (!validate(e.currentTarget)) return;
 
     if (form.password !== form.confirmPassword) {
-      setFieldError("confirmPassword", "The two passwords do not match.");
+      setFieldError("confirmPassword", t("validation.passwordsDiffer"));
       return;
     }
 
@@ -46,47 +50,83 @@ export default function Register() {
       await register(dto);
       navigate("/");
     } catch (err) {
-      setError(getErrorMessage(err, "Registration failed. Please try again."));
+      setError(getErrorMessage(err, t("auth.registrationFailed")));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="auth-wrap">
+    <AuthLayout
+      title={t("auth.asideRegister")}
+      points={t("auth.asideRegisterPoints", { returnObjects: true })}
+    >
       <form className="auth-card" onSubmit={handleSubmit} noValidate>
-        <h1>Create your account</h1>
-        <p className="muted" style={{ marginBottom: "1.4rem" }}>
-          One account to rent a home or list your own.
+        <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
+          <Link to="/" aria-label={t("nav.homeAria")}>
+            <Logo size={105} variant="full" />
+          </Link>
+        </div>
+        <h1>{t("auth.createTitle")}</h1>
+        <p className="muted auth-sub">
+          {t("auth.createSub")}
         </p>
 
         {error && <p className="error-text">{error}</p>}
 
-        <div className="field">
-          <label className="label" htmlFor="fullName">Full name</label>
-          <input
-            id="fullName"
-            name="fullName"
-            className="input"
-            autoComplete="name"
-            placeholder="Dawud Asasfeh"
-            maxLength={100}
-            value={form.fullName}
-            onChange={update}
-            required
-          />
-          <FieldError>{errors.fullName}</FieldError>
+        {/* Name and phone share a row, as the passwords do. Five stacked
+            fields pushed the submit button past the fold; three rows keep the
+            whole form on one screen. */}
+        <div className="auth-row">
+          <div className="field">
+            <label className="label" htmlFor="fullName">{t("auth.fullName")}</label>
+            <input
+              id="fullName"
+              name="fullName"
+              className="input"
+              autoComplete="name"
+              placeholder={t("auth.namePlaceholder")}
+              maxLength={100}
+              value={form.fullName}
+              onChange={update}
+              required
+            />
+            <FieldError>{errors.fullName}</FieldError>
+          </div>
+
+          <div className="field">
+            <label className="label" htmlFor="phoneNumber">{t("auth.phone")}</label>
+            {/* type="tel" validates nothing on its own — it only hints at a
+                phone keypad on mobile. Jordanian mobiles are ten digits
+                beginning 077, 078 or 079, so the pattern is what refuses a
+                bad one. */}
+            <input
+              id="phoneNumber"
+              name="phoneNumber"
+              className="input"
+              type="tel"
+              autoComplete="tel"
+              placeholder={t("auth.phonePlaceholder")}
+              pattern="07[789][0-9]{7}"
+              title={t("auth.phoneTitle")}
+              maxLength={10}
+              value={form.phoneNumber}
+              onChange={update}
+              required
+            />
+            <FieldError>{errors.phoneNumber}</FieldError>
+          </div>
         </div>
 
         <div className="field">
-          <label className="label" htmlFor="email">Email</label>
+          <label className="label" htmlFor="email">{t("auth.email")}</label>
           <input
             id="email"
             name="email"
             className="input"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={t("auth.emailPlaceholder")}
             value={form.email}
             onChange={update}
             required
@@ -94,41 +134,19 @@ export default function Register() {
           <FieldError>{errors.email}</FieldError>
         </div>
 
-        <div className="field">
-          <label className="label" htmlFor="phoneNumber">Phone number</label>
-          {/* type="tel" validates nothing on its own — it only hints at a phone
-              keypad on mobile. Jordanian mobiles are ten digits beginning 077,
-              078 or 079, so the pattern is what actually refuses a bad one. */}
-          <input
-            id="phoneNumber"
-            name="phoneNumber"
-            className="input"
-            type="tel"
-            autoComplete="tel"
-            placeholder="0790000000"
-            pattern="07[789][0-9]{7}"
-            title="A Jordanian mobile number: ten digits starting 077, 078 or 079."
-            maxLength={10}
-            value={form.phoneNumber}
-            onChange={update}
-            required
-          />
-          <FieldError>{errors.phoneNumber}</FieldError>
-        </div>
-
         <div className="auth-row">
           <div className="field">
-            <label className="label" htmlFor="password">Password</label>
+            <label className="label" htmlFor="password">{t("auth.password")}</label>
             <input
               id="password"
               name="password"
               className="input"
               type="password"
               autoComplete="new-password"
-              placeholder="At least 6 characters"
+              placeholder={t("auth.minChars")}
               minLength={6}
               pattern=".{6,}"
-              title="At least 6 characters."
+              title={t("auth.minChars")}
               value={form.password}
               onChange={update}
               required
@@ -137,14 +155,14 @@ export default function Register() {
           </div>
 
           <div className="field">
-            <label className="label" htmlFor="confirmPassword">Confirm password</label>
+            <label className="label" htmlFor="confirmPassword">{t("auth.confirmPassword")}</label>
             <input
               id="confirmPassword"
               name="confirmPassword"
               className="input"
               type="password"
               autoComplete="new-password"
-              placeholder="Repeat it"
+              placeholder={t("auth.confirmPlaceholder")}
               value={form.confirmPassword}
               onChange={update}
               required
@@ -154,17 +172,17 @@ export default function Register() {
         </div>
 
         <p className="auth-hint">
-          Use at least 6 characters with an uppercase letter, a number and a symbol.
+          {t("auth.passwordHint")}
         </p>
 
         <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>
-          {busy ? "Creating account…" : "Create account"}
+          {busy ? t("auth.creatingAccount") : t("auth.createAccount")}
         </button>
 
         <p className="auth-foot">
-          Already registered? <Link to="/login">Log in</Link>
+          {t("auth.alreadyRegistered")} <Link to="/login">{t("auth.logInInstead")}</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

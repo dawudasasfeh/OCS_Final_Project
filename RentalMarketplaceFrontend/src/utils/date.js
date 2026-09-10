@@ -1,7 +1,18 @@
+import i18n from "../i18n";
+
+// The instance is read at call time, not at import time, so a language change
+// re-renders into the new locale without a reload. "en-GB" stays the English
+// default because "01 Oct 2026" is the order a Jordanian reader expects, which
+// en-US would reverse.
+// -u-nu-latn keeps the Arabic month names but forces Latin digits. Without it
+// a date reads ٠١ تشرين الأول ٢٠٢٦ while the price beside it reads 550, because
+// prices are plain JS numbers and are never localised.
+const locale = () => (i18n.resolvedLanguage === "ar" ? "ar-JO-u-nu-latn" : "en-GB");
+
 export function formatDay(iso) {
     if(!iso) return "";
     const [y, m, d] = iso.split("-").map(Number);
-    return new Date(y, m-1, d).toLocaleDateString("en-GB",{
+    return new Date(y, m-1, d).toLocaleDateString(locale(),{
         day: "2-digit",
         month: "short",
         year: "numeric"

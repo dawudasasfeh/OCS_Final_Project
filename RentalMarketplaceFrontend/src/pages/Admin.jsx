@@ -7,6 +7,7 @@ import {
   rejectTestimonial,
 } from "../api/testimonials";
 import { getPendingPayments, confirmPayment, rejectPayment } from "../api/payments";
+import { useTranslation } from "react-i18next";
 import { getErrorMessage } from "../api/errors";
 import { imageUrl } from "../utils/images";
 import { formatDay } from "../utils/date";
@@ -16,17 +17,10 @@ const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
 // spaced() would turn CliQ into "Cli Q", so payment methods are named rather
 // than derived. Keys are Domain/Enums/PaymentMethod.cs.
-const METHOD_LABEL = {
-  Cash: "Cash",
-  CliQ: "CliQ",
-  BankTransfer: "Bank transfer",
-  Card: "Card",
-};
-
 const TABS = [
-  { key: "listings", label: "Listings" },
-  { key: "testimonials", label: "Testimonials" },
-  { key: "payments", label: "Subscriptions" },
+  { key: "listings", labelKey: "admin.tabListings" },
+  { key: "testimonials", labelKey: "admin.tabTestimonials" },
+  { key: "payments", labelKey: "admin.tabPayments" },
 ];
 
 /**
@@ -80,7 +74,8 @@ function useQueue(load, onChanged) {
 }
 
 function QueueSection({ queue, empty, children }) {
-  if (queue.loading) return <p className="muted">Loading…</p>;
+  const { t } = useTranslation();
+  if (queue.loading) return <p className="muted">{t("admin.loading")}</p>;
 
   return (
     <>
@@ -93,50 +88,51 @@ function QueueSection({ queue, empty, children }) {
 }
 
 function Listings({ onChanged }) {
+  const { t } = useTranslation();
   const queue = useQueue(getPendingHouses, onChanged);
 
   return (
-    <QueueSection queue={queue} empty="No listings waiting for review.">
+    <QueueSection queue={queue} empty={t("admin.noListings")}>
       {queue.items.map((h) => (
         <article className="listing-card" key={h.id}>
           <Link to={`/houses/${h.id}`} className="booking-thumb">
             {h.imageUrls?.[0]
               ? <img src={imageUrl(h.imageUrls[0])} alt="" />
-              : <span>NO PHOTO</span>}
+              : <span>{t("card.noPhoto")}</span>}
           </Link>
 
           <div className="booking-body">
             <div className="booking-card-head">
-              <Link to={`/houses/${h.id}`} className="booking-title">{h.title}</Link>
-              <span className="badge badge-pending">Pending</span>
+              <Link to={`/houses/${h.id}`} className="booking-title" dir="auto">{h.title}</Link>
+              <span className="badge badge-pending">{t("status.pending")}</span>
             </div>
 
             <p className="booking-sub">
-              {h.neighborhood ? `${h.neighborhood}, ` : ""}{h.city} · {spaced(h.propertyType)}
+              {h.neighborhood ? `${h.neighborhood}, ` : ""}{t(`city.${h.city}`, { defaultValue: h.city })} · {t(`propertyType.${h.propertyType.charAt(0).toLowerCase()}${h.propertyType.slice(1)}`, { defaultValue: spaced(h.propertyType) })}
             </p>
 
             <dl className="booking-facts">
-              <div><dt>Owner</dt><dd>{h.ownerName}</dd></div>
-              <div><dt>Price</dt><dd><strong>{h.price} JOD</strong> / {h.priceUnit.toLowerCase()}</dd></div>
-              <div><dt>Property</dt><dd>{h.bedrooms} bed · {h.bathrooms} bath · {h.areaSqM} m²</dd></div>
+              <div><dt>{t("admin.owner")}</dt><dd>{h.ownerName}</dd></div>
+              <div><dt>{t("admin.price")}</dt><dd><strong>{h.price} {t("common.jod")}</strong> {t("card.perUnit", { unit: t(`period.${h.priceUnit.toLowerCase()}`, { defaultValue: h.priceUnit.toLowerCase() }) })}</dd></div>
+              <div><dt>{t("admin.property")}</dt><dd>{t("admin.propertySummary", { beds: h.bedrooms, baths: h.bathrooms, area: h.areaSqM })}</dd></div>
             </dl>
 
-            <p className="admin-excerpt">{h.description}</p>
+            <p className="admin-excerpt" dir="auto">{h.description}</p>
 
             <div className="booking-actions">
               <button
                 type="button" className="btn btn-primary"
                 disabled={queue.busyId === h.id}
-                onClick={() => queue.decide(h.id, approveHouse, "Could not approve this listing.", "Listing approved and visible to renters.")}
+                onClick={() => queue.decide(h.id, approveHouse, t("admin.couldNotApproveListing"), t("admin.listingApproved"))}
               >
-                Approve
+                {t("admin.approve")}
               </button>
               <button
                 type="button" className="btn btn-outline"
                 disabled={queue.busyId === h.id}
-                onClick={() => queue.decide(h.id, rejectHouse, "Could not reject this listing.", "Listing rejected.")}
+                onClick={() => queue.decide(h.id, rejectHouse, t("admin.couldNotRejectListing"), t("admin.listingRejected"))}
               >
-                Reject
+                {t("admin.reject")}
               </button>
             </div>
           </div>
@@ -147,34 +143,37 @@ function Listings({ onChanged }) {
 }
 
 function Testimonials({ onChanged }) {
+  const { t } = useTranslation();
   const queue = useQueue(getPendingTestimonials, onChanged);
 
   return (
-    <QueueSection queue={queue} empty="No testimonials waiting for review.">
-      {queue.items.map((t) => (
-        <article className="admin-card" key={t.id}>
+    <QueueSection queue={queue} empty={t("admin.noTestimonials")}>
+      {/* Named item, not t — the map parameter would shadow the translation
+          function for the whole block. */}
+      {queue.items.map((item) => (
+        <article className="admin-card" key={item.id}>
           <div className="booking-card-head">
-            <span className="booking-title">{t.userName}</span>
-            <span className="badge badge-pending">{t.status}</span>
+            <span className="booking-title">{item.userName}</span>
+            <span className="badge badge-pending">{t(`status.${item.status.toLowerCase()}`, { defaultValue: item.status })}</span>
           </div>
-          <p className="booking-sub">Written {formatDay(t.createdAt.slice(0, 10))}</p>
+          <p className="booking-sub">{t("admin.written", { date: formatDay(item.createdAt.slice(0, 10)) })}</p>
 
-          <blockquote className="admin-quote">{t.content}</blockquote>
+          <blockquote className="admin-quote" dir="auto">{item.content}</blockquote>
 
           <div className="booking-actions">
             <button
               type="button" className="btn btn-primary"
-              disabled={queue.busyId === t.id}
-              onClick={() => queue.decide(t.id, approveTestimonial, "Could not approve this testimonial.", "Testimonial published.")}
+              disabled={queue.busyId === item.id}
+              onClick={() => queue.decide(item.id, approveTestimonial, t("admin.couldNotApproveTestimonial"), t("admin.testimonialPublished"))}
             >
-              Approve
+              {t("admin.approve")}
             </button>
             <button
               type="button" className="btn btn-outline"
-              disabled={queue.busyId === t.id}
-              onClick={() => queue.decide(t.id, rejectTestimonial, "Could not reject this testimonial.", "Testimonial rejected.")}
+              disabled={queue.busyId === item.id}
+              onClick={() => queue.decide(item.id, rejectTestimonial, t("admin.couldNotRejectTestimonial"), t("admin.testimonialRejected"))}
             >
-              Reject
+              {t("admin.reject")}
             </button>
           </div>
         </article>
@@ -184,43 +183,44 @@ function Testimonials({ onChanged }) {
 }
 
 function Payments({ onChanged }) {
+  const { t } = useTranslation();
   const queue = useQueue(getPendingPayments, onChanged);
 
   return (
-    <QueueSection queue={queue} empty="No subscription payments waiting.">
+    <QueueSection queue={queue} empty={t("admin.noPayments")}>
       {queue.items.map((p) => (
         <article className="admin-card" key={p.id}>
           <div className="booking-card-head">
             <span className="booking-title">{p.payerName}</span>
-            <span className="badge badge-pending">{p.status}</span>
+            <span className="badge badge-pending">{t(`status.${p.status.toLowerCase()}`, { defaultValue: p.status })}</span>
           </div>
 
           <dl className="booking-facts">
-            <div><dt>Amount</dt><dd><strong>{p.amount} JOD</strong></dd></div>
-            <div><dt>Method</dt><dd>{METHOD_LABEL[p.method] ?? p.method}</dd></div>
-            <div><dt>Recorded</dt><dd>{formatDay(p.createdAt.slice(0, 10))}</dd></div>
+            <div><dt>{t("admin.amount")}</dt><dd><strong>{p.amount} {t("common.jod")}</strong></dd></div>
+            <div><dt>{t("admin.method")}</dt><dd>{t(`paymentMethod.${p.method}`, { defaultValue: p.method })}</dd></div>
+            <div><dt>{t("admin.recorded")}</dt><dd>{formatDay(p.createdAt.slice(0, 10))}</dd></div>
           </dl>
 
           {p.referenceNote && <p className="admin-excerpt">{p.referenceNote}</p>}
 
           <p className="field-hint admin-note">
-            Confirming this also gives {p.payerName} an active subscription.
+            {t("admin.confirmingGrants", { name: p.payerName })}
           </p>
 
           <div className="booking-actions">
             <button
               type="button" className="btn btn-primary"
               disabled={queue.busyId === p.id}
-              onClick={() => queue.decide(p.id, confirmPayment, "Could not confirm this payment.", "Payment confirmed and subscription granted.")}
+              onClick={() => queue.decide(p.id, confirmPayment, t("admin.couldNotConfirmPayment"), t("admin.paymentConfirmed"))}
             >
               Confirm
             </button>
             <button
               type="button" className="btn btn-outline"
               disabled={queue.busyId === p.id}
-              onClick={() => queue.decide(p.id, rejectPayment, "Could not reject this payment.", "Payment rejected.")}
+              onClick={() => queue.decide(p.id, rejectPayment, t("admin.couldNotRejectPayment"), t("admin.paymentRejected"))}
             >
-              Reject
+              {t("admin.reject")}
             </button>
           </div>
         </article>
@@ -230,6 +230,7 @@ function Payments({ onChanged }) {
 }
 
 export default function Admin() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState("listings");
   const [counts, setCounts] = useState({});
 
@@ -249,22 +250,21 @@ export default function Admin() {
 
   return (
     <div className="container section">
-      <h1 className="page-title">Admin</h1>
+      <h1 className="page-title">{t("admin.title")}</h1>
       <p className="muted page-sub">
-        Everything waiting on a decision. Listings and testimonials stay hidden
-        from renters until they are approved.
+        {t("admin.sub")}
       </p>
 
       <div className="admin-tabs">
-        {TABS.map((t) => (
+        {TABS.map((tabDef) => (
           <button
-            key={t.key}
+            key={tabDef.key}
             type="button"
-            className={t.key === tab ? "admin-tab active" : "admin-tab"}
-            onClick={() => setTab(t.key)}
+            className={tabDef.key === tab ? "admin-tab active" : "admin-tab"}
+            onClick={() => setTab(tabDef.key)}
           >
-            {t.label}
-            {counts[t.key] > 0 && <span className="admin-tab-count">{counts[t.key]}</span>}
+            {t(tabDef.labelKey)}
+            {counts[tabDef.key] > 0 && <span className="admin-tab-count">{counts[tabDef.key]}</span>}
           </button>
         ))}
       </div>

@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getBookingRequests, confirmBooking, rejectBooking } from "../api/bookings";
 import { getErrorMessage } from "../api/errors";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
 
 export default function BookingRequests() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
@@ -21,7 +23,7 @@ export default function BookingRequests() {
         const data = await getBookingRequests();
         if (!cancelled) setBookings(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, "Could not load your booking requests."));
+        if (!cancelled) setError(getErrorMessage(err, t("requests.couldNotLoad")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -51,23 +53,23 @@ export default function BookingRequests() {
 
   return (
     <div className="container section">
-      <h1 className="page-title">Booking requests</h1>
+      <h1 className="page-title">{t("requests.title")}</h1>
       <p className="muted page-sub">
-        Requests for your properties.{" "}
+        {t("requests.sub")}{" "}
         {pendingCount > 0
-          ? `${pendingCount} waiting for your answer.`
-          : "Nothing waiting for your answer."}{" "}
-        Confirming shares your phone number with the renter, and theirs with you.
+          ? t("requests.waiting", { count: pendingCount })
+          : t("requests.nothingWaiting")}{" "}
+        {t("requests.confirmingShares")}
       </p>
 
       {error && <p className="error-text">{error}</p>}
 
       {loading ? (
-        <p className="muted">Loading requests…</p>
+        <p className="muted">{t("requests.loading")}</p>
       ) : bookings.length === 0 ? (
         <div className="empty-state">
-          <p>Nobody has requested one of your properties yet.</p>
-          <Link to="/my-listings" className="btn btn-outline">My listings</Link>
+          <p>{t("requests.empty")}</p>
+          <Link to="/my-listings" className="btn btn-outline">{t("nav.myListings")}</Link>
         </div>
       ) : (
         <div className="booking-list">
@@ -79,18 +81,18 @@ export default function BookingRequests() {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onClick={() => decide(b.id, confirmBooking, "Could not confirm this booking.", "Booking confirmed. The renter can now see your phone number.")}
+                    onClick={() => decide(b.id, confirmBooking, t("requests.couldNotConfirm"), t("requests.confirmed"))}
                     disabled={busyId === b.id}
                   >
-                    {busyId === b.id ? "Working…" : "Confirm"}
+                    {busyId === b.id ? t("requests.working") : t("requests.confirm")}
                   </button>
                   <button
                     type="button"
                     className="btn btn-outline"
-                    onClick={() => decide(b.id, rejectBooking, "Could not reject this booking.", "Booking request declined.")}
+                    onClick={() => decide(b.id, rejectBooking, t("requests.couldNotReject"), t("requests.declined"))}
                     disabled={busyId === b.id}
                   >
-                    Reject
+                    {t("requests.decline")}
                   </button>
                 </div>
               )}

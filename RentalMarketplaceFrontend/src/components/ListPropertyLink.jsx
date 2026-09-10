@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSubscription } from "../context/SubscriptionContext";
 import { useToast } from "../context/ToastContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * "List a property", wherever it appears.
@@ -21,20 +22,23 @@ export default function ListPropertyLink({ className = "", children, role }) {
   const { isSubscribed } = useSubscription();
   const toast = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   function handleClick(e) {
     e.preventDefault();
 
     if (!user) {
-      toast.info("Log in to list a property.");
+      toast.info(t("nav.loginToList"));
       // returnTo brings them back here once they are in, so the click is not
       // simply lost.
       navigate("/login?returnTo=/houses/new");
       return;
     }
 
-    if (!isSubscribed) {
-      toast.info("Listing a property needs an active subscription.");
+    // Same exemption as the route guard and HouseService — three places now
+    // agree that an admin is not subject to the fee.
+    if (!isSubscribed && user.role !== "Admin") {
+      toast.info(t("nav.subscriptionNeeded"));
       navigate("/subscribe");
       return;
     }
@@ -46,7 +50,7 @@ export default function ListPropertyLink({ className = "", children, role }) {
   // ordinary click runs the check.
   return (
     <Link to="/houses/new" className={className} role={role} onClick={handleClick}>
-      {children ?? "List a property"}
+      {children ?? t("nav.listProperty")}
     </Link>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDay } from "../utils/date";
 import { periodLabel } from "../utils/duration";
+import { useTranslation } from "react-i18next";
 import { imageUrl } from "../utils/images";
 
 /**
@@ -13,12 +14,13 @@ import { imageUrl } from "../utils/images";
  * Action buttons are passed as children so each page owns its own mutations.
  */
 export default function BookingCard({ booking: b, side = "renter", children }) {
+  const { t } = useTranslation();
   const [broken, setBroken] = useState(false);
 
   const other =
     side === "owner"
-      ? { label: "Renter", name: b.renterName, phone: b.renterPhone }
-      : { label: "Owner", name: b.ownerName, phone: b.ownerPhone };
+      ? { label: t("bookings.renter"), name: b.renterName, phone: b.renterPhone }
+      : { label: t("bookings.owner"), name: b.ownerName, phone: b.ownerPhone };
 
   return (
     <article className="booking-card">
@@ -26,30 +28,34 @@ export default function BookingCard({ booking: b, side = "renter", children }) {
         {b.houseImageUrl && !broken ? (
           <img src={imageUrl(b.houseImageUrl)} alt="" onError={() => setBroken(true)} />
         ) : (
-          <span>NO PHOTO</span>
+          <span>{t("card.noPhoto")}</span>
         )}
       </Link>
 
       <div className="booking-body">
         <div className="booking-card-head">
-          <Link to={`/houses/${b.houseId}`} className="booking-title">
+          <Link to={`/houses/${b.houseId}`} className="booking-title" dir="auto">
             {b.houseTitle}
           </Link>
-          <span className={`badge badge-${b.status.toLowerCase()}`}>{b.status}</span>
+          {/* The raw status drives the badge colour, so it stays in the class name;
+              only the visible text is translated. */}
+          <span className={`badge badge-${b.status.toLowerCase()}`}>
+            {t(`status.${b.status.toLowerCase()}`, { defaultValue: b.status })}
+          </span>
         </div>
 
         <p className="booking-sub">
-          {b.houseCity} · {periodLabel(b.durationCount, b.durationType)}
+          {t(`city.${b.houseCity}`, { defaultValue: b.houseCity })} · {periodLabel(t, b.durationCount, b.durationType)}
         </p>
 
         <dl className="booking-facts">
           <div>
-            <dt>Dates</dt>
+            <dt>{t("bookings.dates")}</dt>
             <dd>{formatDay(b.startDate)} — {formatDay(b.lastNight)}</dd>
           </div>
           <div>
-            <dt>Total</dt>
-            <dd><strong>{b.totalPrice} JOD</strong></dd>
+            <dt>{t("bookings.total")}</dt>
+            <dd><strong>{b.totalPrice} {t("common.jod")}</strong></dd>
           </div>
           <div>
             <dt>{other.label}</dt>
@@ -58,7 +64,7 @@ export default function BookingCard({ booking: b, side = "renter", children }) {
               {other.phone ? (
                 <> · <a href={`tel:${other.phone}`}>{other.phone}</a></>
               ) : b.status === "Pending" ? (
-                <span className="muted"> · phone shown once confirmed</span>
+                <span className="muted"> · {t("bookings.phoneOnceConfirmed")}</span>
               ) : null}
             </dd>
           </div>

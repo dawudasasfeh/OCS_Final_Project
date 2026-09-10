@@ -6,18 +6,22 @@ import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "../components/FieldError";
+import { useTranslation } from "react-i18next";
 
+// Address and hours are translated; the email and phone are literals that must
+// not be, since they are what a reader copies or dials.
 const DETAILS = [
-  { icon: "✉", label: "Email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
-  { icon: "☎", label: "Phone", value: "+962 7 9000 0000", href: "tel:+962790000000" },
-  { icon: "⌂", label: "Office", value: "Al Shmeisani, Amman, Jordan" },
-  { icon: "◷", label: "Hours", value: "Sunday to Thursday, 9:00 – 17:00" },
+  { icon: "✉", labelKey: "contact.email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
+  { icon: "☎", labelKey: "contact.phone", value: "+962 7 9000 0000", href: "tel:+962790000000" },
+  { icon: "⌂", labelKey: "contact.office", valueKey: "contact.officeValue" },
+  { icon: "◷", labelKey: "contact.hours", valueKey: "contact.hoursValue" },
 ];
 
 const MIN = 20;
 const MAX = 1000;
 
 export default function Contact() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const toast = useToast();
@@ -58,10 +62,9 @@ export default function Contact() {
     <>
       <section className="page-head">
         <div className="container">
-          <h1>Contact us</h1>
+          <h1>{t("contact.title")}</h1>
           <p>
-            Questions about a listing, a booking or your subscription? Reach us on the
-            details below — or share your experience of using Beytak.
+            {t("contact.intro")}
           </p>
         </div>
       </section>
@@ -71,41 +74,39 @@ export default function Contact() {
 
           {/* ── Testimonial form ─────────────────────────────── */}
           <div className="contact-panel">
-            <h2>Share your experience</h2>
+            <h2>{t("contact.shareExperience")}</h2>
             <p className="muted" style={{ fontSize: ".88rem", marginBottom: "1.1rem" }}>
-              Tell other renters and owners how Beytak worked for you. Testimonials are
-              reviewed by our team before they appear on the site.
+              {t("contact.shareIntro")}
             </p>
 
             {!user ? (
               <div className="auth-prompt">
                 <p style={{ margin: "0 0 .9rem" }}>
-                  You need an account to leave a testimonial.
+                  {t("contact.needAccount")}
                 </p>
                 <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
-                  <Link to="/login" className="btn btn-primary">Log in</Link>
-                  <Link to="/register" className="btn btn-outline">Create account</Link>
+                  <Link to="/login" className="btn btn-primary">{t("nav.login")}</Link>
+                  <Link to="/register" className="btn btn-outline">{t("footer.createAccount")}</Link>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate>
                 {sent && (
                   <p className="notice">
-                    Thank you. Your testimonial has been submitted and will appear once
-                    it is approved.
+                    {t("contact.submitted")}
                   </p>
                 )}
                 {error && <p className="error-text">{error}</p>}
 
                 <div className="field">
-                  <label className="label" htmlFor="content">Your testimonial</label>
+                  <label className="label" htmlFor="content">{t("contact.yourTestimonial")}</label>
                   <textarea
                     id="content"
                     className="input"
                     rows={7}
                     style={{ resize: "vertical" }}
                     maxLength={MAX}
-                    placeholder="What did you use Beytak for, and how did it go?"
+                    placeholder={t("contact.testimonialPlaceholder")}
                     value={content}
                     onChange={(e) => { setContent(e.target.value); setSent(false); clearError("content"); }}
                     required
@@ -119,7 +120,7 @@ export default function Contact() {
                 </p>
 
                 <button className="btn btn-primary" type="submit" disabled={busy}>
-                  {busy ? "Submitting…" : "Submit testimonial"}
+                  {busy ? t("contact.submitting") : t("contact.submit")}
                 </button>
               </form>
             )}
@@ -127,15 +128,15 @@ export default function Contact() {
 
           {/* ── Contact details ──────────────────────────────── */}
           <aside className="contact-panel">
-            <h2>Get in touch</h2>
+            <h2>{t("contact.getInTouch")}</h2>
 
             {DETAILS.map((d) => (
-              <div className="contact-item" key={d.label}>
+              <div className="contact-item" key={d.labelKey}>
                 <span className="contact-icon" aria-hidden="true">{d.icon}</span>
                 <div>
-                  <div className="contact-item-label">{d.label}</div>
+                  <div className="contact-item-label">{t(d.labelKey)}</div>
                   <div className="contact-item-value">
-                    {d.href ? <a href={d.href}>{d.value}</a> : d.value}
+                    {d.href ? <a href={d.href} className="ltr">{d.value}</a> : t(d.valueKey)}
                   </div>
                 </div>
               </div>

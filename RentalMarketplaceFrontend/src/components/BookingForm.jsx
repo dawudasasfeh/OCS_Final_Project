@@ -6,7 +6,8 @@ import { useToast } from "../context/ToastContext";
 import { addDays, endOfStay, formatDay, parseDay, toIso, todayIso } from "../utils/date";
 import AvailabilityCalendar from "./AvailabilityCalendar";
 
-import { DURATION_TYPE, UNIT_NOUN } from "../utils/duration";
+import { DURATION_TYPE, UNIT_KEY, periodLabel } from "../utils/duration";
+import { useTranslation } from "react-i18next";
 
 /**
  * Mirrors the overlap test in BookingService.CreateAsync: the *requested* range
@@ -48,6 +49,7 @@ function firstBookableStart(fromIso, durationType, count, booked, turnoverDays, 
 }
 
 export default function BookingForm({ house }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [startDate, setStartDate] = useState(todayIso);
   const [durationCount, setDurationCount] = useState(1);
@@ -79,7 +81,10 @@ export default function BookingForm({ house }) {
     return () => { alive = false; };
   }, [house.id, house.priceUnit]);
 
-  const noun = UNIT_NOUN[house.priceUnit] ?? "period";
+  // The bare noun for "How many months?"; the counted phrase comes from
+  // periodLabel, which knows Arabic needs six plural forms.
+  const unitKey = UNIT_KEY[house.priceUnit] ?? "period";
+  const unitNoun = t(`booking.unit${unitKey.charAt(0).toUpperCase()}${unitKey.slice(1)}`);
   const count = Number(durationCount) || 0;
   const total = house.price * count;
 
@@ -101,9 +106,9 @@ export default function BookingForm({ house }) {
         durationType: DURATION_TYPE[house.priceUnit],
       });
       setCreated(booking);
-      toast.success("Booking request sent. The owner will confirm or decline.");
+      toast.success(t("booking.sentNote"));
     } catch (err) {
-      const message = getErrorMessage(err, "Could not send the booking request.");
+      const message = getErrorMessage(err, t("booking.couldNotSend"));
       setError(message);
       toast.error(message);
     } finally {
@@ -114,12 +119,12 @@ export default function BookingForm({ house }) {
   if (created) {
     return (
       <div className="booking-done">
-        <p className="booking-done-title">Request sent</p>
+        <p className="booking-done-title">{t("booking.sent")}</p>
         <p className="muted">
           {formatDay(created.startDate)} — {formatDay(created.lastNight)}
         </p>
         <p className="booking-total">
-          <span>Total</span>
+          <span>{t("booking.total")}</span>
           <strong>{created.totalPrice} JOD</strong>
         </p>
         <p className="muted booking-note">
@@ -145,7 +150,7 @@ export default function BookingForm({ house }) {
       />
 
       <div className="field">
-        <label className="label" htmlFor="startDate">Start date</label>
+        <label className="label" htmlFor="startDate">{t("booking.startDate")}</label>
         <input
           id="startDate"
           className="input"
@@ -158,7 +163,7 @@ export default function BookingForm({ house }) {
       </div>
 
       <div className="field">
-        <label className="label" htmlFor="durationCount">How many {noun}s?</label>
+        <label className="label" htmlFor="durationCount">{t("booking.howMany", { unit: unitNoun })}</label>
         <input
           id="durationCount"
           className="input"
@@ -185,7 +190,7 @@ export default function BookingForm({ house }) {
       )}
 
       <p className="booking-total">
-        <span>{count} {noun}{count === 1 ? "" : "s"} × {house.price} JOD</span>
+        <span>{t("booking.lineTotal", { period: periodLabel(t, count, house.priceUnit), price: house.price })}</span>
         <strong>{total} JOD</strong>
       </p>
 
@@ -194,7 +199,7 @@ export default function BookingForm({ house }) {
         type="submit"
         disabled={busy || count < 1 || overlaps}
       >
-        {busy ? "Sending…" : "Request booking"}
+        {busy ? t("booking.sending") : t("booking.requestBooking")}
       </button>
 
       <p className="muted booking-note">

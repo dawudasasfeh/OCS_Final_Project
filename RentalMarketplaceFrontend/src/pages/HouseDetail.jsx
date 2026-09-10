@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getHouse } from "../api/houses";
 import { imageUrl } from "../utils/images";
+import { formatDay } from "../utils/date";
 import { getErrorMessage } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
 import WishlistButton from "../components/WishlistButton";
 import BookingForm from "../components/BookingForm";
+import { Trans, useTranslation } from "react-i18next";
 
 
 const initials = (name = "") =>
@@ -15,10 +17,12 @@ const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
 const reference = (id) => `BYT${String(id).padStart(6, "0")}`;
 
-const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+// Was a second, en-GB-only formatter. formatDay already follows the reading
+// language, so the listing date matches every other date on the site.
+const formatDate = (iso) => formatDay(String(iso).slice(0, 10));
 
 export default function HouseDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -47,8 +51,8 @@ export default function HouseDetail() {
         if (!cancelled) {
           setError(
             err?.response?.status === 404
-              ? "This property is not available."
-              : getErrorMessage(err, "Could not load this property.")
+              ? t("house.unavailable")
+              : getErrorMessage(err, t("house.couldNotLoad"))
           );
         }
       } finally {
@@ -63,7 +67,7 @@ export default function HouseDetail() {
   if (loading) {
     return (
       <div className="container section">
-        <p className="muted">Loading property…</p>
+        <p className="muted">{t("house.loading")}</p>
       </div>
     );
   }
@@ -72,8 +76,8 @@ export default function HouseDetail() {
     return (
       <div className="container section">
         <div className="empty-state">
-          <p>{error || "Property not found."}</p>
-          <Link to="/houses" className="btn btn-outline">Back to properties</Link>
+          <p>{error || t("house.notFound")}</p>
+          <Link to="/houses" className="btn btn-outline">{t("house.backToProperties")}</Link>
         </div>
       </div>
     );
@@ -98,33 +102,39 @@ export default function HouseDetail() {
   // Ordered building-level first, then the property, then room counts —
   // the convention Jordanian listing sites use.
   // Optional fields are filtered out rather than shown as "—".
+  // Enum values arrive from the API in PascalCase ("BankTransfer", "Monthly").
+  // They are looked up by a lowercased key, falling back to the spaced English
+  // so a value the translation files have not caught up with still reads.
+  const enumLabel = (ns, value) =>
+    value ? t(`${ns}.${String(value).charAt(0).toLowerCase() + String(value).slice(1)}`, { defaultValue: spaced(value) }) : value;
+
   const details = [
-    ["Building age", house.buildingAge ? spaced(house.buildingAge) : null],
-    ["Rental period", house.priceUnit],
-    ["Property type", spaced(house.propertyType)],
-    ["Floor", house.floorNumber],
-    ["Apartments in building", house.apartmentsInBuilding],
-    ["Furnishing", house.isFurnished ? "Furnished" : "Unfurnished"],
-    ["Area", `${house.areaSqM} m²`],
-    ["Bedrooms", house.bedrooms],
-    ["Master bedrooms", house.masterBedrooms],
-    ["Bathrooms", house.bathrooms],
-    ["Turnover between stays", `${house.turnoverDays} day${house.turnoverDays === 1 ? "" : "s"}`],
+    [t("house.buildingAge"), house.buildingAge ? spaced(house.buildingAge) : null],
+    [t("house.rentalPeriod"), enumLabel("period", house.priceUnit)],
+    [t("house.propertyType"), enumLabel("propertyType", house.propertyType)],
+    [t("house.floor"), house.floorNumber],
+    [t("house.apartmentsInBuilding"), house.apartmentsInBuilding],
+    [t("house.furnishing"), house.isFurnished ? t("houses.furnished") : t("houses.unfurnished")],
+    [t("house.area"), t("common.sqm", { value: house.areaSqM })],
+    [t("house.bedrooms"), house.bedrooms],
+    [t("house.masterBedrooms"), house.masterBedrooms],
+    [t("house.bathrooms"), house.bathrooms],
+    [t("house.turnover"), t("house.turnoverDays", { count: house.turnoverDays })],
   ].filter(([, value]) => value !== null && value !== undefined && value !== "");
 
   const listingInfo = [
-    ["Reference", reference(house.id)],
-    ["Listed on", formatDate(house.createdAt)],
-    ["Location", `${house.neighborhood ? house.neighborhood + ", " : ""}${house.city}`],
+    [t("house.reference"), reference(house.id)],
+    [t("house.listedOn"), formatDate(house.createdAt)],
+    [t("house.location"), `${house.neighborhood ? house.neighborhood + ", " : ""}${t(`city.${house.city}`, { defaultValue: house.city })}`],
   ];
 
   return (
     <>
       <div className="container">
         <nav className="breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t("nav.home")}</Link>
           <span className="sep">›</span>
-          <Link to="/houses">Properties</Link>
+          <Link to="/houses">{t("nav.properties")}</Link>
           <span className="sep">›</span>
           <Link to={`/houses?city=${encodeURIComponent(house.city)}`}>{house.city}</Link>
           <span className="sep">›</span>
@@ -133,14 +143,14 @@ export default function HouseDetail() {
 
         <div className="gallery">
           <div className="gallery-thumbs">
-            {images.length === 0 && <div className="gallery-thumb">NO IMAGE</div>}
+            {images.length === 0 && <div className="gallery-thumb">{t("house.noImage")}</div>}
             {images.map((url, i) => (
               <button
                 key={url + i}
                 type="button"
                 className={i === activeImage ? "gallery-thumb active" : "gallery-thumb"}
                 onClick={() => setActiveImage(i)}
-                aria-label={`Show image ${i + 1}`}
+                aria-label={t("house.showImage", { n: i + 1 })}
               >
                 {broken.has(i)
                   ? <span>{i + 1}</span>
@@ -151,7 +161,7 @@ export default function HouseDetail() {
 
           <div className="gallery-main">
             {images.length === 0 || broken.has(activeImage) ? (
-              "PHOTO NOT AVAILABLE"
+              t("house.photoUnavailable")
             ) : (
               <img src={imageUrl(images[activeImage])} alt={house.title}
                    onError={() => markBroken(activeImage)} />
@@ -166,13 +176,17 @@ export default function HouseDetail() {
           <div>
             {house.status !== "Approved" && (
               <p className={house.status === "Rejected" ? "error-text" : "notice"}>
-                This listing is <strong>{house.status}</strong>. Only you and an
-                administrator can see it.
+                <Trans
+                  i18nKey="house.statusNotice"
+                  values={{ status: t(`status.${house.status.toLowerCase()}`, { defaultValue: house.status }) }}
+                >
+                  <strong />
+                </Trans>
               </p>
             )}
 
             <div className="detail-title-row">
-              <h1 className="detail-title">{house.title}</h1>
+              <h1 className="detail-title" dir="auto">{house.title}</h1>
               <WishlistButton
                 houseId={house.id}
                 ownerId={house.ownerId}
@@ -186,29 +200,29 @@ export default function HouseDetail() {
 
             <div className="spec-bar">
               <div className="spec">
-                <span className="spec-label">Bedrooms</span>
+                <span className="spec-label">{t("house.bedrooms")}</span>
                 <span className="spec-value">{house.bedrooms}</span>
               </div>
               <div className="spec">
-                <span className="spec-label">Bathrooms</span>
+                <span className="spec-label">{t("house.bathrooms")}</span>
                 <span className="spec-value">{house.bathrooms}</span>
               </div>
               <div className="spec">
-                <span className="spec-label">Area</span>
-                <span className="spec-value">{house.areaSqM} m²</span>
+                <span className="spec-label">{t("house.area")}</span>
+                <span className="spec-value">{t("common.sqm", { value: house.areaSqM })}</span>
               </div>
               <div className="spec">
-                <span className="spec-label">Furnishing</span>
-                <span className="spec-value">{house.isFurnished ? "Furnished" : "Unfurnished"}</span>
+                <span className="spec-label">{t("house.furnishing")}</span>
+                <span className="spec-value">{house.isFurnished ? t("houses.furnished") : t("houses.unfurnished")}</span>
               </div>
               <div className="spec">
-                <span className="spec-label">Type</span>
+                <span className="spec-label">{t("house.type")}</span>
                 <span className="spec-value">{spaced(house.propertyType)}</span>
               </div>
             </div>
 
             <div className="detail-block">
-              <h2>Details</h2>
+              <h2>{t("house.details")}</h2>
               <dl className="detail-table">
                 {details.map(([label, value]) => (
                   <div className="detail-row" key={label}>
@@ -220,12 +234,12 @@ export default function HouseDetail() {
             </div>
 
             <div className="detail-block">
-              <h2>Description</h2>
-              <p className="detail-description">{house.description}</p>
+              <h2>{t("house.description")}</h2>
+              <p className="detail-description" dir="auto">{house.description}</p>
             </div>
 
             <div className="detail-block">
-              <h2>Listing information</h2>
+              <h2>{t("house.listingInformation")}</h2>
               <dl className="detail-table detail-table-meta">
                 {listingInfo.map(([label, value]) => (
                   <div className="detail-row" key={label}>
@@ -240,20 +254,21 @@ export default function HouseDetail() {
           <aside className="detail-aside">
             <div className="price-card">
               <div className="price-tag">
-                {house.price} JOD <span>/ {house.priceUnit.toLowerCase()}</span>
+                {house.price} {t("common.jod")}{" "}
+                <span>{t("card.perUnit", { unit: t(`period.${house.priceUnit.toLowerCase()}`, { defaultValue: house.priceUnit.toLowerCase() }) })}</span>
               </div>
               <p className="price-note">
-                {house.isAvailable ? "Available to book" : "Currently unavailable"}
+                {house.isAvailable ? t("status.availableToBook") : t("status.currentlyUnavailable")}
               </p>
 
               {isOwner ? (
                 <Link to="/my-listings" className="btn btn-outline phone-btn">
-                  Manage this listing
+                  {t("house.manageListing")}
                 </Link>
               ) : (
                 <div className="action-stack">
                   {!phone ? (
-                    <div className="phone-btn phone-empty">No phone number provided</div>
+                    <div className="phone-btn phone-empty">{t("house.noPhone")}</div>
                   ) : user ? (
                     <a href={`tel:${phone}`} className="btn btn-primary phone-btn">
                       <span className="phone-icon" aria-hidden="true">&#9742;</span>
@@ -269,7 +284,7 @@ export default function HouseDetail() {
                       <span className="phone-icon" aria-hidden="true">&#9742;</span>
                       <span className="phone-text">
                         <strong>{phone}</strong>
-                        <small>Sign in to see the full number</small>
+                        <small>{t("house.signInForNumber")}</small>
                       </span>
                     </Link>
                   )}
@@ -285,7 +300,7 @@ export default function HouseDetail() {
                       rel="noopener noreferrer"
                     >
                       <span className="phone-icon" aria-hidden="true">&#128172;</span>
-                      <span className="phone-text"><strong>Chat on WhatsApp</strong></span>
+                      <span className="phone-text"><strong>{t("house.chatWhatsapp")}</strong></span>
                     </a>
                   )}
 
@@ -319,18 +334,18 @@ export default function HouseDetail() {
                 <span className="owner-avatar">{initials(house.ownerName)}</span>
                 <div>
                   <div className="owner-name">{house.ownerName || "Owner"}</div>
-                  <div className="owner-role">Property owner</div>
+                  <div className="owner-role">{t("house.propertyOwner")}</div>
                 </div>
               </div>
             </div>
 
             <div className="tips-card">
-              <h3>Before you rent</h3>
+              <h3>{t("house.beforeYouRent")}</h3>
               <ul>
-                <li>Visit the property in person before paying anything.</li>
-                <li>Do not transfer money before seeing the place.</li>
-                <li>Agree the dates and the total in writing.</li>
-                <li>Deposits are arranged directly with the owner.</li>
+                <li>{t("house.tipVisit")}</li>
+                <li>{t("house.tipNoTransfer")}</li>
+                <li>{t("house.agreeInWriting")}</li>
+                <li>{t("house.tipDeposits")}</li>
               </ul>
             </div>
           </aside>

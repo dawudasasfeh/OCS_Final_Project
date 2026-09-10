@@ -13,6 +13,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * and screen-reader behaviour a native select gives free has to be written —
  * which is what the roles, aria-* attributes and key handling below are for.
  */
+import { useTranslation } from "react-i18next";
+
 export default function FilterSelect({
   id,
   label,
@@ -21,7 +23,11 @@ export default function FilterSelect({
   options,
   placeholder = "Any",
   searchable = false,
+  // The hero search has no room for a caption above each control, but the
+  // control still has to be named for anyone not reading the screen.
+  hideLabel = false,
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -109,7 +115,7 @@ export default function FilterSelect({
 
   return (
     <div className="fs" ref={root} onKeyDown={onKeyDown}>
-      <label className="filter-label" htmlFor={id}>{label}</label>
+      {!hideLabel && <label className="filter-label" htmlFor={id}>{label}</label>}
 
       <button
         id={id}
@@ -118,6 +124,7 @@ export default function FilterSelect({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={hideLabel ? label : undefined}
       >
         <span className="fs-value">{selected ? selected.label : placeholder}</span>
         <span className="fs-caret" aria-hidden="true" />
@@ -138,7 +145,7 @@ export default function FilterSelect({
           )}
 
           <ul className="fs-list" role="listbox" ref={listRef} aria-label={label}>
-            {shown.length === 0 && <li className="fs-empty">No match</li>}
+            {shown.length === 0 && <li className="fs-empty">{t("select.noMatch")}</li>}
 
             {shown.map((o, i) => (
               <li key={o.value || "any"}>

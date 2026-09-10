@@ -3,16 +3,17 @@ import { Link } from "react-router-dom";
 import { getMySubscription } from "../api/subscription";
 import { createSubscriptionPayment, getMyPayments } from "../api/payments";
 import { getErrorMessage } from "../api/errors";
+import { Trans, useTranslation } from "react-i18next";
 import { useToast } from "../context/ToastContext";
 import { useSubscription } from "../context/SubscriptionContext";
 import { formatDay } from "../utils/date";
 
 // Values are Domain/Enums/PaymentMethod.cs.
 const METHODS = [
-  { value: 1, label: "Cash" },
-  { value: 2, label: "CliQ" },
-  { value: 3, label: "Bank transfer" },
-  { value: 4, label: "Card" },
+  { value: 1, key: "paymentMethod.Cash" },
+  { value: 2, key: "paymentMethod.CliQ" },
+  { value: 3, key: "paymentMethod.BankTransfer" },
+  { value: 4, key: "paymentMethod.Card" },
 ];
 
 export default function Subscribe() {
@@ -25,6 +26,7 @@ export default function Subscribe() {
   const [sent, setSent] = useState(false);
   const toast = useToast();
   const { refresh: refreshSubscription } = useSubscription();
+  const { t } = useTranslation();
 
   async function load() {
     // Read the subscription from the API, never from user.isSubscribed: that
@@ -39,7 +41,7 @@ export default function Subscribe() {
   useEffect(() => {
     let cancelled = false;
     load()
-      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, "Could not load your subscription.")); })
+      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("subscribe.couldNotLoad"))); })
       .finally(() => { if (!cancelled) setBusy(false); });
     return () => { cancelled = true; };
   }, []);
@@ -55,12 +57,12 @@ export default function Subscribe() {
         referenceNote: note.trim() || null,
       });
       setSent(true);
-      toast.success("Payment recorded. An administrator will confirm it shortly.");
+      toast.success(t("subscribe.recordedNote"));
       // The gate reads the API, so ask again in case this completed the flow.
       refreshSubscription();
       await load();
     } catch (err) {
-      const message = getErrorMessage(err, "Could not record your payment.");
+      const message = getErrorMessage(err, t("subscribe.couldNotRecord"));
       setError(message);
       toast.error(message);
     } finally {
@@ -71,14 +73,14 @@ export default function Subscribe() {
   if (!sub) {
     return (
       <div className="container section">
-        {error ? <p className="error-text">{error}</p> : <p className="muted">Loading…</p>}
+        {error ? <p className="error-text">{error}</p> : <p className="muted">{t("common.loading")}</p>}
       </div>
     );
   }
 
   return (
     <div className="container section">
-      <h1 className="page-title">Subscription</h1>
+      <h1 className="page-title">{t("subscribe.title")}</h1>
       <p className="muted page-sub">
         Owners need an active subscription to publish a listing. It costs{" "}
         <strong>{sub.pricePerMonth} JOD</strong> per month.
@@ -88,22 +90,24 @@ export default function Subscribe() {
 
       <div className="sub-status">
         <span className={`badge badge-${sub.isActive ? "approved" : "rejected"}`}>
-          {sub.isActive ? "Active" : "Not active"}
+          {sub.isActive ? t("status.active") : t("status.notActive")}
         </span>
         {sub.isActive ? (
           <p className="muted">
-            Runs until <strong>{formatDay(sub.expiresAt)}</strong> — {sub.daysRemaining}{" "}
-            day{sub.daysRemaining === 1 ? "" : "s"} left.{" "}
-            <Link to="/houses/new">List a property</Link>.
+            <Trans i18nKey="subscribe.runsUntil" values={{ date: formatDay(sub.expiresAt) }}>
+              <strong />
+            </Trans>{" "}
+            {t("subscribe.daysLeft", { count: sub.daysRemaining })}{" "}
+            <Link to="/houses/new">{t("nav.listProperty")}</Link>.
           </p>
         ) : (
-          <p className="muted">You cannot publish a listing until this is active.</p>
+          <p className="muted">{t("subscribe.cannotPublish")}</p>
         )}
       </div>
 
       {pending ? (
         <div className="form-block sub-pending">
-          <p className="booking-done-title">Payment recorded</p>
+          <p className="booking-done-title">{t("subscribe.recorded")}</p>
           <p className="muted">
             {pending.amount} JOD, recorded {formatDay(pending.createdAt.slice(0, 10))}.
             An administrator will confirm it, and your subscription starts then.
@@ -112,7 +116,7 @@ export default function Subscribe() {
       ) : (
         <form className="listing-form" onSubmit={handleSubmit}>
           <fieldset className="form-block">
-            <legend>{sub.isActive ? "Renew" : "Subscribe"}</legend>
+            <legend>{sub.isActive ? t("subscribe.renew") : t("subscribe.subscribe")}</legend>
 
             <p className="field-hint" style={{ marginTop: 0 }}>
               Pay {sub.pricePerMonth} JOD by whichever method suits you, then record
@@ -122,14 +126,14 @@ export default function Subscribe() {
             </p>
 
             <div className="field">
-              <label className="label" htmlFor="method">How did you pay?</label>
+              <label className="label" htmlFor="method">{t("subscribe.howDidYouPay")}</label>
               <select
                 id="method" className="input"
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
               >
                 {METHODS.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
+                  <option key={m.value} value={m.value}>{t(m.key)}</option>
                 ))}
               </select>
             </div>
@@ -140,7 +144,7 @@ export default function Subscribe() {
               </label>
               <input
                 id="note" className="input" maxLength={250}
-                placeholder="CliQ alias, transfer reference, who you handed it to…"
+                placeholder={t("subscribe.referencePlaceholder")}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
@@ -149,10 +153,10 @@ export default function Subscribe() {
               </p>
             </div>
 
-            {sent && <p className="notice">Recorded. Waiting for confirmation.</p>}
+            {sent && <p className="notice">{t("subscribe.waitingConfirmation")}</p>}
 
             <button className="btn btn-primary" type="submit" disabled={busy}>
-              {busy ? "Recording…" : `Record ${sub.pricePerMonth} JOD payment`}
+              {busy ? t("subscribe.recording") : t("subscribe.recordPayment", { amount: sub.pricePerMonth })}
             </button>
           </fieldset>
         </form>

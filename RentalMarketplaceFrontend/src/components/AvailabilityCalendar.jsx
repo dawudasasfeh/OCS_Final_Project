@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { addDays, parseDay, toIso, todayIso } from "../utils/date";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+// Monday-first, which is the working week in Jordan; the keys are resolved in
+// the component so the row relabels when the language changes.
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 const MONTH_LABEL = (d) =>
-  d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  d.toLocaleDateString(i18n.resolvedLanguage === "ar" ? "ar-JO-u-nu-latn" : "en-GB", { month: "long", year: "numeric" });
 
 /**
  * Builds a lookup of iso day -> why it is unavailable.
@@ -66,6 +70,7 @@ export default function AvailabilityCalendar({
   value,
   onChange,
 }) {
+  const { t } = useTranslation();
   const today = todayIso();
   const [cursor, setCursor] = useState(() => {
     const d = value ? parseDay(value) : new Date();
@@ -126,7 +131,7 @@ export default function AvailabilityCalendar({
           className="cal-nav"
           onClick={() => shift(-1)}
           disabled={atFloor}
-          aria-label="Previous month"
+          aria-label={t("calendar.prevMonth")}
         >
           ‹
         </button>
@@ -135,15 +140,15 @@ export default function AvailabilityCalendar({
           type="button"
           className="cal-nav"
           onClick={() => shift(1)}
-          aria-label="Next month"
+          aria-label={t("calendar.nextMonth")}
         >
           ›
         </button>
       </div>
 
       <div className="cal-grid cal-weekdays">
-        {WEEKDAYS.map((w) => (
-          <span key={w} className="cal-weekday">{w}</span>
+        {WEEKDAY_KEYS.map((w) => (
+          <span key={w} className="cal-weekday">{t(`calendar.${w}`)}</span>
         ))}
       </div>
 
@@ -171,9 +176,9 @@ export default function AvailabilityCalendar({
               aria-pressed={isSelected}
               title={
                 state === "turnover"
-                  ? `Turnover gap — the owner keeps ${turnoverDays} day${turnoverDays === 1 ? "" : "s"} between stays`
+                  ? t("calendar.turnoverGap", { count: turnoverDays })
                   : state
-                    ? state === "pending" ? "Requested by someone else" : "Booked"
+                    ? state === "pending" ? t("calendar.requestedBySomeoneElse") : t("calendar.booked")
                     : undefined
               }
               onClick={() => onChange?.(iso)}

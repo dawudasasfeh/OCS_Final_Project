@@ -9,18 +9,15 @@ import { getErrorMessage } from "../api/errors";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "./FieldError";
 import { formatDay } from "../utils/date";
+import { useTranslation } from "react-i18next";
 
 // Values are Domain/Enums/PaymentMethod.cs.
 const METHODS = [
-  { value: 1, label: "Cash" },
-  { value: 2, label: "CliQ" },
-  { value: 3, label: "Bank transfer" },
-  { value: 4, label: "Card" },
+  { value: 1, key: "paymentMethod.Cash" },
+  { value: 2, key: "paymentMethod.CliQ" },
+  { value: 3, key: "paymentMethod.BankTransfer" },
+  { value: 4, key: "paymentMethod.Card" },
 ];
-
-const METHOD_LABEL = Object.fromEntries(
-  [["Cash", "Cash"], ["CliQ", "CliQ"], ["BankTransfer", "Bank transfer"], ["Card", "Card"]]
-);
 
 /**
  * The payment log for one booking.
@@ -29,6 +26,7 @@ const METHOD_LABEL = Object.fromEntries(
  * Beytak never moves money — this is the two parties writing down that it moved.
  */
 export default function BookingPayments({ booking, side }) {
+  const { t } = useTranslation();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,7 +45,7 @@ export default function BookingPayments({ booking, side }) {
     getBookingPayments(booking.id)
       .then((data) => { if (!cancelled) setPayments(data); })
       .catch((err) => {
-        if (!cancelled) setError(getErrorMessage(err, "Could not load payments."));
+        if (!cancelled) setError(getErrorMessage(err, t("booking.couldNotLoadPayments")));
       })
       .finally(() => { if (!cancelled) setLoading(false); });
 
@@ -78,7 +76,7 @@ export default function BookingPayments({ booking, side }) {
       setNote("");
       setOpen(false);
     } catch (err) {
-      setError(getErrorMessage(err, "Could not record the payment."));
+      setError(getErrorMessage(err, t("booking.couldNotRecord")));
     } finally {
       setSaving(false);
     }
@@ -102,9 +100,9 @@ export default function BookingPayments({ booking, side }) {
   return (
     <div className="pay-block">
       <div className="pay-head">
-        <span className="pay-title">Payments</span>
+        <span className="pay-title">{t("booking.payments")}</span>
         <span className="muted">
-          {paid} of {booking.totalPrice} JOD confirmed
+          {t("booking.paidOf", { paid, total: booking.totalPrice })}
         </span>
       </div>
 
@@ -114,25 +112,27 @@ export default function BookingPayments({ booking, side }) {
         <ul className="pay-list">
           {payments.map((p) => (
             <li key={p.id} className="pay-row">
-              <span className="pay-amount">{p.amount} JOD</span>
+              <span className="pay-amount">{p.amount} {t("common.jod")}</span>
               <span className="muted">
-                {METHOD_LABEL[p.method] ?? p.method} · {formatDay(p.createdAt.slice(0, 10))}
+                {t(`paymentMethod.${p.method}`, { defaultValue: p.method })} · {formatDay(p.createdAt.slice(0, 10))}
               </span>
-              <span className={`badge badge-${p.status.toLowerCase()}`}>{p.status}</span>
+              <span className={`badge badge-${p.status.toLowerCase()}`}>
+                {t(`status.${p.status.toLowerCase()}`, { defaultValue: p.status })}
+              </span>
 
               {side === "owner" && p.status === "Pending" && (
                 <span className="pay-actions">
                   <button
                     type="button" disabled={busyId === p.id}
-                    onClick={() => decide(p.id, confirmPayment, "Could not confirm this payment.")}
+                    onClick={() => decide(p.id, confirmPayment, t("booking.couldNotConfirmPayment"))}
                   >
-                    Confirm
+                    {t("requests.confirm")}
                   </button>
                   <button
                     type="button" disabled={busyId === p.id}
-                    onClick={() => decide(p.id, rejectPayment, "Could not reject this payment.")}
+                    onClick={() => decide(p.id, rejectPayment, t("booking.couldNotRejectPayment"))}
                   >
-                    Reject
+                    {t("admin.reject")}
                   </button>
                 </span>
               )}
@@ -146,9 +146,9 @@ export default function BookingPayments({ booking, side }) {
           <form className="pay-form" onSubmit={handleRecord} noValidate>
             <div className="pay-form-row">
               <input
-                id="payAmount" aria-label="Amount"
+                id="payAmount" aria-label={t("booking.amount")}
                 className="input" type="number" min="1" step="1" required
-                placeholder="Amount in JOD"
+                placeholder={t("booking.amountPlaceholder")}
                 value={amount}
                 onChange={(e) => { setAmount(e.target.value); clearError("payAmount"); }}
               />
@@ -157,16 +157,16 @@ export default function BookingPayments({ booking, side }) {
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
               >
-                {METHODS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+                {METHODS.map((m) => <option key={m.value} value={m.value}>{t(m.key)}</option>)}
               </select>
             </div>
 
             <FieldError>{errors.payAmount}</FieldError>
 
             <input
-              id="payNote" aria-label="Reference"
+              id="payNote" aria-label={t("booking.reference")}
               className="input" maxLength={250}
-              placeholder="Reference, optional"
+              placeholder={t("booking.referencePlaceholder")}
               value={note}
               onChange={(e) => { setNote(e.target.value); clearError("payNote"); }}
             />
@@ -174,7 +174,7 @@ export default function BookingPayments({ booking, side }) {
 
             <div className="booking-actions">
               <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? "Recording…" : "Record payment"}
+                {saving ? t("booking.recording") : t("booking.recordPayment")}
               </button>
               <button className="btn btn-outline" type="button" onClick={() => setOpen(false)}>
                 Cancel

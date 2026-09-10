@@ -8,8 +8,12 @@
   --primary-hover: #B01F1F;
   --primary-soft: #FDEDED;
 
+  /* Four steps, each with a job: headings sit darker than body so a page has a
+     spine, and the two greys separate supporting copy from incidental labels.
+     Previously headings and body shared one colour, which flattened everything. */
+  --heading: #0E1116;
   --text: #1F2328;
-  --text-muted: #6B7280;
+  --text-muted: #5B6472;
   --text-light: #9CA3AF;
 
   --bg: #FFFFFF;
@@ -32,27 +36,90 @@
   --shadow-lg: 0 8px 28px rgba(0, 0, 0, .16);
 
   --nav-h: 58px;
+  /* Height of the logo mark. This is the only logo number to tune — it must
+     stay under --nav-h, because the badge is centred on the bar and anything
+     taller than the bar would have its top clipped by the viewport. */
+  --logo-mark: 46px;
+  /* The circle is derived, not set. The mark is 1.35:1, and at 1.75× its
+     height the circle is still ~6% wider than the mark at the mark’s widest
+     point — so the art clears the curve at every breakpoint automatically. */
+  --logo-badge: calc(var(--logo-mark) * 1.75);
+  /* Transparent, so the hero photo shows through instead of being covered by
+     a white disc. Set this to #fff or var(--surface-alt) to bring the circle
+     back — nothing else has to change. */
+  --logo-badge-bg: transparent;
   --container: 1160px;
   --gutter: 24px;
   --section-y: 52px;
 
-  --sans: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --arabic: 'Noto Kufi Arabic', 'Segoe UI', sans-serif;
+
+  /* A real scale, not 35 near-identical nudges. Each step is a deliberate
+     jump, so a heading is unmistakably a heading and small print is
+     unmistakably small. Everything below picks from these. */
+  --fs-2xs: .75rem;    /* 12 — badges, counts */
+  --fs-xs:  .8125rem;  /* 13 — labels, captions */
+  --fs-sm:  .875rem;   /* 14 — secondary text, UI */
+  --fs-base: 1rem;     /* 16 — body */
+  --fs-md:  1.125rem;  /* 18 — lede, card titles */
+  --fs-lg:  1.375rem;  /* 22 — h3 */
+  --fs-xl:  1.75rem;   /* 28 — h2 */
+  --fs-2xl: 2.25rem;   /* 36 — h1 */
+  --fs-hero: clamp(2rem, 4.2vw, 3rem);
+
+  /* Large type needs negative tracking or it looks loose; small type needs
+     positive or it looks cramped. One value for both is why untuned pages
+     read as flat. */
+  --track-tight: -.022em;
+  --track-snug: -.012em;
+  --track-wide: .04em;
 
   font-family: var(--sans);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-body { margin: 0; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.55; }
+/* 16px, not 15. An odd base makes every derived size land on a fraction, which
+   is how a stylesheet ends up with 35 sizes none of which relate to each
+   other. Line height loosens too — 1.55 was tight for a 15px measure. */
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-size: var(--fs-base); line-height: 1.6;
+}
 
-h1, h2, h3 { margin: 0 0 .5em; line-height: 1.2; font-weight: 700; }
-h1 { font-size: clamp(1.5rem, 3.4vw, 2.5rem); }
-h2 { font-size: clamp(1.2rem, 2vw, 1.6rem); }
-h3 { font-size: .98rem; }
+/* Headings take the display face and get progressively tighter tracking as
+   they grow. h3 used to be 0.98rem — smaller than body text, which is the
+   clearest sign there was no scale at all. */
+h1, h2, h3 {
+  margin: 0 0 .5em;
+  font-family: var(--display);
+  color: var(--heading);
+  font-weight: 800;
+  line-height: 1.15;
+}
+h1 { font-size: var(--fs-2xl); letter-spacing: var(--track-tight); }
+h2 { font-size: var(--fs-xl); letter-spacing: var(--track-snug); font-weight: 700; }
+/* 18, not 22. At 22 an h3 sat only 6px below h2 — too close to read as a
+   different level, and far too heavy for the card titles that use it. */
+h3 { font-size: var(--fs-md); letter-spacing: var(--track-snug); font-weight: 700; line-height: 1.35; }
+
+/* Arabic has no italic and different vertical proportions, so it gets its own
+   face rather than falling back to whatever the OS supplies. */
+:lang(ar), .ar { font-family: var(--arabic); }
 
 p { margin: 0 0 .9rem; }
+
+/* The sentence under a heading. Larger and lighter than body copy, which is
+   what separates an introduction from a paragraph. */
+.lede {
+  font-size: var(--fs-md); line-height: 1.55;
+  color: var(--text-muted); max-width: 58ch;
+}
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
@@ -100,7 +167,7 @@ img { max-width: 100%; display: block; }
    padding keeps long option text off the chevron. */
 select.input {
   appearance: none; -webkit-appearance: none;
-  padding-right: 2.1rem; cursor: pointer;
+  padding-inline-end: 2.1rem; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%236B7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right .75rem center;
@@ -158,9 +225,51 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .nav-link:hover { color: var(--primary); }
 .nav-link.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-.nav-logo { display: flex; align-items: baseline; gap: .28rem; justify-self: center; }
-.nav-logo-mark { font-size: 1.2rem; font-weight: 700; letter-spacing: -.01em; color: var(--primary); }
-.nav-logo-sub { font-size: .85rem; font-weight: 500; color: var(--text-muted); }
+/* The badge straddles the bar: it starts just inside the navbar and hangs
+   equally above and below it. .nav-logo keeps a box exactly one bar tall —
+   that is what stops the circle stretching the row — while the circle itself
+   is taken out of flow to overflow it. */
+.nav-logo {
+  position: relative;
+  justify-self: center;
+  width: var(--logo-badge);
+  height: var(--nav-h);
+}
+
+.nav-logo-badge {
+  position: absolute;
+  /* Centred on the bar, which makes this negative: the circle is taller than
+     the navbar, so its top is clipped by the viewport. Only the circle is cut,
+     never the mark — the mark sits at (--nav-h - --logo-mark) / 2 from the top
+     regardless of the circle’s size, so keeping --logo-mark under --nav-h is
+     what guarantees the whole logo stays on screen. */
+  top: calc((var(--nav-h) - var(--logo-badge)) / 2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--logo-badge);
+  height: var(--logo-badge);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  /* No border and no fill by default, so the hero shows through. A ring is the
+     one thing that would make the circle read on a white page:
+     border: 1px solid var(--border); */
+  border: 0;
+  background: var(--logo-badge-bg);
+  transition: transform .15s ease-out;
+}
+
+/* Sized here rather than by Logo’s size prop, so one variable per breakpoint
+   drives both the mark and the circle derived from it. */
+.nav-logo-badge .logo-svg { height: var(--logo-mark); width: auto; }
+
+.nav-logo:hover .nav-logo-badge { transform: translateX(-50%) translateY(2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-logo-badge { transition: none; }
+}
+.nav-logo-mark { font-size: 1.25rem; font-weight: 700; letter-spacing: -.01em; color: var(--primary); }
+.nav-logo-sub { font-size: .85rem; font-weight: 600; color: var(--text-muted); font-family: var(--arabic); }
 
 .nav-actions { display: flex; align-items: center; justify-content: flex-end; gap: .7rem; }
 .nav-user { font-size: .88rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
@@ -189,7 +298,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .account-caret { font-size: .7rem; color: var(--text-muted); }
 
 .account-menu {
-  position: absolute; top: calc(100% + .5rem); right: 0;
+  position: absolute; top: calc(100% + .5rem); inset-inline-end: 0;
   width: 250px; z-index: 60;
   background: #fff; border: 1px solid var(--border);
   border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
@@ -218,7 +327,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .account-menu-list { display: flex; flex-direction: column; padding: .35rem 0; }
 .account-menu-list a,
 .account-menu-foot button {
-  display: block; width: 100%; text-align: left;
+  display: block; width: 100%; text-align: start;
   padding: .5rem .9rem;
   background: none; border: none;
   font: inherit; font-size: .88rem; color: var(--text);
@@ -234,20 +343,50 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .hero {
   position: relative;
   min-height: 540px;
-  display: flex; align-items: center;
-  /* heavier bottom padding lifts the block, clearing the flag in the photo */
+  display: flex;
+  align-items: center;
   padding: 40px 0 150px;
-  text-align: center; color: #fff;
+  text-align: center;
+  color: #fff;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
   background:
     linear-gradient(rgba(20, 22, 25, .48), rgba(20, 22, 25, .60)),
     var(--hero-img, linear-gradient(180deg, #4B5158 0%, #2A2E33 100%));
   background-size: cover;
-  /* the flag sits near the top of the photo — bias the crop upward so it
-     lands above the heading rather than behind it */
   background-position: center 78%;
+  filter: blur(2px);
+  z-index: 0;
 }
 
-.hero h1 { color: #fff; margin-bottom: 1.6rem; }
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+/* The hero heading is the one place the type should be genuinely large. It was
+   capped at 2.5rem, barely above an interior h1, which is why the section read
+   as a photo with a caption rather than a statement. The shadow is not
+   decoration: white text over a photograph needs it wherever the image goes
+   pale, and the gradient alone cannot guarantee contrast. */
+.hero h1 {
+  color: #fff;
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  letter-spacing: var(--track-tight);
+  line-height: 1.05;
+  margin: 0 auto 1.8rem;
+  /* No max-width: 16ch dropped "Jordan" onto a line of its own, which reads as
+     a mistake rather than a break. The container is measure enough, and the
+     line wraps naturally once the screen is narrow. */
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .35);
+  text-wrap: balance;
+}
+
 
 /* ── Search panel ──────────────────────────────────────────────── */
 .search-tabs { display: flex; max-width: 780px; margin: 0 auto; }
@@ -269,23 +408,70 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   background: #fff;
   border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  text-align: left;
+  text-align: start;
 }
 
 .search-types {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: .5rem .85rem; margin-bottom: .95rem;
+  display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .85rem;
 }
 
+/* A segmented control, not a list of radio buttons. The native dots were the
+   loudest "this is a form" signal on the page, sitting in the middle of the
+   main call to action. The input stays in the DOM for keyboard and screen
+   reader users; only its rendering is replaced. */
 .type-chip {
-  display: inline-flex; align-items: center; gap: .45rem;
-  font-size: .88rem; color: var(--text);
+  position: relative; flex: 1 1 auto; min-width: 88px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: .5rem .7rem;
+  font-size: var(--fs-sm); font-weight: 600; white-space: nowrap;
+  color: var(--text-muted); background: var(--surface-alt);
+  border: 1px solid transparent; border-radius: var(--radius);
   cursor: pointer; user-select: none;
+  transition: color .15s, background .15s, border-color .15s;
 }
-.type-chip input { accent-color: var(--primary); width: 15px; height: 15px; margin: 0; flex: none; }
-.type-chip.selected { color: var(--primary); font-weight: 600; }
+.type-chip:hover { color: var(--text); }
+.type-chip.selected {
+  color: var(--primary); background: var(--primary-soft); border-color: var(--primary);
+}
+
+/* Clipped rather than display:none — a hidden input is skipped by the keyboard
+   and unreadable to a screen reader, which would make the control unusable
+   without a mouse. */
+.type-chip input {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+/* The focus ring has to move to the label, since the input it belongs to is
+   now invisible. */
+.type-chip:has(input:focus-visible) {
+  border-color: var(--primary); box-shadow: var(--focus-ring);
+}
 
 .search-row { display: grid; grid-template-columns: 1fr auto; gap: .6rem; }
+
+/* ── Autocomplete: a text box with suggestions under it ────────────
+   Shares the popup styling with FilterSelect so the two read as one family,
+   but the field itself is the input rather than a button that opens a list. */
+.ac { position: relative; display: block; }
+.ac-input { padding-inline-end: 2.2rem; }
+
+.ac-clear {
+  position: absolute; top: 50%; inset-inline-end: .5rem; transform: translateY(-50%);
+  width: 22px; height: 22px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 1.05rem; line-height: 1;
+  color: var(--text-light); background: none; border: none; cursor: pointer;
+  border-radius: 50%;
+}
+.ac-clear:hover { color: var(--text); background: var(--surface-alt); }
+
+.ac-pop { left: 0; right: 0; width: auto; }
+
+/* The hero control is bigger than the one in the filter bar — it is the main
+   call to action on the page, and it has to sit level with the Find button. */
+.search-row .ac-input { min-height: 42px; font-size: .92rem; }
+.search-row .fs-pop { max-width: none; }
 
 /* ── House cards ───────────────────────────────────────────────── */
 /* auto-FILL, not auto-fit: empty tracks are kept, so a single result
@@ -309,7 +495,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .house-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 .house-tag {
-  position: absolute; top: .6rem; left: .6rem;
+  position: absolute; top: .6rem; inset-inline-start: .6rem;
   padding: .2rem .5rem; border-radius: 4px;
   background: var(--primary); color: #fff;
   font-size: .65rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
@@ -317,7 +503,15 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 
 .house-body { padding: .9rem 1rem 1rem; display: flex; flex-direction: column; flex: 1; }
 .house-city { font-size: .8rem; color: var(--text-muted); margin-bottom: .25rem; }
-.house-title { margin-bottom: .5rem; }
+/* Clamped to two lines so every card in a row is the same height and the
+   prices line up across the grid. Titles ran to three lines before, which is
+   why the footers sat at different heights. */
+.house-title {
+  margin-bottom: .5rem;
+  font-size: var(--fs-md); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .house-meta { display: flex; flex-wrap: wrap; gap: .7rem; font-size: .82rem; color: var(--text-muted); margin-bottom: .8rem; }
 .house-foot {
   margin-top: auto; padding-top: .7rem; border-top: 1px solid var(--border);
@@ -332,13 +526,23 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .section-head h2 { margin-bottom: .25rem; }
 
 /* ── Page header (pages without a photo hero) ──────────────────── */
+/* No band. A grey box with a border put a second horizontal division directly
+   under the navbar and left most of its width empty, since the heading is left
+   aligned and nothing balances it on the right. Worse on About, where a boxed
+   "About Beytak" sat immediately above the page's own first heading, so the
+   two competed.
+
+   The heading now belongs to the content it introduces: generous space above
+   to clear the navbar, tighter below so it reads as attached to what follows
+   rather than as a separate strip. */
 .page-head {
-  background: var(--surface-alt);
-  border-bottom: 1px solid var(--border);
-  padding: 44px 0;
+  padding: 56px 0 4px;
 }
-.page-head h1 { margin-bottom: .3rem; }
-.page-head p { margin: 0; max-width: 620px; color: var(--text-muted); }
+.page-head h1 { margin-bottom: .4rem; font-size: var(--fs-2xl); }
+.page-head p {
+  margin: 0; max-width: 58ch;
+  font-size: var(--fs-md); line-height: 1.55; color: var(--text-muted);
+}
 
 /* ── Prose ─────────────────────────────────────────────────────── */
 .prose { max-width: 680px; }
@@ -526,8 +730,8 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   overflow: hidden;
   padding: 3.8rem 2rem;
   color: #fff;
-  background: linear-gradient(rgba(20, 22, 25, .62), rgba(20, 22, 25, .75)),
-              url('/about/amman-city.jpg') center/cover no-repeat;
+  background: linear-gradient(rgba(20, 22, 25, .58), rgba(20, 22, 25, .72)),
+              url('/about/about-close.jpg') center/cover no-repeat;
   text-align: center;
   box-shadow: var(--shadow-lg);
 }
@@ -579,12 +783,23 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  /* Holds a numeral now rather than an emoji, so it wants the display face and
+     tabular weight — an emoji sat at 1.2rem, a two-digit number needs less. */
+  font-family: var(--display);
+  font-size: var(--fs-sm); font-weight: 800;
+  letter-spacing: var(--track-wide);
   margin-bottom: .8rem;
 }
 .value-card h3 {
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
   margin-bottom: .4rem;
+}
+
+/* The figures close the guarantees section rather than occupying a section of
+   their own — four numbers did not warrant their own band. */
+.about-stats {
+  margin-top: 2.5rem; padding-top: 2rem;
+  border-top: 1px solid var(--border);
 }
 .value-card p {
   font-size: .88rem;
@@ -654,14 +869,17 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 /* Small and quiet: enough to scan the row by, not enough to compete with the
    values or to cost the row of height the stacked layout needed. */
 .filter-label {
-  font-size: .68rem; font-weight: 600; letter-spacing: .03em;
+  font-size: var(--fs-2xs); font-weight: 600; letter-spacing: var(--track-wide);
   text-transform: uppercase; color: var(--text-light);
-  padding-left: .15rem;
+  padding-inline-start: .15rem;
 }
 
 .filter-bar .input {
   min-height: 36px; padding: .35rem .6rem; font-size: .86rem;
 }
+/* .filter-bar .input outranks .ac-input, so the room the clear button needs
+   has to be restored at the same specificity. */
+.filter-bar .ac-input { padding-inline-end: 2rem; }
 
 /* ── FilterSelect: a dropdown we draw ourselves ─────────────────────
    Native select and datalist popups are painted by the browser and ignore
@@ -675,7 +893,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .fs-btn {
   display: flex; align-items: center; gap: .5rem;
   width: 100%; min-height: 36px; padding: .35rem .6rem;
-  font: inherit; font-size: .86rem; text-align: left;
+  font: inherit; font-size: .86rem; text-align: start;
   color: var(--text-light); background: #fff; cursor: pointer;
   border: 1px solid var(--border-strong); border-radius: var(--radius);
   transition: border-color .15s, box-shadow .15s;
@@ -687,14 +905,14 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .fs-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .fs-caret {
-  flex: none; width: 9px; height: 9px; margin-right: .1rem;
+  flex: none; width: 9px; height: 9px; margin-inline-end: .1rem;
   border-right: 1.6px solid var(--text-light); border-bottom: 1.6px solid var(--text-light);
   transform: translateY(-2px) rotate(45deg);
 }
 .fs-btn[aria-expanded="true"] .fs-caret { transform: translateY(2px) rotate(-135deg); }
 
 .fs-pop {
-  position: absolute; z-index: 40; top: calc(100% + 4px); left: 0;
+  position: absolute; z-index: 40; top: calc(100% + 4px); inset-inline-start: 0;
   min-width: 100%; width: max-content; max-width: 260px;
   background: #fff; border: 1px solid var(--border-strong);
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
@@ -715,7 +933,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .fs-opt {
   display: flex; align-items: center; justify-content: space-between; gap: .75rem;
   width: 100%; padding: .42rem .55rem;
-  font: inherit; font-size: .86rem; text-align: left; white-space: nowrap;
+  font: inherit; font-size: .86rem; text-align: start; white-space: nowrap;
   color: var(--text); background: none; cursor: pointer;
   border: none; border-radius: var(--radius);
 }
@@ -759,7 +977,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
    a full-width control there would read as another filter. Its popup opens
    from the right so it cannot run off the edge of the page. */
 .results-sort { min-width: 168px; }
-.results-sort .fs-pop { left: auto; right: 0; }
+.results-sort .fs-pop { inset-inline-start: auto; inset-inline-end: 0; }
 
 @media (max-width: 480px) {
   .results-sort { width: 100%; }
@@ -785,8 +1003,20 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 /* align-items: start stops the grid stretching .gallery-main to the row
    height, which would otherwise override its max-height. */
 .gallery { display: grid; grid-template-columns: 92px 1fr; gap: .6rem; margin: 1.25rem 0; align-items: start; }
-.gallery-thumbs { display: flex; flex-direction: column; gap: .6rem; max-height: 420px; overflow-y: auto; }
+/* Capped to the main image beside it, not 20px past it, so the two columns end
+   on the same line. overscroll-behavior stops the page taking over once the
+   rail reaches its end. */
+.gallery-thumbs {
+  display: flex; flex-direction: column; gap: .6rem;
+  max-height: 400px; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
 .gallery-thumb {
+  /* flex: none is what makes the rail scroll. Without it these are flex items
+     with the default shrink of 1, so seven thumbnails squeezed themselves into
+     the 420px column instead of overflowing it — no scrollbar, and the 4:3
+     ratio quietly crushed. */
+  flex: none;
   aspect-ratio: 4/3; border: 2px solid transparent; border-radius: var(--radius);
   background: var(--surface-alt); cursor: pointer; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
@@ -832,7 +1062,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   font-size: .9rem;
 }
 .detail-row dt { color: var(--text-muted); margin: 0; }
-.detail-row dd { margin: 0; font-weight: 600; text-align: right; }
+.detail-row dd { margin: 0; font-weight: 600; text-align: end; }
 
 .detail-description { white-space: pre-line; color: var(--text-muted); }
 
@@ -908,7 +1138,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 /* ── toasts ────────────────────────────────────────────────────────── */
 .toast-stack {
   position: fixed; z-index: 100;
-  top: 1rem; right: 1rem;
+  top: 1rem; inset-inline-end: 1rem;
   display: flex; flex-direction: column; gap: .5rem;
   width: min(360px, calc(100vw - 2rem));
   /* The stack spans the width of the widest toast, so it would otherwise sit
@@ -922,7 +1152,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   padding: .7rem .8rem;
   font-size: .85rem; line-height: 1.4;
   background: var(--surface); color: var(--text);
-  border: 1px solid var(--border-strong); border-left-width: 3px;
+  border: 1px solid var(--border-strong); border-inline-start-width: 3px;
   border-radius: var(--radius);
   box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
   animation: toast-in .18s ease-out;
@@ -935,9 +1165,9 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   .toast { animation: none; }
 }
 
-.toast-success { border-left-color: var(--confirmed); background: var(--confirmed-bg); }
-.toast-error   { border-left-color: var(--rejected);  background: var(--rejected-bg); }
-.toast-info    { border-left-color: var(--primary);   background: var(--primary-soft); }
+.toast-success { border-inline-start-color: var(--confirmed); background: var(--confirmed-bg); }
+.toast-error   { border-inline-start-color: var(--rejected);  background: var(--rejected-bg); }
+.toast-info    { border-inline-start-color: var(--primary);   background: var(--primary-soft); }
 
 .toast-text { flex: 1; }
 
@@ -1043,14 +1273,27 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 }
 
 /* ── booking list pages (My bookings · Booking requests) ───────────── */
-.page-title { font-size: 1.7rem; margin: 0 0 .25rem; }
-.page-sub { margin: 0 0 1.5rem; font-size: .9rem; }
+/* The heading on an interior working page — smaller than a banner h1, because
+   it sits directly on the content rather than in a band of its own. */
+.page-title {
+  font-family: var(--display); font-weight: 800;
+  font-size: var(--fs-xl); letter-spacing: var(--track-snug);
+  line-height: 1.2; color: var(--heading);
+  margin: 0 0 .25rem;
+}
+.page-sub { margin: 0 0 1.5rem; font-size: var(--fs-sm); color: var(--text-muted); }
 
-.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-.nav-cta { min-height: 32px; padding: 0 .8rem; font-size: .82rem; }
+/* Was a second .page-head rule, which silently turned every banner hero into a
+   flex row — About, Contact and Properties were all being laid out as toolbars
+   because one working page needed a title with a button beside it. */
+.page-bar {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.nav-cta { min-height: 32px; padding: 0 .8rem; font-size: var(--fs-xs); }
 
 @media (max-width: 767px) {
-  .page-head { flex-direction: column; }
+  .page-bar { flex-direction: column; }
   .nav-cta { display: none; }
 }
 
@@ -1099,7 +1342,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
 }
 .form-block legend {
-  padding: 0 .4rem; margin-left: -.4rem;
+  padding: 0 .4rem; margin-inline-start: -.4rem;
   font-size: .82rem; font-weight: 700; letter-spacing: .04em;
   text-transform: uppercase; color: var(--text-muted);
 }
@@ -1161,7 +1404,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .upload-grid + .field-hint { margin-top: .7rem; }
 
 .upload-badge {
-  position: absolute; top: .35rem; left: .35rem;
+  position: absolute; top: .35rem; inset-inline-start: .35rem;
   padding: .1rem .4rem; border-radius: 3px;
   background: var(--primary); color: #fff;
   font-size: .64rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
@@ -1208,7 +1451,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .pay-row:last-child { border-bottom: none; }
 .pay-amount { font-weight: 600; min-width: 82px; }
 
-.pay-actions { display: flex; gap: .3rem; margin-left: auto; }
+.pay-actions { display: flex; gap: .3rem; margin-inline-start: auto; }
 .pay-actions button {
   padding: .18rem .55rem; cursor: pointer;
   background: #fff; border: 1px solid var(--border-strong); border-radius: 4px;
@@ -1235,7 +1478,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 /* ── wishlist heart ────────────────────────────────────────────── */
 .wish-btn {
-  position: absolute; top: .5rem; right: .5rem; z-index: 2;
+  position: absolute; top: .5rem; inset-inline-end: .5rem; z-index: 2;
   width: 32px; height: 32px; padding: 0; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   background: rgba(255, 255, 255, .92); color: var(--text-muted);
@@ -1275,7 +1518,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
    colour whether or not the tab is active. */
 .admin-tab-count {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 18px; height: 18px; margin-left: .4rem; padding: 0 .35rem;
+  min-width: 18px; height: 18px; margin-inline-start: .4rem; padding: 0 .35rem;
   font-size: .7rem; font-weight: 700; line-height: 1;
   color: #fff; background: var(--primary); border-radius: 999px;
 }
@@ -1293,7 +1536,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 .admin-quote {
   margin: .8rem 0 0; padding: .7rem .9rem;
-  background: var(--surface-alt); border-left: 3px solid var(--border-strong);
+  background: var(--surface-alt); border-inline-start: 3px solid var(--border-strong);
   border-radius: 0 var(--radius) var(--radius) 0;
   font-size: .9rem; line-height: 1.55;
 }
@@ -1318,7 +1561,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 .tips-card { background: var(--surface-alt); }
 .tips-card h3 { font-size: .9rem; margin-bottom: .6rem; }
-.tips-card ul { margin: 0; padding-left: 1.1rem; font-size: .84rem; color: var(--text-muted); }
+.tips-card ul { margin: 0; padding-inline-start: 1.1rem; font-size: .84rem; color: var(--text-muted); }
 .tips-card li { margin-bottom: .35rem; }
 
 @media (max-width: 1023px) {
@@ -1336,7 +1579,16 @@ textarea.input { resize: vertical; line-height: 1.5; }
 }
 
 /* ── Testimonials ──────────────────────────────────────────────── */
-.grid-testimonials { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+/* auto-FIT, not auto-fill: fill keeps the empty tracks, so three testimonials
+   in a four-track row sat left with a gap beside them. The upper bound stops
+   three cards stretching to a silly width once the tracks collapse, and
+   justify-content then centres whatever number there happens to be. */
+.grid-testimonials {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  gap: 1.25rem;
+  justify-content: center;
+}
 
 .testimonial-card {
   display: flex; flex-direction: column;
@@ -1390,15 +1642,100 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .footer-cities a { color: inherit; }
 .footer-cities a:hover { color: var(--primary); }
 .footer-cities a + a::before {
-  content: "·"; margin-right: .5rem; color: var(--border-strong);
+  content: "·"; margin-inline-end: .5rem; color: var(--border-strong);
 }
 
 /* ── Auth pages ────────────────────────────────────────────────── */
-.auth-wrap { display: flex; justify-content: center; padding: 52px var(--gutter); background: var(--surface-alt); min-height: 70vh; }
-.auth-card { width: 100%; max-width: 400px; padding: 1.75rem; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
-.auth-card { max-width: 400px; }
-.auth-card h1 { font-size: 1.4rem; margin-bottom: .25rem; }
-.auth-card .muted { font-size: .88rem; }
+/* Two panels: the form on the right, brand on the left. Full height rather
+   than a card floating in a grey field, which is what made it read as a
+   dialog rather than a page. */
+/* Exactly the viewport, and nothing scrolls. The form is sized to fit inside
+   it rather than the page growing to fit the form — which is why the fields
+   below are tightened and register pairs name with phone. */
+.auth-split {
+  display: grid; grid-template-columns: 1fr 1fr;
+  /* The extra pixel is the navbar's border-bottom, which --nav-h does not
+     include — without it the split overshoots and the page scrolls by 1px. */
+  height: calc(100vh - var(--nav-h) - 1px);
+  overflow: hidden;
+}
+
+/* An auth page owns the whole viewport, so the site footer underneath it would
+   guarantee a scrollbar no matter how well the form fits — 299px of links
+   below a screen that is already full. */
+body:has(.auth-split) .footer { display: none; }
+
+/* Tightened for the fixed height. The global .field spacing is set for long
+   working forms; an auth card has to hold everything on one screen, so the
+   gaps close up proportionally rather than the type shrinking. */
+.auth-card .field { margin-bottom: .65rem; }
+.auth-card h1 { margin-bottom: .2rem; }
+.auth-card .auth-row { gap: .65rem; }
+.auth-sub { margin-bottom: 1.1rem; }
+.auth-card .auth-hint { margin: .1rem 0 .8rem; }
+.auth-card .auth-foot { margin-top: .8rem; }
+
+.auth-aside {
+  /* justify-content centres the block across the panel; the text inside stays
+     left-aligned because the points are a ticked list, and a centred list puts
+     every tick at a different distance from its own line. */
+  position: relative; display: flex; align-items: center; justify-content: center;
+  padding: 3rem;
+  color: #fff;
+  /* The red is carried in the overlay rather than laid on flat, so the panel
+     is unmistakably Beytak without hiding the photograph underneath. */
+  background:
+    linear-gradient(150deg, rgba(150, 22, 22, .82), rgba(20, 22, 25, .78)),
+    var(--auth-img) center / cover no-repeat;
+}
+.auth-aside-inner { max-width: 30rem; }
+
+.auth-aside-title {
+  color: #fff; font-size: var(--fs-xl);
+  line-height: 1.2; margin-bottom: 1.5rem;
+  text-wrap: balance;
+}
+
+.auth-points { margin: 0; padding: 0; list-style: none; display: grid; gap: .85rem; }
+.auth-points li {
+  position: relative; padding-inline-start: 1.6rem;
+  font-size: var(--fs-sm); line-height: 1.5; color: rgba(255, 255, 255, .88);
+}
+/* A drawn tick rather than a character, so it does not change shape between
+   platforms the way a unicode check does. */
+.auth-points li::before {
+  content: ""; position: absolute; inset-inline-start: 0; top: .35em;
+  width: 9px; height: 5px;
+  border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+  transform: rotate(-45deg); opacity: .9;
+}
+
+.auth-main {
+  display: flex;
+  /* Padding gives way before the form does: 3rem on a tall screen, down to 1rem
+     on a short one, which is 64px the card no longer has to find. */
+  padding: clamp(1rem, 4vh, 3rem) var(--gutter);
+  background: #fff;
+  /* .auth-split clips, so on a short screen the submit button was not merely
+     below the fold — it could not be reached at all. Scrolling this column is
+     the fallback when even the reduced form cannot fit. */
+  overflow-y: auto;
+}
+
+/* margin:auto, not align-items:center. Both centre a card that fits, but a
+   centred flex item taller than its scroll container overflows past the top
+   and that part cannot be scrolled back to; auto margins collapse instead. */
+.auth-card { margin: auto; }
+
+/* The lockup is the one thing on the card that can lose height without losing
+   meaning, so it scales with the viewport rather than staying at the prop. */
+.auth-card .logo-full { height: clamp(56px, 11vh, 105px); width: auto; }
+
+/* No border or shadow now — it sits on its own white panel, so a card outline
+   would just be a box inside a box. */
+.auth-card { width: 100%; max-width: 25rem; }
+.auth-card h1 { font-size: var(--fs-xl); margin-bottom: .3rem; }
+.auth-card .muted { font-size: var(--fs-sm); }
 .auth-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 .auth-hint { margin: -.2rem 0 1.1rem; font-size: .78rem; color: var(--text-light); }
 .auth-submit { width: 100%; margin-top: .2rem; }
@@ -1407,8 +1744,9 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .auth-foot a { color: var(--primary); font-weight: 600; }
 
 /* dev-only demo account shortcuts */
+/* Sits under the form now, so the space belongs above it rather than below. */
 .quick-cred {
-  margin-bottom: 1.1rem; padding: .7rem .8rem;
+  margin-top: 1.4rem; padding: .7rem .8rem;
   background: var(--surface-alt); border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
 }
@@ -1427,7 +1765,9 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .quick-cred-btn:hover { border-color: var(--primary); color: var(--primary); }
 
 /* register has more fields, so it gets a wider card */
-.auth-card:has(.auth-row) { max-width: 480px; }
+/* Register carries a two-up row for the password fields, so it needs a wider
+   measure than the login form. */
+.auth-card:has(.auth-row) { max-width: 28rem; }
 
 /* ═════════════════════════════════════════════════════════════════
    RESPONSIVE
@@ -1449,7 +1789,14 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 /* ── Tablet ≤1023px ────────────────────────────────────────────── */
 @media (max-width: 1023px) {
-  :root { --nav-h: 54px; --section-y: 40px; }
+  :root { --nav-h: 54px; --section-y: 40px; --logo-mark: 40px; }
+
+  /* The brand panel drops out rather than stacking above the form. Stacking
+     would make a phone scroll past a photograph to reach the thing it came
+     for, which is the sign-in box. */
+  .auth-split { grid-template-columns: 1fr; }
+  .auth-aside { display: none; }
+  .auth-main { padding: 2.5rem var(--gutter); align-items: flex-start; }
 
   .nav-inner {
     height: auto;
@@ -1464,11 +1811,11 @@ textarea.input { resize: vertical; line-height: 1.5; }
   /* Off-canvas rather than hidden, so it slides and can be animated. The links
      stay in the DOM and keep their tab order. */
   .nav-links {
-    position: fixed; top: var(--nav-h); left: 0; bottom: 0; z-index: 60;
+    position: fixed; top: var(--nav-h); inset-inline-start: 0; bottom: 0; z-index: 60;
     width: min(74vw, 280px);
     flex-direction: column; align-items: stretch; gap: 0;
     padding: .5rem 0;
-    background: #fff; border-right: 1px solid var(--border);
+    background: #fff; border-inline-end: 1px solid var(--border);
     box-shadow: 4px 0 24px rgba(0, 0, 0, .08);
     transform: translateX(-100%);
     transition: transform .2s ease-out;
@@ -1478,10 +1825,10 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .nav-links li { display: block; }
   .nav-link {
     display: block; padding: .85rem 1.2rem;
-    border-bottom: none; border-left: 3px solid transparent;
+    border-bottom: none; border-inline-start: 3px solid transparent;
     font-size: .95rem;
   }
-  .nav-link.active { border-bottom-color: transparent; border-left-color: var(--primary); }
+  .nav-link.active { border-bottom-color: transparent; border-inline-start-color: var(--primary); }
 
   .nav-backdrop {
     display: block; position: fixed; inset: var(--nav-h) 0 0; z-index: 55;
@@ -1509,6 +1856,10 @@ textarea.input { resize: vertical; line-height: 1.5; }
   :root { --gutter: 16px; --section-y: 34px; }
 
   .nav-logo-sub { display: none; }
+
+  /* Smaller again on a phone, where the bar is the same height but the width
+     either side of the mark is not. */
+  :root { --logo-mark: 34px; }
   .nav-actions { gap: .45rem; }
   .nav-user { display: none; }
   .btn { padding: 0 .85rem; font-size: .86rem; }
@@ -1524,7 +1875,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .grid-houses { grid-template-columns: 1fr; gap: 1rem; }
   .grid-testimonials { grid-template-columns: 1fr; gap: 1rem; }
   .contact-grid { grid-template-columns: 1fr; gap: 1.25rem; }
-  .page-head { padding: 32px 0; }
+  .page-head { padding: 32px 0 4px; }
   .grid-features { gap: 1.25rem; }
 
   .footer { padding: 30px 0 16px; }
@@ -1534,11 +1885,93 @@ textarea.input { resize: vertical; line-height: 1.5; }
 /* ── Small phone ≤480px ────────────────────────────────────────── */
 @media (max-width: 480px) {
   .search-card { padding: .9rem; }
-  .search-types { grid-template-columns: 1fr; gap: .4rem; }
-  .search-tab { font-size: .8rem; }
+  /* .search-types became a flex row when the radios turned into a segmented
+     control, so the old grid override did nothing. Two per row fits a phone. */
+  .type-chip { flex: 1 1 calc(50% - .2rem); }
+  .search-tab { font-size: var(--fs-sm); }
 
   .footer-grid { grid-template-columns: 1fr; gap: 1.4rem; }
-  .auth-card { padding: 1.35rem; }
   .auth-row { grid-template-columns: 1fr; gap: 0; }
   .house-body { padding: .85rem; }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   ARABIC / RTL
+   Direction itself is handled by logical properties throughout the
+   sheet — padding-inline, border-inline, inset-inline — so this block
+   is only for the things logic cannot express: the typeface, and the
+   two transforms that carry a hard-coded direction in their sign.
+   ═════════════════════════════════════════════════════════════════ */
+
+/* Font fallback is per glyph, not per element, so the order does the work:
+   Latin characters are taken from Inter or Plus Jakarta Sans and Arabic ones
+   from Noto Kufi. That matters because a lot of the page stays Latin on an
+   Arabic screen — owner-written listing titles, "JOD", "CliQ", an email — and
+   naming the Arabic face alone rendered all of it in Noto Kufi’s Latin, which
+   is an afterthought in that family. */
+:root.rtl body,
+:root.rtl .btn, :root.rtl .input, :root.rtl .label {
+  font-family: "Inter", var(--arabic);
+}
+
+:root.rtl h1, :root.rtl h2, :root.rtl h3, :root.rtl h4,
+:root.rtl .hero h1, :root.rtl .section-title {
+  font-family: "Plus Jakarta Sans", var(--arabic);
+}
+
+/* Latin runs inside Arabic copy — "20 JOD", "ASP.NET", an email address —
+   keep the Latin face, since Noto Kufi's Latin is an afterthought. */
+:root.rtl .ltr,
+:root.rtl input[type="email"],
+:root.rtl input[type="password"],
+:root.rtl input[type="tel"] {
+  font-family: var(--sans);
+  direction: ltr;
+  text-align: start;
+}
+
+/* The drawer slides in from the inline start, and translateX does not know
+   what that means — the sign has to be flipped by hand. Scoped to the same
+   breakpoint as the drawer itself: above 1024px .nav-links is an ordinary
+   static row, and an unscoped transform pushes it clean off the viewport. */
+@media (max-width: 1023px) {
+  :root.rtl .nav-links { transform: translateX(100%); }
+  :root.rtl .nav-links.open { transform: none; }
+}
+
+/* Headings read tighter in Latin than in Arabic; negative tracking on Arabic
+   collides the joins, so it is reset rather than inherited. */
+:root.rtl h1, :root.rtl h2, :root.rtl h3, :root.rtl .hero h1 {
+  letter-spacing: normal;
+}
+
+/* The language switch. Sized to sit level with the account button rather than
+   the nav links, because it is a control, not a destination. */
+.lang-toggle {
+  min-height: 32px; padding: 0 .7rem;
+  font: inherit; font-size: var(--fs-xs); font-weight: 600;
+  color: var(--text); background: transparent;
+  border: 1px solid var(--border); border-radius: 999px;
+  cursor: pointer; white-space: nowrap;
+  transition: border-color .15s, color .15s;
+}
+.lang-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.lang-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* The label is always the *other* language, so it is always the face this page
+   is not using — name it explicitly rather than inheriting the page's. */
+.lang-toggle[lang="ar"] { font-family: var(--arabic); }
+.lang-toggle[lang="en"] { font-family: var(--sans); }
+
+/* A section heading with an action beside it. The button drops under the text
+   on a phone rather than squeezing the heading into two words a line. */
+.section-head-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.section-head-row > div { flex: 1 1 20rem; }
+
+@media (max-width: 560px) {
+  .section-head-row { align-items: stretch; }
+  .section-head-row .btn { width: 100%; }
 }

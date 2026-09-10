@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyBookings, cancelBooking } from "../api/bookings";
 import { getErrorMessage } from "../api/errors";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
 
 export default function MyBookings() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
@@ -21,7 +23,7 @@ export default function MyBookings() {
         const data = await getMyBookings();
         if (!cancelled) setBookings(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, "Could not load your bookings."));
+        if (!cancelled) setError(getErrorMessage(err, t("bookings.couldNotLoad")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -37,9 +39,9 @@ export default function MyBookings() {
     try {
       const updated = await cancelBooking(id);
       setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
-      toast.success("Booking cancelled.");
+      toast.success(t("bookings.cancelled"));
     } catch (err) {
-      const message = getErrorMessage(err, "Could not cancel this booking.");
+      const message = getErrorMessage(err, t("bookings.couldNotCancel"));
       setError(message);
       toast.error(message);
     } finally {
@@ -49,7 +51,7 @@ export default function MyBookings() {
 
   return (
     <div className="container section">
-      <h1 className="page-title">My bookings</h1>
+      <h1 className="page-title">{t("bookings.title")}</h1>
       <p className="muted page-sub">
         Requests you have sent. The owner's phone number appears once a booking is
         confirmed.
@@ -58,11 +60,11 @@ export default function MyBookings() {
       {error && <p className="error-text">{error}</p>}
 
       {loading ? (
-        <p className="muted">Loading your bookings…</p>
+        <p className="muted">{t("bookings.loading")}</p>
       ) : bookings.length === 0 ? (
         <div className="empty-state">
-          <p>You have not booked anything yet.</p>
-          <Link to="/houses" className="btn btn-primary">Browse properties</Link>
+          <p>{t("bookings.empty")}</p>
+          <Link to="/houses" className="btn btn-primary">{t("bookings.browse")}</Link>
         </div>
       ) : (
         <div className="booking-list">
@@ -77,7 +79,7 @@ export default function MyBookings() {
                     onClick={() => handleCancel(b.id)}
                     disabled={busyId === b.id}
                   >
-                    {busyId === b.id ? "Cancelling…" : "Cancel request"}
+                    {busyId === b.id ? t("bookings.cancelling") : t("bookings.cancelRequest")}
                   </button>
                 </div>
               )}

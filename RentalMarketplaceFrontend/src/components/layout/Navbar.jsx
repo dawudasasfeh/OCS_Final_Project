@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 import ListPropertyLink from "../ListPropertyLink";
+import LanguageToggle from "../LanguageToggle";
 
 const initials = (name = "") =>
   name.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const menuRef = useRef(null);
@@ -44,7 +47,7 @@ export default function Navbar() {
         <button
           type="button"
           className="nav-burger"
-          aria-label={navOpen ? "Close menu" : "Open menu"}
+          aria-label={navOpen ? t("nav.closeMenu") : t("nav.openMenu")}
           aria-expanded={navOpen}
           onClick={() => setNavOpen((v) => !v)}
         >
@@ -52,27 +55,29 @@ export default function Navbar() {
         </button>
 
         <ul className={navOpen ? "nav-links open" : "nav-links"}>
-          <li><NavLink to="/" end className={linkClass}>Home</NavLink></li>
-          <li><NavLink to="/houses" className={linkClass}>Properties</NavLink></li>
-          <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
-          <li><NavLink to="/contact" className={linkClass}>Contact</NavLink></li>
+          <li><NavLink to="/" end className={linkClass}>{t("nav.home")}</NavLink></li>
+          <li><NavLink to="/houses" className={linkClass}>{t("nav.properties")}</NavLink></li>
+          <li><NavLink to="/about" className={linkClass}>{t("nav.about")}</NavLink></li>
+          <li><NavLink to="/contact" className={linkClass}>{t("nav.contact")}</NavLink></li>
         </ul>
 
         {navOpen && (
           <button
             type="button"
             className="nav-backdrop"
-            aria-label="Close menu"
+            aria-label={t("nav.closeMenu")}
             onClick={() => setNavOpen(false)}
           />
         )}
 
-        <Link to="/" className="nav-logo">
-          <span className="nav-logo-mark">Beytak</span>
-          <span className="nav-logo-sub">بيتك</span>
+        <Link to="/" className="nav-logo" aria-label={t("nav.homeAria")}>
+          <div className="nav-logo-badge">
+            <img src="/logo.svg" alt="Baytek" className="logo-svg" />
+          </div>
         </Link>
 
         <div className="nav-actions">
+          <LanguageToggle />
           {/* Shown to guests too — the click is what explains the requirement,
               and sending them to login is more use than hiding the button. */}
           <ListPropertyLink className="btn btn-outline nav-cta" />
@@ -85,7 +90,7 @@ export default function Navbar() {
                 onClick={() => setOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={open}
-                aria-label="Account menu"
+                aria-label={t("nav.accountMenu")}
               >
                 <span className="account-avatar">{initials(user.name)}</span>
                 <span className="account-caret" aria-hidden="true">▾</span>
@@ -104,26 +109,26 @@ export default function Navbar() {
 
                   <div className="account-menu-list">
                     <ListPropertyLink role="menuitem" />
-                    <Link to="/my-listings" role="menuitem">My listings</Link>
-                    <Link to="/subscribe" role="menuitem">Subscription</Link>
-                    <Link to="/my-bookings" role="menuitem">My bookings</Link>
-                    <Link to="/wishlist" role="menuitem">Saved properties</Link>
-                    <Link to="/requests" role="menuitem">Booking requests</Link>
+                    <Link to="/my-listings" role="menuitem">{t("nav.myListings")}</Link>
+                    <Link to="/subscribe" role="menuitem">{t("nav.subscription")}</Link>
+                    <Link to="/my-bookings" role="menuitem">{t("nav.myBookings")}</Link>
+                    <Link to="/wishlist" role="menuitem">{t("nav.wishlist")}</Link>
+                    <Link to="/requests" role="menuitem">{t("nav.bookingRequests")}</Link>
                     {user.role === "Admin" && (
-                      <Link to="/admin" role="menuitem">Admin dashboard</Link>
+                      <Link to="/admin" role="menuitem">{t("nav.adminDashboard")}</Link>
                     )}
                   </div>
 
                   <div className="account-menu-foot">
-                    <button type="button" onClick={logout} role="menuitem">Sign out</button>
+                    <button type="button" onClick={logout} role="menuitem">{t("nav.signOut")}</button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost">Log in</Link>
-              <Link to="/register" className="btn btn-primary">Register</Link>
+              <Link to="/login" className="btn btn-ghost">{t("nav.login")}</Link>
+              <Link to="/register" className="btn btn-primary">{t("nav.register")}</Link>
             </>
           )}
         </div>

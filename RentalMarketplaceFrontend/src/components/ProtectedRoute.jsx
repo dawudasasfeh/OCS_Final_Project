@@ -10,7 +10,10 @@ export default function ProtectedRoute({ children, role, requireSubscription }) 
 
     if (role && user.role !== role) return <Navigate to="/" replace />
 
-    if (requireSubscription) {
+    // Admins are exempt, matching HouseService: the gate collects a fee from
+    // owners, and an admin is not a customer. Without this the server would
+    // accept the listing while the client still refused to show the form.
+    if (requireSubscription && user.role !== "Admin") {
         // The subscription is read from the API, so on a cold load it is not
         // known yet. Redirecting during that window would bounce a paying owner
         // to the paywall on every refresh, so wait for the answer first.

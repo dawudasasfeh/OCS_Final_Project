@@ -4,12 +4,14 @@ import { getWishlist } from "../api/wishlist";
 import { getErrorMessage } from "../api/errors";
 import HouseCard from "../components/HouseCard";
 import { useWishlist } from "../context/WishlistContext";
+import { useTranslation } from "react-i18next";
 
 export default function Wishlist() {
   const [houses, setHouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { ids } = useWishlist();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let cancelled = false;
@@ -19,7 +21,7 @@ export default function Wishlist() {
         const data = await getWishlist();
         if (!cancelled) setHouses(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, "Could not load your wishlist."));
+        if (!cancelled) setError(getErrorMessage(err, t("wishlist.couldNotLoad")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -35,20 +37,19 @@ export default function Wishlist() {
 
   return (
     <div className="container section">
-      <h1 className="page-title">Saved properties</h1>
+      <h1 className="page-title">{t("wishlist.title")}</h1>
       <p className="muted page-sub">
-        Listings you have saved. A property that is rejected or taken off the
-        market drops out of this list.
+        {t("wishlist.sub")}
       </p>
 
       {error && <p className="error-text">{error}</p>}
 
       {loading ? (
-        <p className="muted">Loading your wishlist…</p>
+        <p className="muted">{t("wishlist.loading")}</p>
       ) : visible.length === 0 ? (
         <div className="empty-state">
-          <p>You have not saved any properties yet.</p>
-          <Link to="/houses" className="btn btn-primary">Browse properties</Link>
+          <p>{t("wishlist.empty")}</p>
+          <Link to="/houses" className="btn btn-primary">{t("bookings.browse")}</Link>
         </div>
       ) : (
         <div className="grid-houses">
