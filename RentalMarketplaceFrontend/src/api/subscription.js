@@ -18,3 +18,11 @@ export function grantSubscription(userId) {
 export function revokeSubscription(userId) {
     return client.patch(`/subscription/${userId}/revoke`).then((r) => r.data);
 }
+
+/**
+ * FR-9.1.1 — every registered account with its subscription state. Admin only;
+ * the server returns 403 to anyone else.
+ */
+export function getAdminUsers(){
+    return client.get(`/subscription/users`).then((r) => r.data);
+}

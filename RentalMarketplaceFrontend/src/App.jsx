@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -11,7 +11,11 @@ import MyBookings from "./pages/MyBookings";
 import BookingRequests from "./pages/BookingRequests";
 import MyListings from "./pages/MyListings";
 import CreateListing from "./pages/CreateListing";
-import Admin from "./pages/Admin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminListings from "./pages/admin/AdminListings";
+import AdminTestimonials from "./pages/admin/AdminTestimonials";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminUsers from "./pages/admin/AdminUsers";
 import Wishlist from "./pages/Wishlist";
 import Subscribe from "./pages/Subscribe";
 import NotFound from "./pages/NotFound";
@@ -74,8 +78,17 @@ function App() {
           />
           <Route
             path="/admin"
-            element={<ProtectedRoute role="Admin"><Admin /></ProtectedRoute>}
-          />
+            element={<ProtectedRoute role="Admin"><AdminLayout /></ProtectedRoute>}
+          >
+            {/* Each section has its own URL now, so the payments queue can be
+                bookmarked and the back button works between them — none of
+                which was true when the section was component state. */}
+            <Route index element={<Navigate to="listings" replace />} />
+            <Route path="listings" element={<AdminListings />} />
+            <Route path="testimonials" element={<AdminTestimonials />} />
+            <Route path="subscriptions" element={<AdminPayments />} />
+            <Route path="users" element={<AdminUsers />} />
+          </Route>
 
           {/* Last, and inside Layout so a wrong URL still gets the nav bar to
               escape with. Without this an unmatched path renders nothing at
