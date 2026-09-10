@@ -56,6 +56,13 @@ public class HouseRepository : GenericRepository<House>, IHouseRepository
         return await query.OrderByDescending(h => h.CreatedAt).ToListAsync();
     }
 
+    public async Task<IReadOnlyDictionary<string, int>> CountByOwnerAsync() =>
+        await _dbSet
+            .AsNoTracking()
+            .GroupBy(h => h.OwnerId)
+            .Select(g => new { OwnerId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.OwnerId, x => x.Count);
+
     public async Task<IReadOnlyList<House>> GetByOwnerAsync(string ownerId) =>
         await _dbSet.AsNoTracking()
             .Include(h => h.Images)

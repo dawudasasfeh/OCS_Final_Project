@@ -26,6 +26,15 @@ public class SubscriptionController : ControllerBase
         return result.Succeeded ? Ok(result.Data) : BadRequest(result.Error);
     }
 
+    /// <summary>
+    /// FR-9.1.1 — every account with its subscription state. Admin only: it is
+    /// a directory of who has registered, which is nobody else's business.
+    /// </summary>
+    [HttpGet("users")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Users()
+        => Ok(await _subscriptionService.GetAllForAdminAsync());
+
     [HttpPatch("{userId}/grant")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Grant(string userId)
