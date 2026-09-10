@@ -99,7 +99,8 @@
     "testimonialsSub": "Feedback from renters and owners using Beytak.",
     "noTestimonials": "No testimonials yet.",
     "shareYours": "Share yours",
-    "addTestimonial": "Add a testimonial"
+    "addTestimonial": "Add a testimonial",
+    "showBatch": "Show properties {{n}} of {{total}}"
   },
   "auth": {
     "welcomeBack": "Welcome back",

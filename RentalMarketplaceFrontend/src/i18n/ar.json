@@ -111,7 +111,8 @@
     "testimonialsSub": "تجارب المستأجرين وأصحاب العقارات مع بيتك.",
     "noTestimonials": "لا توجد آراء بعد.",
     "shareYours": "شاركنا رأيك",
-    "addTestimonial": "أضف رأيك"
+    "addTestimonial": "أضف رأيك",
+    "showBatch": "عرض المجموعة {{n}} من {{total}}"
   },
   "auth": {
     "welcomeBack": "أهلًا بعودتك",

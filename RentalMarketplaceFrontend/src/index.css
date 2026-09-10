@@ -2151,6 +2151,54 @@ body:has(.auth-split) .footer { display: none; }
    has to clear the sticky bar. */
 .results-anchor { scroll-margin-top: calc(var(--nav-h) + 14px); }
 .results-page { color: var(--text-light); }
+/* ── Home: the rotating batch ───────────────────────────────────── */
+/* clip, not hidden: hidden on one axis forces the other to auto, which would
+   turn the slide into a scrollbar appearing and vanishing three times a
+   minute. clip has no such side effect. */
+.rotator { position: relative; overflow-x: clip; }
+
+/* Keyed on the batch index in Home.jsx, so React replaces the cards instead of
+   patching them in place — which is what gives the animation something to run
+   on. Without the key the prices would change under a static grid. */
+/* Sideways, in the direction of travel: the batch that is arriving comes in
+   from the side the next batch lives on, so the movement says "forward"
+   rather than "something changed". Faster than the old fade too — at three
+   seconds a batch, a 450ms entrance is a sixth of the time it is on screen. */
+.rotator-slide { animation: rotator-in .38s cubic-bezier(.22, .61, .36, 1) both; }
+@keyframes rotator-in {
+  from { opacity: 0; transform: translateX(36px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Arabic reads the other way, so "the next one" lives on the left and the
+   slide has to come from there. */
+:root.rtl .rotator-slide { animation-name: rotator-in-rtl; }
+@keyframes rotator-in-rtl {
+  from { opacity: 0; transform: translateX(-36px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.rotator-dots { display: flex; justify-content: center; gap: .45rem; margin-top: 1.2rem; }
+/* The button is 34×22 for the thumb; the bar inside it is 4px for the eye. */
+.rotator-dot {
+  width: 34px; height: 22px; padding: 9px 0;
+  border: 0; background: none; cursor: pointer; display: block;
+}
+.rotator-dot-fill {
+  display: block; height: 4px; border-radius: 999px;
+  background: var(--border-strong); transition: background .2s ease;
+}
+.rotator-dot:hover .rotator-dot-fill { background: var(--text-light); }
+.rotator-dot.active .rotator-dot-fill { background: var(--primary); }
+.rotator-dot:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+.rotator-more { text-align: center; margin-top: 1.75rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Home.jsx also refuses to start the timer, so this only covers the one
+     fade that a manual dot press would still produce. */
+  .rotator-slide { animation: none; }
+  .gallery-nav, .pager-btn, .gallery-thumb { transition: none; }
+}
 @media (max-width: 480px) {
   .pager-list { display: none; }
   .pager-compact { display: inline-block; }

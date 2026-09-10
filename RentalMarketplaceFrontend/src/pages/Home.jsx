@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { searchHouses, getCityCounts } from "../api/houses";
 import { getApprovedTestimonials } from "../api/testimonials";
@@ -23,7 +23,18 @@ const DURATIONS = [
   { value: "3", key: "period.yearly" },
 ];
 
+// Four cards on screen, three batches behind them. Twelve is the most the home
+// page can hold without the request becoming its own reason to wait.
+// Three seconds a batch, so the whole set has been past the reader inside ten.
+const PER_BATCH = 4;
+const BATCHES = 3;
+const ROTATE_MS = 3000;
+
 const initials = (name) => name.split(" ").map((w) => w[0]).join("").slice(0, 2);
+
+const chunk = (list, size) =>
+  Array.from({ length: Math.ceil(list.length / size) }, (_, i) =>
+    list.slice(i * size, i * size + size));
 
 export default function Home() {
   const [duration, setDuration] = useState("2");
@@ -41,12 +52,12 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
 
-    searchHouses({ pageSize: 4 })
+    searchHouses({ pageSize: PER_BATCH * BATCHES })
       .then((data) => { if (!cancelled) setLatest(data.items ?? []); })
       .catch(() => { if (!cancelled) setLatest([]); });
 
     // A separate call now that the search is paged: counting cities from the
-    // four listings on screen would report four listings' worth of cities.
+    // twelve listings on screen would report twelve listings' worth of cities.
     getCityCounts()
       .then((counts) => { if (!cancelled) setCityCounts(counts); })
       .catch(() => {});
@@ -57,6 +68,66 @@ export default function Home() {
 
     return () => { cancelled = true; };
   }, []);
+
+  // ── The rotating batch ────────────────────────────────────────────
+  const batches = useMemo(() => chunk(latest, PER_BATCH), [latest]);
+  const [batch, setBatch] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [taken, setTaken] = useState(false);   // reader picked a batch by hand
+  const [hidden, setHidden] = useState(false);
+
+  // Someone with vestibular sensitivity has asked the operating system not to
+  // move things at them. Four property cards sliding past every three seconds
+  // is exactly that, so the rotation simply does not start — the dots
+  // still work, and nothing else about the section changes.
+  const [still, setStill] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setStill(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // A background tab should not be cycling. Browsers throttle the timer rather
+  // than stop it, so without this the reader returns to a section that has
+  // silently moved on while they were elsewhere.
+  useEffect(() => {
+    const sync = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
+  const paused = hovering || taken || hidden || still;
+
+  useEffect(() => {
+    if (paused || batches.length <= 1) return;
+    const id = setInterval(
+      () => setBatch((b) => (b + 1) % batches.length),
+      ROTATE_MS
+    );
+    return () => clearInterval(id);
+  }, [paused, batches.length]);
+
+  // The list can shrink under the index — a listing delisted between two
+  // visits is enough — and an index past the end renders nothing at all.
+  useEffect(() => {
+    if (batch >= batches.length) setBatch(0);
+  }, [batch, batches.length]);
+
+  // Focus is a pause too, not just the pointer: someone tabbing through the
+  // cards must not have the card under their cursor swapped mid-reach.
+  const holdRef = useRef(null);
+
+  function show(i) {
+    setBatch(i);
+    // Choosing a batch ends the rotation for this visit. Being moved off the
+    // thing you just asked to see, three seconds later, is worse than a section
+    // that has stopped.
+    setTaken(true);
+  }
+
+  const shown = batches[batch] ?? [];
 
   function handleSearch(e) {
     e.preventDefault();
@@ -124,7 +195,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2 ── Latest listings ──────────────────────────────────── */}
+      {/* 2 ── Latest listings, four at a time ──────────────────── */}
       <section className="section">
         <div className="container">
           <div className="section-head">
@@ -135,12 +206,43 @@ export default function Home() {
           {latest.length === 0 ? (
             <p className="muted">{t("home.noneYet")}</p>
           ) : (
-            <div className="grid-houses">
-              {latest.map((h) => <HouseCard key={h.id} house={h} />)}
+            <div
+              className="rotator"
+              ref={holdRef}
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+              onFocusCapture={() => setHovering(true)}
+              onBlurCapture={(e) => {
+                if (!holdRef.current?.contains(e.relatedTarget)) setHovering(false);
+              }}
+            >
+              {/* Keyed on the batch so React replaces the cards rather than
+                  patching them, which is what lets the fade run at all. */}
+              <div className="grid-houses rotator-slide" key={batch}>
+                {shown.map((h) => <HouseCard key={h.id} house={h} />)}
+              </div>
+
+              {batches.length > 1 && (
+                <div className="rotator-dots" role="tablist" aria-label={t("home.latestTitle")}>
+                  {batches.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === batch}
+                      className={i === batch ? "rotator-dot active" : "rotator-dot"}
+                      onClick={() => show(i)}
+                      aria-label={t("home.showBatch", { n: i + 1, total: batches.length })}
+                    >
+                      <span className="rotator-dot-fill" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          <div style={{ textAlign: "center", marginTop: "1.75rem" }}>
+          <div className="rotator-more">
             <Link to="/houses" className="btn btn-outline">{t("home.browseAll")}</Link>
           </div>
         </div>
