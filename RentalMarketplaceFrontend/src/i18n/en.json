@@ -44,7 +44,8 @@
     "adminDashboard": "Admin dashboard",
     "signOut": "Sign out",
     "loginToList": "Log in to list a property.",
-    "subscriptionNeeded": "Listing a property needs an active subscription."
+    "subscriptionNeeded": "Listing a property needs an active subscription.",
+    "adminCannotList": "Administrators do not publish listings."
   },
   "footer": {
     "blurb": "Rent apartments, villas and studios across Jordan — by the week, the month or the year.",
@@ -334,7 +335,10 @@
     "couldNotUpdate": "Could not save your changes.",
     "saveChanges": "Save changes",
     "saving": "Saving…",
-    "edit": "Edit"
+    "edit": "Edit",
+    "makeMain": "Make main",
+    "remove": "Remove",
+    "primaryHint": "The first photo is used on search results and booking cards."
   },
   "myListings": {
     "title": "My listings",

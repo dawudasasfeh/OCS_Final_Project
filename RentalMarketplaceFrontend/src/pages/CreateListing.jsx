@@ -498,18 +498,18 @@ export default function CreateListing() {
                     <div className="upload-item-actions">
                       {i !== 0 && (
                         <button type="button" onClick={() => makePrimary(p.preview)}>
-                          Make main
+                          {t("listing.makeMain")}
                         </button>
                       )}
                       <button type="button" onClick={() => removePhoto(p.preview)}>
-                        Remove
+                        {t("listing.remove")}
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
               <p className="field-hint">
-                The first photo is used on search results and booking cards.
+                {t("listing.primaryHint")}
                 Photos upload when you publish.
               </p>
             </>
