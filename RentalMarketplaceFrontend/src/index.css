@@ -1007,38 +1007,100 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .breadcrumb .sep { color: var(--text-light); }
 .breadcrumb .current { color: var(--text); font-weight: 500; }
 
-/* align-items: start stops the grid stretching .gallery-main to the row
-   height, which would otherwise override its max-height. */
-.gallery { display: grid; grid-template-columns: 92px 1fr; gap: .6rem; margin: 1.25rem 0; align-items: start; }
-/* Capped to the main image beside it, not 20px past it, so the two columns end
-   on the same line. overscroll-behavior stops the page taking over once the
-   rail reaches its end. */
-.gallery-thumbs {
-  display: flex; flex-direction: column; gap: .6rem;
-  max-height: 400px; overflow-y: auto; overscroll-behavior: contain;
-  scrollbar-width: thin;
+/* The photograph gets the width, the thumbnails get a strip.
+   It was a 92px rail beside a 400px pane, which spent a whole column of the
+   layout on six thumbnails — and the photograph is the thing people came for.
+   One layout at every width now, which also means the arrows sit in the same
+   place on a phone as on a desktop. */
+.gallery { margin: 1.25rem 0; }
+
+/* clamp, not a fixed 400: at 375px a fixed height is most of the screen, and
+   at 1440 it is a letterbox. The middle term ties it to the viewport so the
+   photograph keeps a sane shape between the two. */
+.gallery-stage {
+  position: relative;
+  height: clamp(240px, 46vw, 480px);
+  border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--surface-alt);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-light);
 }
+.gallery-stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-empty { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; }
+
+/* Over the photograph rather than beside it: a photograph that fills its frame
+   has no margin to put a button in, and buttons underneath put the reader's
+   eye somewhere other than the thing they are paging through.
+
+   Dark and translucent so they read against a bright sky and a dark room
+   alike — a white circle disappears into the first, a grey one into the second.
+   translate rather than transform for the centring, so the hover nudge has
+   transform to itself and the two cannot overwrite each other. */
+.gallery-nav {
+  position: absolute; top: 50%; translate: 0 -50%;
+  width: 44px; height: 44px; padding: 0;
+  border: 1px solid rgba(255, 255, 255, .5); border-radius: 50%;
+  background: rgba(17, 20, 24, .42);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: #fff; cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .18s ease, transform .18s ease, border-color .18s ease;
+}
+.gallery-nav:hover { background: rgba(17, 20, 24, .74); border-color: rgba(255, 255, 255, .8); }
+.gallery-nav:active { transform: scale(.94); }
+.gallery-nav:focus-visible {
+  outline: 2px solid #fff; outline-offset: 2px; background: rgba(17, 20, 24, .8);
+}
+/* Logical, not left/right: in Arabic the whole gallery reverses, and an arrow
+   pinned to the left edge would be the one meaning "forward". */
+.gallery-nav.prev { inset-inline-start: 12px; }
+.gallery-nav.next { inset-inline-end: 12px; }
+/* One chevron drawn once, pointed by the stylesheet. */
+.gallery-nav.prev svg { transform: scaleX(-1); }
+
+.gallery-counter {
+  position: absolute; inset-inline-end: 12px; bottom: 12px;
+  padding: .3rem .6rem; border-radius: 999px;
+  background: rgba(17, 20, 24, .62); color: #fff;
+  font-size: var(--fs-2xs); letter-spacing: .05em;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+
+/* Above the stage, not below it: the strip is the index and the photograph
+   is the page. Reading order matches, so tabbing reaches the thumbnails
+   before the arrows rather than doubling back up the page. */
+.gallery-strip {
+  display: flex; gap: .55rem; margin-bottom: .55rem; padding-bottom: .3rem;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: thin; scroll-snap-type: x proximity;
+  /* Two declarations, and the first is not dead code. Plain center on a
+     scroll container is a trap: once the thumbnails are wider than the strip,
+     centring pushes the first of them past the scroll origin, where nothing
+     can reach them — you can scroll right, never back left. safe center
+     centres only while everything fits and falls back to start the moment it
+     does not. A browser without safe alignment throws the second line away
+     and keeps the first, which is the behaviour we want anyway. */
+  justify-content: flex-start;
+  justify-content: safe center;
+}
+/* flex: none is what makes the strip scroll. Without it these are flex items
+   with the default shrink of 1, so seven thumbnails squeeze themselves into
+   the row instead of overflowing it — no scrollbar, and the 4:3 ratio quietly
+   crushed. */
 .gallery-thumb {
-  /* flex: none is what makes the rail scroll. Without it these are flex items
-     with the default shrink of 1, so seven thumbnails squeezed themselves into
-     the 420px column instead of overflowing it — no scrollbar, and the 4:3
-     ratio quietly crushed. */
-  flex: none;
-  aspect-ratio: 4/3; border: 2px solid transparent; border-radius: var(--radius);
+  flex: none; width: 96px; aspect-ratio: 4/3; padding: 0;
+  border: 2px solid transparent; border-radius: var(--radius);
   background: var(--surface-alt); cursor: pointer; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   font-size: .6rem; color: var(--text-light); letter-spacing: .1em;
+  scroll-snap-align: center;
+  opacity: .65; transition: opacity .18s ease, border-color .18s ease;
 }
-.gallery-thumb.active { border-color: var(--primary); }
+.gallery-thumb:hover { opacity: 1; }
+.gallery-thumb.active { border-color: var(--primary); opacity: 1; }
+.gallery-thumb:focus-visible { outline: none; box-shadow: var(--focus-ring); opacity: 1; }
 .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-.gallery-main {
-  height: 400px; border-radius: var(--radius-lg); overflow: hidden;
-  background: var(--surface-alt);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-light); font-size: .8rem; letter-spacing: .18em;
-}
-.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
 
 .detail-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: start; }
 
@@ -1579,9 +1641,13 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .cal { max-width: 340px; }
 }
 @media (max-width: 640px) {
-  .gallery { grid-template-columns: 1fr; }
-  .gallery-thumbs { flex-direction: row; max-height: none; overflow-x: auto; }
-  .gallery-thumb { width: 84px; flex: none; }
+  /* Smaller circles and a tighter inset, so two 44px buttons do not take a
+     third of a 375px photograph between them. Still 40px, which is the floor
+     for something meant to be tapped. */
+  .gallery-nav { width: 40px; height: 40px; }
+  .gallery-nav.prev { inset-inline-start: 8px; }
+  .gallery-nav.next { inset-inline-end: 8px; }
+  .gallery-thumb { width: 76px; }
   .detail-table { columns: 1; }
 }
 
@@ -2103,6 +2169,7 @@ body:has(.auth-split) .footer { display: none; }
   }
   .admin-side-link.active { border-bottom-color: var(--primary); }
 }
+
 /* ── Pagination ─────────────────────────────────────────────────── */
 /* One control for the site, whether the pages come from the database or from
    a slice in the browser. It renders nothing at all when there is one page —
@@ -2151,6 +2218,7 @@ body:has(.auth-split) .footer { display: none; }
    has to clear the sticky bar. */
 .results-anchor { scroll-margin-top: calc(var(--nav-h) + 14px); }
 .results-page { color: var(--text-light); }
+
 /* ── Home: the rotating batch ───────────────────────────────────── */
 /* clip, not hidden: hidden on one axis forces the other to auto, which would
    turn the slide into a scrollbar appearing and vanishing three times a
@@ -2199,14 +2267,23 @@ body:has(.auth-split) .footer { display: none; }
   .rotator-slide { animation: none; }
   .gallery-nav, .pager-btn, .gallery-thumb { transition: none; }
 }
+
 @media (max-width: 480px) {
   .pager-list { display: none; }
   .pager-compact { display: inline-block; }
   .pager-step { padding: 0 .7rem; }
 }
+
 /* ── Right-to-left ──────────────────────────────────────────────── */
 /* Every chevron on the site is the same path pointing right, turned by the
    stylesheet. In Arabic "next" points left, so the whole set flips — and the
    ones already flipped for "back" flip themselves upright again. */
 :root.rtl .pager-chevron { transform: scaleX(-1); }
 :root.rtl .pager-chevron.back { transform: none; }
+:root.rtl .gallery-nav svg { transform: scaleX(-1); }
+:root.rtl .gallery-nav.prev svg { transform: none; }
+/* The counter carries .ltr so "1 / 6" keeps Latin digits and reads left to
+   right in both languages. That also makes its own inline-end resolve to the
+   right edge, so the position has to be mirrored back by hand — the text
+   direction and the corner it sits in are two different questions. */
+:root.rtl .gallery-counter { inset-inline-end: auto; inset-inline-start: 12px; }

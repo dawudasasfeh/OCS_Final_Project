@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getHouse } from "../api/houses";
 import { imageUrl } from "../utils/images";
@@ -22,7 +22,7 @@ const reference = (id) => `BYT${String(id).padStart(6, "0")}`;
 const formatDate = (iso) => formatDay(String(iso).slice(0, 10));
 
 export default function HouseDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -31,6 +31,7 @@ export default function HouseDetail() {
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState(0);
   const [broken, setBroken] = useState(() => new Set());
+  const stripRef = useRef(null);
   const [booking, setBooking] = useState(false);
 
   const markBroken = (i) => setBroken((prev) => new Set(prev).add(i));
@@ -85,6 +86,37 @@ export default function HouseDetail() {
 
   const images = house.imageUrls ?? [];
   const isOwner = user?.id === house.ownerId;
+
+  // ── Gallery navigation ──────────────────────────────────────────
+  // Wraps at both ends. A gallery of five photographs is a loop, not a list
+  // with a wall at each end, and a disabled arrow on the last photo just asks
+  // the reader to travel back through all five.
+  const rtl = i18n.dir() === "rtl";
+
+  function showImage(i) {
+    setActiveImage(i);
+    // block: nearest keeps the page still — scrollIntoView on a thumbnail
+    // will happily drag the whole document up to centre it otherwise.
+    stripRef.current?.children[i]?.scrollIntoView({
+      behavior: "smooth", block: "nearest", inline: "center",
+    });
+  }
+
+  const step = (delta) => {
+    if (images.length < 2) return;
+    showImage((activeImage + delta + images.length) % images.length);
+  };
+
+  // Arrow keys, but only while the focus is inside the gallery: binding them
+  // to the window would take the arrow keys away from scrolling the page.
+  // In Arabic the right arrow means back, because that is the direction the
+  // photographs are laid out in.
+  function onGalleryKey(e) {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    e.preventDefault();
+    const forward = e.key === "ArrowRight" ? !rtl : rtl;
+    step(forward ? 1 : -1);
+  }
 
   // The API decides what this string is: a guest receives 079048XXXX,
   // a signed-in caller receives the whole number. Nothing is masked here.
@@ -141,32 +173,84 @@ export default function HouseDetail() {
           <span className="current">{house.title}</span>
         </nav>
 
-        <div className="gallery">
-          <div className="gallery-thumbs">
-            {images.length === 0 && <div className="gallery-thumb">{t("house.noImage")}</div>}
-            {images.map((url, i) => (
-              <button
-                key={url + i}
-                type="button"
-                className={i === activeImage ? "gallery-thumb active" : "gallery-thumb"}
-                onClick={() => setActiveImage(i)}
-                aria-label={t("house.showImage", { n: i + 1 })}
-              >
-                {broken.has(i)
-                  ? <span>{i + 1}</span>
-                  : <img src={imageUrl(url)} alt="" onError={() => markBroken(i)} />}
-              </button>
-            ))}
-          </div>
+        {/* The stage carries the photograph and the strip under it carries the
+            choice. It used to be a vertical rail beside a 400px pane, which
+            gave the rail a whole column of the layout to show six thumbnails
+            in — the photograph is the thing people came for, so it now takes
+            the width and the thumbnails take a strip.
 
-          <div className="gallery-main">
+            onKeyDown sits on the wrapper rather than on each button so that a
+            key pressed on a thumbnail, an arrow, or anywhere else inside the
+            gallery reaches the same handler once, by bubbling. */}
+        <div className="gallery" onKeyDown={onGalleryKey}>
+          {images.length > 1 && (
+            <div className="gallery-strip" ref={stripRef}>
+              {images.map((url, i) => (
+                <button
+                  key={url + i}
+                  type="button"
+                  className={i === activeImage ? "gallery-thumb active" : "gallery-thumb"}
+                  onClick={() => showImage(i)}
+                  aria-label={t("house.showImage", { n: i + 1 })}
+                  aria-current={i === activeImage ? "true" : undefined}
+                >
+                  {broken.has(i)
+                    ? <span>{i + 1}</span>
+                    : <img src={imageUrl(url)} alt="" onError={() => markBroken(i)} />}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="gallery-stage">
             {images.length === 0 || broken.has(activeImage) ? (
-              t("house.photoUnavailable")
+              <span className="gallery-empty">
+                {images.length === 0 ? t("house.noImage") : t("house.photoUnavailable")}
+              </span>
             ) : (
-              <img src={imageUrl(images[activeImage])} alt={house.title}
-                   onError={() => markBroken(activeImage)} />
+              <img
+                src={imageUrl(images[activeImage])}
+                alt={t("house.imageOf", { n: activeImage + 1, total: images.length, title: house.title })}
+                onError={() => markBroken(activeImage)}
+              />
+            )}
+
+            {/* Nothing to page through with one photograph, and two arrows
+                that do nothing are worse than no arrows. */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button" className="gallery-nav prev"
+                  onClick={() => step(-1)}
+                  aria-label={t("house.previousImage")}
+                >
+                  <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
+                    <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor"
+                          strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                <button
+                  type="button" className="gallery-nav next"
+                  onClick={() => step(1)}
+                  aria-label={t("house.nextImage")}
+                >
+                  <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
+                    <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor"
+                          strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {/* Latin digits in both languages, like every other number on
+                    the site. The strip below can be scrolled out of view; this
+                    is the only thing that says how much is left. */}
+                <span className="gallery-counter ltr">
+                  {activeImage + 1} / {images.length}
+                </span>
+              </>
             )}
           </div>
+
         </div>
       </div>
 
@@ -314,7 +398,7 @@ export default function HouseDetail() {
                           onClick={() => setBooking(true)}
                           disabled={!house.isAvailable}
                         >
-                          Book now
+                          {t("house.bookNow")}
                         </button>
                       )
                     ) : (
@@ -322,7 +406,7 @@ export default function HouseDetail() {
                         to={`/login?returnTo=/houses/${house.id}`}
                         className="btn btn-outline phone-btn"
                       >
-                        Book now
+                        {t("house.bookNow")}
                       </Link>
                     )}
                 </div>

@@ -281,7 +281,11 @@
     "beforeYouRent": "Before you rent",
     "tipVisit": "Visit the property in person before paying anything.",
     "tipNoTransfer": "Do not transfer money before seeing the place.",
-    "tipDeposits": "Deposits are arranged directly with the owner."
+    "tipDeposits": "Deposits are arranged directly with the owner.",
+    "previousImage": "Previous photo",
+    "nextImage": "Next photo",
+    "imageOf": "{{title}} — photo {{n}} of {{total}}",
+    "bookNow": "Book now"
   },
   "listing": {
     "title": "List a property",
