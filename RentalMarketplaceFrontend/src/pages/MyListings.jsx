@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { formatDay } from "../utils/date";
 import { imageUrl } from "../utils/images";
 import ListPropertyLink from "../components/ListPropertyLink";
+import Pagination, { usePaged } from "../components/Pagination";
 import { useToast } from "../context/ToastContext";
 
 const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
@@ -120,6 +121,11 @@ export default function MyListings() {
 
   const live = houses.filter((h) => h.status === "Approved").length;
 
+  // Counted from every listing, not the page. "3 of 9 live" has to mean
+  // nine listings, or the owner of a page-two listing is told it does not
+  // exist.
+  const paged = usePaged(houses, 6);
+
   return (
     <div className="container section">
       <div className="page-bar">
@@ -145,7 +151,7 @@ export default function MyListings() {
         </div>
       ) : (
         <div className="booking-list">
-          {houses.map((h) => (
+          {paged.items.map((h) => (
             <ListingCard
               key={h.id}
               house={h}
@@ -156,6 +162,13 @@ export default function MyListings() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={paged.page}
+        totalPages={paged.totalPages}
+        onChange={paged.setPage}
+        label={t("myListings.title")}
+      />
     </div>
   );
 }

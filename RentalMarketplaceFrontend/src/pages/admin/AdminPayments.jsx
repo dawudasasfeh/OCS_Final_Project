@@ -21,7 +21,15 @@ export default function AdminPayments() {
   const queue = useQueue(getPendingPayments, refreshCounts);
 
   return (
-    <QueueSection queue={queue} empty={t("admin.noPayments")} layout="table">
+    <QueueSection
+      queue={queue}
+      empty={t("admin.noPayments")}
+      label={t("admin.tabPayments")}
+      layout="table"
+      /* Confirming does two things at once, and an admin should know that
+         before clicking rather than discover it afterwards. */
+      note={t("admin.confirmingGrantsAny")}
+    >
       <table className="admin-table">
         <thead>
           <tr>
@@ -33,7 +41,7 @@ export default function AdminPayments() {
           </tr>
         </thead>
         <tbody>
-          {queue.items.map((p) => (
+          {queue.paged.items.map((p) => (
             <tr key={p.id}>
               <td>
                 <span className="admin-table-strong">{p.payerName}</span>
@@ -66,10 +74,6 @@ export default function AdminPayments() {
           ))}
         </tbody>
       </table>
-
-      {/* Confirming does two things at once, and an admin should know that
-          before clicking rather than discover it afterwards. */}
-      <p className="field-hint admin-note">{t("admin.confirmingGrantsAny")}</p>
     </QueueSection>
   );
 }

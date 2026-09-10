@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
+import Pagination, { usePaged } from "../components/Pagination";
 
 export default function MyBookings() {
   const { t } = useTranslation();
@@ -49,6 +50,12 @@ export default function MyBookings() {
     }
   }
 
+  // Six per page. A booking card is tall — dates, price, payment state and
+  // sometimes a payment form — so six is already a long scroll, and a renter
+  // with two years of history should not have to load all of it to reach the
+  // one they are looking for.
+  const paged = usePaged(bookings, 6);
+
   return (
     <div className="container section">
       <h1 className="page-title">{t("bookings.title")}</h1>
@@ -68,7 +75,7 @@ export default function MyBookings() {
         </div>
       ) : (
         <div className="booking-list">
-          {bookings.map((b) => (
+          {paged.items.map((b) => (
             <BookingCard key={b.id} booking={b} side="renter">
               {b.status === "Confirmed" && <BookingPayments booking={b} side="renter" />}
               {b.status === "Pending" && (
@@ -87,6 +94,13 @@ export default function MyBookings() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={paged.page}
+        totalPages={paged.totalPages}
+        onChange={paged.setPage}
+        label={t("bookings.title")}
+      />
     </div>
   );
 }

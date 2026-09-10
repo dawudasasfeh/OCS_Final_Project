@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { searchHouses } from "../api/houses";
+import { searchHouses, getCityCounts } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import HouseCard from "../components/HouseCard";
 import FilterSelect from "../components/FilterSelect";
 import Autocomplete from "../components/Autocomplete";
+import Pagination from "../components/Pagination";
 import { cityOptions } from "../utils/cities";
 import { useTranslation } from "react-i18next";
 
@@ -29,6 +30,10 @@ const FURNISHING_KEYS = [
   { value: "false", key: "houses.unfurnished" },
 ];
 
+// Values match the HouseSort enum the API binds by name. Sorting is the
+// server's job now: with twelve listings on screen out of ninety, ordering only
+// what arrived would mean "cheapest of the newest twelve" — not what anyone
+// reading "price: low to high" is asking for.
 const SORT_KEYS = [
   { value: "newest", key: "houses.newestFirst" },
   { value: "priceAsc", key: "houses.priceLowHigh" },
@@ -36,23 +41,19 @@ const SORT_KEYS = [
   { value: "areaDesc", key: "houses.sortAreaLargest" },
 ];
 
-const resolve = (t, list) => list.map((o) => ({ value: o.value, label: t(o.key) }));
+const PAGE_SIZE = 12;
 
-// A weekly 175 and a yearly 35,000 cannot be compared as raw numbers, so price
-// sorting normalises everything to a monthly figure first.
-const MONTHLY = { Weekly: 4.345, Monthly: 1, Yearly: 1 / 12 };
-const monthlyPrice = (h) => h.price * (MONTHLY[h.priceUnit] ?? 1);
+const resolve = (t, list) => list.map((o) => ({ value: o.value, label: t(o.key) }));
 
 const labelOf = (list, value) => list.find((o) => o.value === value)?.label ?? value;
 
 export default function Houses() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [houses, setHouses] = useState([]);
+  const [page, setPage] = useState({ items: [], totalCount: 0, totalPages: 0, page: 1 });
   const [cityCounts, setCityCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [sort, setSort] = useState("newest");
   const { t } = useTranslation();
 
   // Rebuilt when the language changes, so an open filter bar relabels in place
@@ -69,13 +70,30 @@ export default function Houses() {
 
   // The URL is the only source of truth. Nothing is mirrored into component
   // state, so a footer link, the back button and the bar cannot disagree.
+  // The page number lives here too, which is what makes a result shareable:
+  // sending someone page 3 of a search now sends them page 3.
   const get = (k) => searchParams.get(k) ?? "";
+  const currentPage = Math.max(1, Number(get("page")) || 1);
+  const sort = get("sort") || "newest";
 
+  // Every filter change resets to page 1. Narrowing a search from ninety
+  // matches to four while sitting on page 6 would otherwise land on an empty
+  // page, which reads as "nothing found" when four things were found.
   function setFilter(key, value) {
     const next = new URLSearchParams(searchParams);
     if (value === "" || value == null) next.delete(key);
     else next.set(key, value);
+    next.delete("page");
     setSearchParams(next, { replace: true });
+  }
+
+  function goToPage(n) {
+    const next = new URLSearchParams(searchParams);
+    if (n <= 1) next.delete("page");
+    else next.set("page", String(n));
+    // A real navigation, not replace: paging is a step the reader took, and the
+    // back button should undo it.
+    setSearchParams(next);
   }
 
   // Only the price boxes need debouncing. City is typed too, but it commits a
@@ -97,6 +115,7 @@ export default function Houses() {
       const next = new URLSearchParams(searchParams);
       draft.min ? next.set("minPrice", draft.min) : next.delete("minPrice");
       draft.max ? next.set("maxPrice", draft.max) : next.delete("maxPrice");
+      next.delete("page");
       setSearchParams(next, { replace: true });
     }, 400);
     return () => clearTimeout(id);
@@ -108,15 +127,19 @@ export default function Houses() {
     setDraft((d) => ({ ...d, [which]: value }));
   }
 
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       setError("");
       try {
-        const data = await searchHouses(Object.fromEntries(searchParams));
-        if (!cancelled) setHouses(data);
+        const data = await searchHouses({
+          ...Object.fromEntries(searchParams),
+          page: currentPage,
+          pageSize: PAGE_SIZE,
+          sort,
+        });
+        if (!cancelled) setPage(data);
       } catch (err) {
         if (!cancelled) setError(getErrorMessage(err, t("houses.couldNotLoad")));
       } finally {
@@ -124,32 +147,33 @@ export default function Houses() {
       }
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Counts come from the data so the suggestions can say which cities actually
-  // have something, without hiding the ones that do not.
+  // Counts say which cities actually have something, without hiding the ones
+  // that do not. They come from their own endpoint now — they used to be
+  // tallied from a full download of every listing, which is precisely what the
+  // paged search stopped sending.
   useEffect(() => {
     let cancelled = false;
-    searchHouses({})
-      .then((all) => {
-        if (cancelled) return;
-        const counts = {};
-        for (const h of all) if (h.city) counts[h.city] = (counts[h.city] ?? 0) + 1;
-        setCityCounts(counts);
-      })
+    getCityCounts()
+      .then((counts) => { if (!cancelled) setCityCounts(counts); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
-  const sorted = useMemo(() => {
-    const list = [...houses];
-    switch (sort) {
-      case "priceAsc": return list.sort((a, b) => monthlyPrice(a) - monthlyPrice(b));
-      case "priceDesc": return list.sort((a, b) => monthlyPrice(b) - monthlyPrice(a));
-      case "areaDesc": return list.sort((a, b) => (b.areaSqM ?? 0) - (a.areaSqM ?? 0));
-      default: return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Paging moves the reader to the top of the results, not the top of the
+  // document: the filter bar is a screenful they have already read, and landing
+  // under it is landing on the first new card. Deliberately skipped on the
+  // first render and on filter changes, which are not paging.
+  const resultsRef = useRef(null);
+  const lastPage = useRef(currentPage);
+  useEffect(() => {
+    if (lastPage.current !== currentPage) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      lastPage.current = currentPage;
     }
-  }, [houses, sort]);
+  }, [currentPage]);
 
   const chips = [];
   if (get("city")) chips.push({ key: "city", label: t(`city.${get("city")}`, { defaultValue: get("city") }) });
@@ -161,6 +185,9 @@ export default function Houses() {
   if (get("isFurnished")) chips.push({ key: "isFurnished", label: labelOf(FURNISHING, get("isFurnished")) });
 
   const clearAll = () => setSearchParams({});
+
+  const houses = page.items ?? [];
+  const total = page.totalCount ?? 0;
 
   return (
     <>
@@ -243,21 +270,29 @@ export default function Houses() {
             />
           </div>
 
-          <div>
+          <div ref={resultsRef} className="results-anchor">
             {error && <p className="error-text">{error}</p>}
 
             <div className="results-head">
+              {/* The count is of everything that matched, not of what is on
+                  screen. "12 properties found" under a search with ninety
+                  matches would be a lie the pager immediately contradicts. */}
               <p className="results-count">
-                {loading ? t("houses.searching") : t("common.results", { count: houses.length })}
+                {loading ? t("houses.searching") : t("common.results", { count: total })}
+                {!loading && page.totalPages > 1 && (
+                  <span className="results-page">
+                    {" · "}{t("pager.pageOf", { page: page.page, total: page.totalPages })}
+                  </span>
+                )}
               </p>
 
-              {houses.length > 1 && (
+              {total > 1 && (
                 <div className="results-sort">
                   <FilterSelect
                     id="f-sort" label={t("houses.sort")} placeholder={t("houses.newestFirst")}
                     options={SORTS.filter((o) => o.value !== "newest")}
                     value={sort === "newest" ? "" : sort}
-                    onChange={(v) => setSort(v || "newest")}
+                    onChange={(v) => setFilter("sort", v || "")}
                   />
                 </div>
               )}
@@ -285,9 +320,18 @@ export default function Houses() {
                   </button>
                 </div>
               ) : (
-                <div className="grid-houses">
-                  {sorted.map((h) => <HouseCard key={h.id} house={h} />)}
-                </div>
+                <>
+                  <div className="grid-houses">
+                    {houses.map((h) => <HouseCard key={h.id} house={h} />)}
+                  </div>
+
+                  <Pagination
+                    page={page.page}
+                    totalPages={page.totalPages}
+                    onChange={goToPage}
+                    label={t("houses.title")}
+                  />
+                </>
               )
             )}
           </div>

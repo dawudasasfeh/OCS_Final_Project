@@ -2103,3 +2103,62 @@ body:has(.auth-split) .footer { display: none; }
   }
   .admin-side-link.active { border-bottom-color: var(--primary); }
 }
+/* ── Pagination ─────────────────────────────────────────────────── */
+/* One control for the site, whether the pages come from the database or from
+   a slice in the browser. It renders nothing at all when there is one page —
+   a row of buttons that are all disabled is furniture, not information. */
+.pager {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: .35rem;
+  margin-top: 1.9rem;
+}
+.pager-list { display: flex; gap: .25rem; margin: 0; padding: 0; list-style: none; }
+
+.pager-btn {
+  min-width: 38px; height: 38px; padding: 0 .55rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.pager-btn:hover:not(:disabled) { background: var(--surface-alt); border-color: var(--border-strong); }
+.pager-btn:disabled { opacity: .42; cursor: not-allowed; }
+.pager-btn:focus-visible { outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); }
+
+.pager-num.active {
+  background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600;
+}
+.pager-num.active:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+
+.pager-gap {
+  display: inline-flex; align-items: flex-end; justify-content: center;
+  min-width: 22px; padding-bottom: .35rem; color: var(--text-light);
+}
+.pager-chevron { flex: none; }
+.pager-chevron.back { transform: scaleX(-1); }
+
+/* "3 / 9" replaces the numbers on a phone. Nine tap targets do not fit across
+   320px without each becoming too small to hit reliably. */
+.pager-compact {
+  display: none; min-width: 4.5rem; text-align: center;
+  font-size: var(--fs-sm); color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Paging scrolls here rather than to the top of the document, so the offset
+   has to clear the sticky bar. */
+.results-anchor { scroll-margin-top: calc(var(--nav-h) + 14px); }
+.results-page { color: var(--text-light); }
+@media (max-width: 480px) {
+  .pager-list { display: none; }
+  .pager-compact { display: inline-block; }
+  .pager-step { padding: 0 .7rem; }
+}
+/* ── Right-to-left ──────────────────────────────────────────────── */
+/* Every chevron on the site is the same path pointing right, turned by the
+   stylesheet. In Arabic "next" points left, so the whole set flips — and the
+   ones already flipped for "back" flip themselves upright again. */
+:root.rtl .pager-chevron { transform: scaleX(-1); }
+:root.rtl .pager-chevron.back { transform: none; }

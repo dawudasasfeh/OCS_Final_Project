@@ -20,8 +20,8 @@ export default function AdminListings() {
   const queue = useQueue(getPendingHouses, refreshCounts);
 
   return (
-    <QueueSection queue={queue} empty={t("admin.noListings")}>
-      {queue.items.map((h) => (
+    <QueueSection queue={queue} empty={t("admin.noListings")} label={t("admin.tabListings")}>
+      {queue.paged.items.map((h) => (
         <article className="listing-card" key={h.id}>
           <Link to={`/houses/${h.id}`} className="booking-thumb">
             {h.imageUrls?.[0]

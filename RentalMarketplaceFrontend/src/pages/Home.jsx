@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { searchHouses } from "../api/houses";
+import { searchHouses, getCityCounts } from "../api/houses";
 import { getApprovedTestimonials } from "../api/testimonials";
 import { formatDay } from "../utils/date";
 import HouseCard from "../components/HouseCard";
@@ -41,17 +41,15 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
 
-    searchHouses()
-      .then((data) => {
-        if (cancelled) return;
-        setLatest(data.slice(0, 4));
-        // Counts come off the same response the Latest section already needs,
-        // so the suggestions cost no extra request.
-        const counts = {};
-        for (const h of data) if (h.city) counts[h.city] = (counts[h.city] ?? 0) + 1;
-        setCityCounts(counts);
-      })
+    searchHouses({ pageSize: 4 })
+      .then((data) => { if (!cancelled) setLatest(data.items ?? []); })
       .catch(() => { if (!cancelled) setLatest([]); });
+
+    // A separate call now that the search is paged: counting cities from the
+    // four listings on screen would report four listings' worth of cities.
+    getCityCounts()
+      .then((counts) => { if (!cancelled) setCityCounts(counts); })
+      .catch(() => {});
 
     getApprovedTestimonials()
       .then((data) => { if (!cancelled) setTestimonials(data.slice(0, 3)); })

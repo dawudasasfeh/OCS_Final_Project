@@ -4,6 +4,7 @@ import { getAdminUsers, grantSubscription, revokeSubscription } from "../../api/
 import { getErrorMessage } from "../../api/errors";
 import { formatDay } from "../../utils/date";
 import { useToast } from "../../context/ToastContext";
+import Pagination, { usePaged } from "../../components/Pagination";
 
 /**
  * FR-9.1.1 — every registered account with its subscription state.
@@ -66,6 +67,12 @@ export default function AdminUsers() {
 
   const state = (u) => (u.isActive ? "active" : u.expiresAt ? "lapsed" : "none");
 
+  // Paged over the filtered list, not the raw one, so searching narrows the
+  // pages rather than searching within page one. The count beside the search
+  // box stays the count of matches — that is what tells you whether the term
+  // found anything.
+  const paged = usePaged(shown, 12);
+
   if (loading) return <p className="muted">{t("admin.loading")}</p>;
 
   return (
@@ -100,7 +107,7 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {shown.map((u) => (
+              {paged.items.map((u) => (
                 <tr key={u.id}>
                   <td>
                     <span className="admin-table-strong">{u.fullName}</span>
@@ -152,6 +159,13 @@ export default function AdminUsers() {
           </table>
         </div>
       )}
+
+      <Pagination
+        page={paged.page}
+        totalPages={paged.totalPages}
+        onChange={paged.setPage}
+        label={t("admin.tabUsers")}
+      />
 
       <p className="field-hint admin-note">{t("admin.usersNote")}</p>
     </>

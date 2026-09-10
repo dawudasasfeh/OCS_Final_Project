@@ -1,4 +1,12 @@
 import client from "./client";
+/**
+ * FR-1.4 — one page of approved listings.
+ *
+ * Resolves to the page object the API returns, not a bare array:
+ * { items, page, pageSize, totalCount, totalPages, hasPrevious, hasNext }.
+ * The count is the point — twelve listings say nothing about whether there
+ * are thirty more behind them, and a pager cannot be drawn without it.
+ */
 export function searchHouses(filters = {}){
     const params = Object.fromEntries(
         Object.entries(filters).filter(
@@ -6,6 +14,17 @@ export function searchHouses(filters = {}){
         )
     );
     return client.get("/houses",{params}).then((r) => r.data);
+}
+
+/**
+ * How many available listings each city has, for the search suggestions.
+ *
+ * Its own call because the search is paged now: these counts used to be
+ * tallied from a full download of every listing, which is exactly what
+ * pagination stopped the browser receiving.
+ */
+export function getCityCounts(){
+    return client.get(`/houses/city-counts`).then((r) => r.data);
 }
 
 export function getHouse(id){

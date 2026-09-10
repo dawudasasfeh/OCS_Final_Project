@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "../context/ToastContext";
 import BookingCard from "../components/BookingCard";
 import BookingPayments from "../components/BookingPayments";
+import Pagination, { usePaged } from "../components/Pagination";
 
 export default function BookingRequests() {
   const { t } = useTranslation();
@@ -51,6 +52,11 @@ export default function BookingRequests() {
 
   const pendingCount = bookings.filter((b) => b.status === "Pending").length;
 
+  // The pending count in the heading counts every request, not the page:
+  // an owner needs to know six people are waiting even while looking at
+  // the first four.
+  const paged = usePaged(bookings, 6);
+
   return (
     <div className="container section">
       <h1 className="page-title">{t("requests.title")}</h1>
@@ -73,7 +79,7 @@ export default function BookingRequests() {
         </div>
       ) : (
         <div className="booking-list">
-          {bookings.map((b) => (
+          {paged.items.map((b) => (
             <BookingCard key={b.id} booking={b} side="owner">
               {b.status === "Confirmed" && <BookingPayments booking={b} side="owner" />}
               {b.status === "Pending" && (
@@ -100,6 +106,13 @@ export default function BookingRequests() {
           ))}
         </div>
       )}
+
+      <Pagination
+        page={paged.page}
+        totalPages={paged.totalPages}
+        onChange={paged.setPage}
+        label={t("requests.title")}
+      />
     </div>
   );
 }

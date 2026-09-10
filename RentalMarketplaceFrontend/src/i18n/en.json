@@ -624,5 +624,15 @@
     "closeText": "Search apartments, villas, houses and studios by the week, the month or the year — or list your own property and reach renters directly.",
     "guaranteesSub": "Four rules the code enforces, not four things we hope people do.",
     "regionsSub": "Listings across the kingdom, from the capital to the coast."
+  },
+  "pager": {
+    "label": "Pagination",
+    "prev": "Prev",
+    "next": "Next",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "goTo": "Go to page {{n}}",
+    "of": "{{page}} / {{total}}",
+    "pageOf": "Page {{page}} of {{total}}"
   }
 }

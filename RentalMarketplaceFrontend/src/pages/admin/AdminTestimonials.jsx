@@ -19,10 +19,10 @@ export default function AdminTestimonials() {
   const queue = useQueue(getPendingTestimonials, refreshCounts);
 
   return (
-    <QueueSection queue={queue} empty={t("admin.noTestimonials")}>
+    <QueueSection queue={queue} empty={t("admin.noTestimonials")} label={t("admin.tabTestimonials")}>
       {/* Named item, not t — a map parameter called t would shadow the
           translation function for the whole block. */}
-      {queue.items.map((item) => (
+      {queue.paged.items.map((item) => (
         <article className="admin-card" key={item.id}>
           <div className="booking-card-head">
             <span className="booking-title">{item.userName}</span>

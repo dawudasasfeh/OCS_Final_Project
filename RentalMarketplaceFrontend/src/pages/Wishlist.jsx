@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getWishlist } from "../api/wishlist";
 import { getErrorMessage } from "../api/errors";
 import HouseCard from "../components/HouseCard";
+import Pagination, { usePaged } from "../components/Pagination";
 import { useWishlist } from "../context/WishlistContext";
 import { useTranslation } from "react-i18next";
 
@@ -35,6 +36,11 @@ export default function Wishlist() {
   // listing on screen with an empty heart. The row is gone on the next load.
   const visible = houses.filter((h) => ids.has(h.id));
 
+  // Twelve, matching the search: these are the same cards in the same grid,
+  // and a page that holds twelve on one screen should not hold six on the
+  // next. usePaged clamps the page when un-hearting empties the last one.
+  const paged = usePaged(visible, 12);
+
   return (
     <div className="container section">
       <h1 className="page-title">{t("wishlist.title")}</h1>
@@ -52,9 +58,18 @@ export default function Wishlist() {
           <Link to="/houses" className="btn btn-primary">{t("bookings.browse")}</Link>
         </div>
       ) : (
-        <div className="grid-houses">
-          {visible.map((h) => <HouseCard key={h.id} house={h} />)}
-        </div>
+        <>
+          <div className="grid-houses">
+            {paged.items.map((h) => <HouseCard key={h.id} house={h} />)}
+          </div>
+
+          <Pagination
+            page={paged.page}
+            totalPages={paged.totalPages}
+            onChange={paged.setPage}
+            label={t("wishlist.title")}
+          />
+        </>
       )}
     </div>
   );
