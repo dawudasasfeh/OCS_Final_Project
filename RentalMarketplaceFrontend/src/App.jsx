@@ -16,10 +16,12 @@ import Wishlist from "./pages/Wishlist";
 import Subscribe from "./pages/Subscribe";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -35,6 +37,14 @@ function App() {
           <Route
             path="/houses/new"
             element={<ProtectedRoute requireSubscription><CreateListing /></ProtectedRoute>}
+          />
+          {/* Editing is not behind requireSubscription. The subscription buys the
+              right to publish; an owner whose subscription has lapsed still has
+              listings on the site and must be able to correct them. Ownership is
+              checked server-side either way. */}
+          <Route
+            path="/houses/:id/edit"
+            element={<ProtectedRoute><CreateListing /></ProtectedRoute>}
           />
           <Route path="/houses/:id" element={<HouseDetail />} />
 

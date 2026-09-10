@@ -4,20 +4,23 @@ import { searchHouses } from "../api/houses";
 import { getApprovedTestimonials } from "../api/testimonials";
 import { formatDay } from "../utils/date";
 import HouseCard from "../components/HouseCard";
+import Autocomplete from "../components/Autocomplete";
+import { cityOptions } from "../utils/cities";
 import heroImg from "../assets/hero-amman.jpg";
+import { useTranslation } from "react-i18next";
 
 // Labels shown to the user, paired with the enum integers the API filters on.
 const PROPERTY_TYPES = [
-  { value: "1", label: "Apartment" },
-  { value: "2", label: "House" },
-  { value: "3", label: "Villa" },
-  { value: "4", label: "Studio" },
+  { value: "1", key: "propertyType.apartment" },
+  { value: "2", key: "propertyType.house" },
+  { value: "3", key: "propertyType.villa" },
+  { value: "4", key: "propertyType.studio" },
 ];
 
 const DURATIONS = [
-  { value: "1", label: "Weekly" },
-  { value: "2", label: "Monthly" },
-  { value: "3", label: "Yearly" },
+  { value: "1", key: "period.weekly" },
+  { value: "2", key: "period.monthly" },
+  { value: "3", key: "period.yearly" },
 ];
 
 const initials = (name) => name.split(" ").map((w) => w[0]).join("").slice(0, 2);
@@ -27,8 +30,10 @@ export default function Home() {
   const [type, setType] = useState("1");
   const [city, setCity] = useState("");
   const [latest, setLatest] = useState([]);
+  const [cityCounts, setCityCounts] = useState({});
   const [testimonials, setTestimonials] = useState([]);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // searchHouses only ever returns approved, available listings, so every card
   // here is guaranteed to open. A failure leaves the section empty rather than
@@ -37,7 +42,15 @@ export default function Home() {
     let cancelled = false;
 
     searchHouses()
-      .then((data) => { if (!cancelled) setLatest(data.slice(0, 4)); })
+      .then((data) => {
+        if (cancelled) return;
+        setLatest(data.slice(0, 4));
+        // Counts come off the same response the Latest section already needs,
+        // so the suggestions cost no extra request.
+        const counts = {};
+        for (const h of data) if (h.city) counts[h.city] = (counts[h.city] ?? 0) + 1;
+        setCityCounts(counts);
+      })
       .catch(() => { if (!cancelled) setLatest([]); });
 
     getApprovedTestimonials()
@@ -50,7 +63,7 @@ export default function Home() {
   function handleSearch(e) {
     e.preventDefault();
     const params = new URLSearchParams({ propertyType: type, priceUnit: duration });
-    if (city.trim()) params.set("city", city.trim());
+    if (city) params.set("city", city);
     navigate(`/houses?${params}`);
   }
 
@@ -59,7 +72,7 @@ export default function Home() {
       {/* 1 ── Title and search ─────────────────────────────────── */}
       <section className="hero" style={{ "--hero-img": `url(${heroImg})` }}>
         <div className="container">
-          <h1>Homes for rent across Jordan</h1>
+          <h1>{t("home.heroTitle")}</h1>
 
           <div className="search-tabs">
             {DURATIONS.map((d) => (
@@ -69,38 +82,45 @@ export default function Home() {
                 className={d.value === duration ? "search-tab active" : "search-tab"}
                 onClick={() => setDuration(d.value)}
               >
-                {d.label}
+                {t(d.key)}
               </button>
             ))}
           </div>
 
           <form className="search-card" onSubmit={handleSearch}>
             <div className="search-types">
-              {PROPERTY_TYPES.map((t) => (
+              {PROPERTY_TYPES.map((pt) => (
                 <label
-                  key={t.value}
-                  className={t.value === type ? "type-chip selected" : "type-chip"}
+                  key={pt.value}
+                  className={pt.value === type ? "type-chip selected" : "type-chip"}
                 >
                   <input
                     type="radio"
                     name="type"
-                    value={t.value}
-                    checked={t.value === type}
+                    value={pt.value}
+                    checked={pt.value === type}
                     onChange={(e) => setType(e.target.value)}
                   />
-                  {t.label}
+                  {t(pt.key)}
                 </label>
               ))}
             </div>
 
+            {/* The placeholder used to offer "city or neighbourhood", but
+                handleSearch only ever sent city — the form has never searched
+                neighbourhoods. Still a text box, so typing works as before, but
+                the suggestions mean "Ammann" no longer quietly returns nothing:
+                only a real city is ever committed to the search. */}
             <div className="search-row">
-              <input
-                className="input"
-                placeholder="Type the city or neighbourhood"
+              <Autocomplete
+                id="hero-city"
+                label={t("houses.city")}
+                placeholder={t("home.searchPlaceholder")}
+                options={cityOptions(t, cityCounts)}
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={setCity}
               />
-              <button className="btn btn-primary" type="submit">Find</button>
+              <button className="btn btn-primary" type="submit">{t("common.find")}</button>
             </div>
           </form>
         </div>
@@ -110,12 +130,12 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div className="section-head">
-            <h2>Latest listings</h2>
-            <p className="muted">The most recently published properties.</p>
+            <h2>{t("home.latestTitle")}</h2>
+            <p className="muted">{t("home.latestSub")}</p>
           </div>
 
           {latest.length === 0 ? (
-            <p className="muted">No properties published yet.</p>
+            <p className="muted">{t("home.noneYet")}</p>
           ) : (
             <div className="grid-houses">
               {latest.map((h) => <HouseCard key={h.id} house={h} />)}
@@ -123,7 +143,7 @@ export default function Home() {
           )}
 
           <div style={{ textAlign: "center", marginTop: "1.75rem" }}>
-            <Link to="/houses" className="btn btn-outline">Browse all properties</Link>
+            <Link to="/houses" className="btn btn-outline">{t("home.browseAll")}</Link>
           </div>
         </div>
       </section>
@@ -131,28 +151,33 @@ export default function Home() {
       {/* 3 ── Testimonials ─────────────────────────────────────── */}
       <section className="section section-alt">
         <div className="container">
-          <div className="section-head">
-            <h2>What people say</h2>
-            <p className="muted">Feedback from renters and owners using Beytak.</p>
+          <div className="section-head section-head-row">
+            <div>
+              <h2>{t("home.testimonialsTitle")}</h2>
+              <p className="muted">{t("home.testimonialsSub")}</p>
+            </div>
+            <Link to="/contact" className="btn btn-outline">
+              {t("home.addTestimonial")}
+            </Link>
           </div>
 
           {testimonials.length === 0 && (
-            <p className="muted">
-              No testimonials yet. <Link to="/contact">Share yours</Link>.
-            </p>
+            <p className="muted">{t("home.noTestimonials")}</p>
           )}
 
           <div className="grid-testimonials">
-            {testimonials.map((t) => (
-              <article className="testimonial-card" key={t.id}>
+            {/* Named item, not t — t is the translation function now, and a map
+                parameter called t would shadow it inside this block. */}
+            {testimonials.map((item) => (
+              <article className="testimonial-card" key={item.id}>
                 <div className="testimonial-mark">&ldquo;</div>
-                <p className="testimonial-text">{t.content}</p>
+                <p className="testimonial-text" dir="auto">{item.content}</p>
                 <div className="testimonial-author">
-                  <span className="testimonial-avatar">{initials(t.userName)}</span>
+                  <span className="testimonial-avatar">{initials(item.userName)}</span>
                   <span>
-                    <span className="testimonial-name">{t.userName}</span><br />
+                    <span className="testimonial-name">{item.userName}</span><br />
                     <span className="testimonial-meta">
-                      {formatDay(t.createdAt.slice(0, 10))}
+                      {formatDay(item.createdAt.slice(0, 10))}
                     </span>
                   </span>
                 </div>
