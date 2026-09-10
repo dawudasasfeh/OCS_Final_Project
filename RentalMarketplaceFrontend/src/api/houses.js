@@ -47,3 +47,21 @@ export function uploadHouseImage(houseId, file){
 }
 
 
+
+/**
+ * FR-2.7 — replaces the editable fields of a listing the caller owns.
+ *
+ * Images are not part of the payload: they have their own endpoint, so editing
+ * a title cannot silently drop a photo the owner never mentioned.
+ */
+export function updateHouse(id, dto){
+    return client.put(`/houses/${id}`, dto).then((r) => r.data);
+}
+
+/**
+ * FR-2.8 — takes a listing off the market, or puts it back, without deleting
+ * it. Bookings already placed against it are unaffected.
+ */
+export function setHouseAvailability(id, isAvailable){
+    return client.patch(`/houses/${id}/availability`, { isAvailable }).then((r) => r.data);
+}

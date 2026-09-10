@@ -56,10 +56,45 @@ public class HousesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create(HouseCreateDto dto)
     {
-        var result = await _houseService.CreateAsync(dto, CurrentUserId!);
+        var result = await _houseService.CreateAsync(dto, CurrentUserId!, User.IsInRole("Admin"));
 
         return result.Succeeded
             ? CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data)
+            : BadRequest(result.Error);
+    }
+    /// <summary>
+    /// FR-2.7 — an owner edits their own listing.
+    ///
+    /// The id comes from the route and the owner from the token; the body carries
+    /// neither, so a caller cannot reach someone else's listing by changing what
+    /// they post. A refusal is 400 rather than 403 because the service returns one
+    /// shape for "not found" and "not yours", and separating them would tell a
+    /// stranger which listing ids exist.
+    /// </summary>
+    [HttpPut("{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> Update(int id, HouseUpdateDto dto)
+    {
+        var result = await _houseService.UpdateAsync(id, dto, CurrentUserId!);
+
+        return result.Succeeded
+            ? Ok(result.Data)
+            : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// FR-2.8 — delist or relist. PATCH rather than PUT: this flips one flag, and
+    /// an owner taking a property off the market should not have to resend the
+    /// whole listing, or re-pass its validation, to do it.
+    /// </summary>
+    [HttpPatch("{id:int}/availability")]
+    [Authorize]
+    public async Task<IActionResult> SetAvailability(int id, [FromBody] HouseAvailabilityDto dto)
+    {
+        var result = await _houseService.SetAvailabilityAsync(id, dto.IsAvailable, CurrentUserId!);
+
+        return result.Succeeded
+            ? Ok(result.Data)
             : BadRequest(result.Error);
     }
 

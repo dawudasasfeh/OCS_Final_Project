@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { createHouse, uploadHouseImage } from "../api/houses";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { createHouse, updateHouse, getHouse, uploadHouseImage } from "../api/houses";
 import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
+import { Trans, useTranslation } from "react-i18next";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "../components/FieldError";
 import { getMySubscription } from "../api/subscription";
@@ -10,27 +12,38 @@ import { getMySubscription } from "../api/subscription";
 // These integers are the Domain enums. If any of them is renumbered,
 // these lists have to change with it.
 const PROPERTY_TYPES = [
-  { value: 1, label: "Apartment" },
-  { value: 2, label: "House" },
-  { value: 3, label: "Villa" },
-  { value: 4, label: "Studio" },
-  { value: 5, label: "Room" },
+  { value: 1, key: "propertyType.apartment" },
+  { value: 2, key: "propertyType.house" },
+  { value: 3, key: "propertyType.villa" },
+  { value: 4, key: "propertyType.studio" },
+  { value: 5, key: "propertyType.room" },
 ];
 
 const PRICE_UNITS = [
-  { value: 1, label: "Weekly" },
-  { value: 2, label: "Monthly" },
-  { value: 3, label: "Yearly" },
+  { value: 1, key: "period.weekly" },
+  { value: 2, key: "period.monthly" },
+  { value: 3, key: "period.yearly" },
 ];
 
 const BUILDING_AGES = [
-  { value: "", label: "Not specified" },
-  { value: 1, label: "Under one year" },
-  { value: 2, label: "One to five years" },
-  { value: 3, label: "Five to ten years" },
-  { value: 4, label: "Ten to twenty years" },
-  { value: 5, label: "Over twenty years" },
+  { value: "", key: "listing.notSpecified" },
+  { value: 1, key: "listing.ageUnder1" },
+  { value: 2, key: "listing.age1to5" },
+  { value: 3, key: "listing.age5to10" },
+  { value: 4, key: "listing.age10to20" },
+  { value: 5, key: "listing.ageOver20" },
 ];
+
+/* HouseDto returns enum names ("Villa", "Yearly", "OneToFiveYears") while the
+   form and the update DTO both use the integers. These turn a loaded listing
+   back into form values; a name the maps do not know falls back to the default
+   rather than sending NaN to the API. */
+const TYPE_VALUE = { Apartment: 1, House: 2, Villa: 3, Studio: 4, Room: 5 };
+const UNIT_VALUE = { Weekly: 1, Monthly: 2, Yearly: 3 };
+const AGE_VALUE = {
+  UnderOneYear: 1, OneToFiveYears: 2, FiveToTenYears: 3,
+  TenToTwentyYears: 4, OverTwentyYears: 5,
+};
 
 const CITIES = ["Amman", "Irbid", "Zarqa", "Aqaba", "Salt", "Madaba", "Jerash", "Karak"];
 
@@ -57,8 +70,19 @@ const EMPTY = {
 /** "" for an optional number means "not provided", which the API wants as null. */
 const optionalNumber = (v) => (v === "" ? null : Number(v));
 
+/**
+ * Serves both /houses/new and /houses/:id/edit.
+ *
+ * One component rather than two, because the two forms are the same twenty
+ * fields with the same validation — a second copy would drift the moment one
+ * of them gained a field. The route decides which mode it is in.
+ */
 export default function CreateListing() {
+  const { t } = useTranslation();
   const toast = useToast();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const [loading, setLoading] = useState(isEdit);
   const [form, setForm] = useState(EMPTY);
   // { file, preview } — nothing is uploaded until the listing exists, so an
   // abandoned form leaves nothing on the server.
@@ -66,8 +90,45 @@ export default function CreateListing() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sub, setSub] = useState(null);
+  const { user } = useAuth();
   const { errors, validate, clearError } = useFieldErrors();
   const navigate = useNavigate();
+
+  // Populates the form in edit mode. Only the editable fields are copied —
+  // status, owner and images are not the owner's to resubmit, and the update
+  // DTO has no room for them.
+  useEffect(() => {
+    if (!isEdit) return;
+    let cancelled = false;
+
+    getHouse(id)
+      .then((h) => {
+        if (cancelled) return;
+        setForm({
+          title: h.title ?? "",
+          description: h.description ?? "",
+          propertyType: TYPE_VALUE[h.propertyType] ?? 1,
+          address: h.address ?? "",
+          city: h.city ?? "Amman",
+          neighborhood: h.neighborhood ?? "",
+          price: h.price ?? "",
+          priceUnit: UNIT_VALUE[h.priceUnit] ?? 2,
+          bedrooms: h.bedrooms ?? 1,
+          bathrooms: h.bathrooms ?? 1,
+          areaSqM: h.areaSqM ?? "",
+          isFurnished: Boolean(h.isFurnished),
+          floorNumber: h.floorNumber ?? "",
+          masterBedrooms: h.masterBedrooms ?? "",
+          apartmentsInBuilding: h.apartmentsInBuilding ?? "",
+          buildingAge: AGE_VALUE[h.buildingAge] ?? "",
+          turnoverDays: h.turnoverDays ?? 2,
+        });
+      })
+      .catch((err) => setError(getErrorMessage(err, t("house.couldNotLoad"))))
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [id, isEdit, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,7 +180,7 @@ export default function CreateListing() {
     setBusy(true);
 
     try {
-      const created = await createHouse({
+      const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
         propertyType: Number(form.propertyType),
@@ -137,25 +198,31 @@ export default function CreateListing() {
         apartmentsInBuilding: optionalNumber(form.apartmentsInBuilding),
         buildingAge: optionalNumber(form.buildingAge),
         turnoverDays: Number(form.turnoverDays),
-        imageUrls: [],
-      });
+      };
+
+      // createHouse wants imageUrls; the update DTO has no such field, because
+      // photos are managed through their own endpoint and resubmitting the
+      // listing must not be able to drop one.
+      const saved = isEdit
+        ? await updateHouse(id, payload)
+        : await createHouse({ ...payload, imageUrls: [] });
 
       // Photos go up after the listing exists, so each one has a house folder
       // to live in. Sequential, so the order chosen is the order stored and the
       // first upload becomes the main photo.
       for (const { file } of photos) {
         try {
-          await uploadHouseImage(created.id, file);
+          await uploadHouseImage(saved.id, file);
         } catch {
           // The listing is already saved; a failed photo should not lose it.
           setError(`The listing was published, but ${file.name} could not be uploaded.`);
         }
       }
 
-      toast.success("Listing created. It is pending review before renters can see it.");
-      navigate(`/houses/${created.id}`, { replace: true });
+      toast.success(isEdit ? t("listing.updated") : t("listing.created"));
+      navigate(`/houses/${saved.id}`, { replace: true });
     } catch (err) {
-      const message = getErrorMessage(err, "Could not create the listing.");
+      const message = getErrorMessage(err, isEdit ? t("listing.couldNotUpdate") : t("listing.couldNotCreate"));
       setError(message);
       toast.error(message);
       setBusy(false);
@@ -164,20 +231,22 @@ export default function CreateListing() {
 
   return (
     <div className="container section">
-      <h1 className="page-title">List a property</h1>
+      <h1 className="page-title">{isEdit ? t("listing.editTitle") : t("listing.title")}</h1>
       <p className="muted page-sub">
-        An administrator reviews every listing before renters can see it. You can
-        follow its status on <Link to="/my-listings">My listings</Link>.
+        <Trans i18nKey={isEdit ? "listing.editSub" : "listing.sub"}>
+          <Link to="/my-listings" />
+        </Trans>
       </p>
 
       {/* The API refuses without a subscription, so say so before the form is
-          filled in rather than after it is submitted. */}
-      {sub && !sub.isActive && (
+          filled in rather than after it is submitted. An admin is exempt on
+          the server, so showing them the warning would be a lie. */}
+      {!isEdit && sub && !sub.isActive && user?.role !== "Admin" && (
         <div className="sub-status">
-          <span className="badge badge-rejected">Not active</span>
+          <span className="badge badge-rejected">{t("listing.notActive")}</span>
           <p className="muted">
-            Publishing needs an active subscription — {sub.pricePerMonth} JOD a
-            month. <Link to="/subscribe">Subscribe</Link>.
+            {t("listing.needsSubscription", { price: sub.pricePerMonth })}{" "}
+            <Link to="/subscribe">{t("listing.subscribe")}</Link>.
           </p>
         </div>
       )}
@@ -186,13 +255,13 @@ export default function CreateListing() {
         {error && <p className="error-text">{error}</p>}
 
         <fieldset className="form-block">
-          <legend>The property</legend>
+          <legend>{t("listing.legendProperty")}</legend>
 
           <div className="field">
-            <label className="label" htmlFor="title">Title</label>
+            <label className="label" htmlFor="title">{t("listing.listingTitle")}</label>
             <input
               id="title" className="input" maxLength={150} required
-              placeholder="Bright 3-bedroom in Abdoun"
+              placeholder={t("listing.titlePlaceholder")}
               value={form.title}
               onChange={(e) => set("title", e.target.value)}
             />
@@ -200,10 +269,10 @@ export default function CreateListing() {
           </div>
 
           <div className="field">
-            <label className="label" htmlFor="description">Description</label>
+            <label className="label" htmlFor="description">{t("listing.description")}</label>
             <textarea
               id="description" className="input" rows={4} maxLength={2000} required
-              placeholder="What makes this place worth renting? Nearby streets, recent work, what is included."
+              placeholder={t("listing.descriptionPlaceholder")}
               value={form.description}
               onChange={(e) => set("description", e.target.value)}
             />
@@ -212,27 +281,27 @@ export default function CreateListing() {
 
           <div className="form-row">
             <div className="field">
-              <label className="label" htmlFor="propertyType">Property type</label>
+              <label className="label" htmlFor="propertyType">{t("listing.propertyTypeLabel")}</label>
               <select
                 id="propertyType" className="input"
                 value={form.propertyType}
                 onChange={(e) => set("propertyType", e.target.value)}
               >
-                {PROPERTY_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                {PROPERTY_TYPES.map((pt) => (
+                  <option key={pt.value} value={pt.value}>{t(pt.key)}</option>
                 ))}
               </select>
             </div>
 
             <div className="field">
-              <label className="label" htmlFor="buildingAge">Building age</label>
+              <label className="label" htmlFor="buildingAge">{t("listing.buildingAgeLabel")}</label>
               <select
                 id="buildingAge" className="input"
                 value={form.buildingAge}
                 onChange={(e) => set("buildingAge", e.target.value)}
               >
                 {BUILDING_AGES.map((a) => (
-                  <option key={a.label} value={a.value}>{a.label}</option>
+                  <option key={a.key} value={a.value}>{t(a.key)}</option>
                 ))}
               </select>
             </div>
@@ -240,13 +309,13 @@ export default function CreateListing() {
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>Where it is</legend>
+          <legend>{t("listing.legendWhere")}</legend>
 
           <div className="field">
-            <label className="label" htmlFor="address">Address</label>
+            <label className="label" htmlFor="address">{t("listing.address")}</label>
             <input
               id="address" className="input" maxLength={250} required
-              placeholder="Abdoun Circle, Building 12"
+              placeholder={t("listing.addressPlaceholder")}
               value={form.address}
               onChange={(e) => set("address", e.target.value)}
             />
@@ -255,21 +324,21 @@ export default function CreateListing() {
 
           <div className="form-row">
             <div className="field">
-              <label className="label" htmlFor="city">City</label>
+              <label className="label" htmlFor="city">{t("houses.city")}</label>
               <select
                 id="city" className="input"
                 value={form.city}
                 onChange={(e) => set("city", e.target.value)}
               >
-                {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                {CITIES.map((c) => <option key={c} value={c}>{t(`city.${c}`, { defaultValue: c })}</option>)}
               </select>
             </div>
 
             <div className="field">
-              <label className="label" htmlFor="neighborhood">Neighbourhood <span className="optional">optional</span></label>
+              <label className="label" htmlFor="neighborhood">{t("listing.neighbourhood")} <span className="optional">{t("listing.optional")}</span></label>
               <input
                 id="neighborhood" className="input" maxLength={100}
-                placeholder="Abdoun"
+                placeholder={t("listing.neighbourhoodPlaceholder")}
                 value={form.neighborhood}
                 onChange={(e) => set("neighborhood", e.target.value)}
               />
@@ -279,14 +348,14 @@ export default function CreateListing() {
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>Price</legend>
+          <legend>{t("listing.legendPrice")}</legend>
 
           <div className="form-row">
             <div className="field">
-              <label className="label" htmlFor="price">Price (JOD)</label>
+              <label className="label" htmlFor="price">{t("listing.priceLabel")}</label>
               <input
                 id="price" className="input" type="number" min="1" step="1" required
-                placeholder="550"
+                placeholder={t("listing.pricePlaceholder")}
                 value={form.price}
                 onChange={(e) => set("price", e.target.value)}
               />
@@ -294,14 +363,14 @@ export default function CreateListing() {
             </div>
 
             <div className="field">
-              <label className="label" htmlFor="priceUnit">Rented by the</label>
+              <label className="label" htmlFor="priceUnit">{t("listing.rentedByThe")}</label>
               <select
                 id="priceUnit" className="input"
                 value={form.priceUnit}
                 onChange={(e) => set("priceUnit", e.target.value)}
               >
                 {PRICE_UNITS.map((u) => (
-                  <option key={u.value} value={u.value}>{u.label}</option>
+                  <option key={u.value} value={u.value}>{t(u.key)}</option>
                 ))}
               </select>
             </div>
@@ -313,7 +382,7 @@ export default function CreateListing() {
           </p>
 
           <div className="field">
-            <label className="label" htmlFor="turnoverDays">Days needed between stays</label>
+            <label className="label" htmlFor="turnoverDays">{t("listing.daysBetweenStays")}</label>
             <input
               id="turnoverDays" className="input" type="number" min="0" max="30"
               value={form.turnoverDays}
@@ -328,11 +397,11 @@ export default function CreateListing() {
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>Rooms and size</legend>
+          <legend>{t("listing.legendRooms")}</legend>
 
           <div className="form-row form-row-3">
             <div className="field">
-              <label className="label" htmlFor="bedrooms">Bedrooms</label>
+              <label className="label" htmlFor="bedrooms">{t("listing.bedrooms")}</label>
               <input
                 id="bedrooms" className="input" type="number" min="0" max="50" required
                 value={form.bedrooms}
@@ -341,7 +410,7 @@ export default function CreateListing() {
               <FieldError>{errors.bedrooms}</FieldError>
             </div>
             <div className="field">
-              <label className="label" htmlFor="bathrooms">Bathrooms</label>
+              <label className="label" htmlFor="bathrooms">{t("listing.bathrooms")}</label>
               <input
                 id="bathrooms" className="input" type="number" min="0" max="50" required
                 value={form.bathrooms}
@@ -350,10 +419,10 @@ export default function CreateListing() {
               <FieldError>{errors.bathrooms}</FieldError>
             </div>
             <div className="field">
-              <label className="label" htmlFor="areaSqM">Area (m²)</label>
+              <label className="label" htmlFor="areaSqM">{t("listing.area")}</label>
               <input
                 id="areaSqM" className="input" type="number" min="1" max="100000" required
-                placeholder="165"
+                placeholder={t("listing.areaPlaceholder")}
                 value={form.areaSqM}
                 onChange={(e) => set("areaSqM", e.target.value)}
               />
@@ -363,7 +432,7 @@ export default function CreateListing() {
 
           <div className="form-row form-row-3">
             <div className="field">
-              <label className="label" htmlFor="masterBedrooms">Master bedrooms <span className="optional">optional</span></label>
+              <label className="label" htmlFor="masterBedrooms">{t("listing.masterBedrooms")} <span className="optional">{t("listing.optional")}</span></label>
               <input
                 id="masterBedrooms" className="input" type="number" min="0" max="20"
                 value={form.masterBedrooms}
@@ -372,7 +441,7 @@ export default function CreateListing() {
               <FieldError>{errors.masterBedrooms}</FieldError>
             </div>
             <div className="field">
-              <label className="label" htmlFor="floorNumber">Floor <span className="optional">optional</span></label>
+              <label className="label" htmlFor="floorNumber">{t("listing.floor")} <span className="optional">{t("listing.optional")}</span></label>
               <input
                 id="floorNumber" className="input" type="number" min="0" max="50"
                 value={form.floorNumber}
@@ -381,7 +450,7 @@ export default function CreateListing() {
               <FieldError>{errors.floorNumber}</FieldError>
             </div>
             <div className="field">
-              <label className="label" htmlFor="apartmentsInBuilding">Flats in building <span className="optional">optional</span></label>
+              <label className="label" htmlFor="apartmentsInBuilding">{t("listing.flatsInBuilding")} <span className="optional">{t("listing.optional")}</span></label>
               <input
                 id="apartmentsInBuilding" className="input" type="number" min="1" max="500"
                 value={form.apartmentsInBuilding}
@@ -397,12 +466,12 @@ export default function CreateListing() {
               checked={form.isFurnished}
               onChange={(e) => set("isFurnished", e.target.checked)}
             />
-            <span>Furnished</span>
+            <span>{t("listing.furnished")}</span>
           </label>
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>Photos</legend>
+          <legend>{t("listing.legendPhotos")}</legend>
 
           <label className="upload-drop">
             <input
@@ -412,8 +481,8 @@ export default function CreateListing() {
               onChange={handleFiles}
               disabled={busy}
             />
-            <span className="upload-drop-title">Choose photos</span>
-            <span className="upload-drop-hint">JPG, PNG or WEBP · up to 5 MB each</span>
+            <span className="upload-drop-title">{t("listing.choosePhotos")}</span>
+            <span className="upload-drop-hint">{t("listing.photoHint")}</span>
           </label>
 
           {photos.length > 0 && (
@@ -425,7 +494,7 @@ export default function CreateListing() {
                     className={i === 0 ? "upload-item primary" : "upload-item"}
                   >
                     <img src={p.preview} alt="" />
-                    {i === 0 && <span className="upload-badge">Main photo</span>}
+                    {i === 0 && <span className="upload-badge">{t("listing.mainPhoto")}</span>}
                     <div className="upload-item-actions">
                       {i !== 0 && (
                         <button type="button" onClick={() => makePrimary(p.preview)}>
@@ -449,9 +518,9 @@ export default function CreateListing() {
 
         <div className="form-actions">
           <button className="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? "Publishing…" : "Publish listing"}
+            {busy ? (isEdit ? t("listing.saving") : t("listing.publishing")) : (isEdit ? t("listing.saveChanges") : t("listing.publish"))}
           </button>
-          <Link to="/my-listings" className="btn btn-outline">Cancel</Link>
+          <Link to="/my-listings" className="btn btn-outline">{t("common.cancel")}</Link>
         </div>
       </form>
     </div>
