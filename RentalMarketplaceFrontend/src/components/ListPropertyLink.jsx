@@ -35,9 +35,15 @@ export default function ListPropertyLink({ className = "", children, role }) {
       return;
     }
 
-    // Same exemption as the route guard and HouseService — three places now
-    // agree that an admin is not subject to the fee.
-    if (!isSubscribed && user.role !== "Admin") {
+    // An admin should never reach this component — the navbar and the account
+    // menu both hide it — but the check stays as the last line of defence, and
+    // matches HouseService, which refuses an admin outright.
+    if (user.role === "Admin") {
+      toast.info(t("nav.adminCannotList"));
+      return;
+    }
+
+    if (!isSubscribed) {
       toast.info(t("nav.subscriptionNeeded"));
       navigate("/subscribe");
       return;

@@ -54,12 +54,16 @@ public class HouseService : IHouseService
         if (owner is null)
             return Result<HouseDto>.Fail("Account not found.");
 
-        // The subscription gate exists to collect the monthly fee from owners.
-        // An admin is not a customer of the platform, and it would be odd for
-        // the account that grants subscriptions to be blocked by one — so the
-        // role is exempt rather than being given a subscription it never pays
-        // for, which would make it indistinguishable from a paying owner.
-        if (!isAdmin && !await _subscriptions.IsActiveAsync(ownerId))
+        // FR-9.4.2 — the Admin role is oversight only. An admin who published a
+        // listing would be the person who approves it, which is the one
+        // separation this system exists to keep: an owner cannot approve their
+        // own listing, a renter cannot confirm their own payment. Exempting the
+        // admin from the fee was the earlier answer and it was the wrong one —
+        // it made the moderator a seller.
+        if (isAdmin)
+            return Result<HouseDto>.Fail("Administrators cannot publish listings.");
+
+        if (!await _subscriptions.IsActiveAsync(ownerId))
             return Result<HouseDto>.Fail("An active subscription is required to publish a listing.");
 
         var house = new House

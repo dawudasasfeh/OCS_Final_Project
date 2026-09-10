@@ -23,7 +23,7 @@ public class BookingsController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Create(BookingCreateDto dto) {
-        var result = await _bookingService.CreateAsync(dto, CurrentUserId!);
+        var result = await _bookingService.CreateAsync(dto, CurrentUserId!, User.IsInRole("Admin"));
         return result.Succeeded ? CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data)
         : BadRequest(result.Error);
     }

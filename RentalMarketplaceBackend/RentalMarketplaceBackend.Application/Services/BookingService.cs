@@ -17,7 +17,12 @@ public class BookingService : IBookingService
         _uow = uow;
     }
 
-    public async Task<Result<BookingDto>> CreateAsync(BookingCreateDto dto, string renterId) {
+    public async Task<Result<BookingDto>> CreateAsync(BookingCreateDto dto, string renterId, bool isAdmin = false) {
+        // FR-9.4.2. Checked before the property is even loaded: whether the
+        // listing exists is not the administrator's business here.
+        if (isAdmin)
+            return Result<BookingDto>.Fail("Administrators cannot make bookings.");
+
         var house = await _uow.Houses.GetByIdAsync(dto.HouseId);
 
         if (house is null)

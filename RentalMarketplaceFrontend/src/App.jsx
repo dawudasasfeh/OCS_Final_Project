@@ -44,29 +44,33 @@ function App() {
               checked server-side either way. */}
           <Route
             path="/houses/:id/edit"
-            element={<ProtectedRoute><CreateListing /></ProtectedRoute>}
+            element={<ProtectedRoute denyAdmin><CreateListing /></ProtectedRoute>}
           />
           <Route path="/houses/:id" element={<HouseDetail />} />
 
           <Route
             path="/my-bookings"
-            element={<ProtectedRoute><MyBookings /></ProtectedRoute>}
+            element={<ProtectedRoute denyAdmin><MyBookings /></ProtectedRoute>}
           />
           <Route
             path="/requests"
-            element={<ProtectedRoute><BookingRequests /></ProtectedRoute>}
+            /* denyAdmin only. Not requireSubscription: an owner whose subscription
+               lapsed still has listings with pending requests, and a renter waiting
+               on an answer should not be stranded because a payment ran out. The
+               account menu hides the link; the page stays reachable. */
+            element={<ProtectedRoute denyAdmin><BookingRequests /></ProtectedRoute>}
           />
           <Route
             path="/my-listings"
-            element={<ProtectedRoute><MyListings /></ProtectedRoute>}
+            element={<ProtectedRoute denyAdmin><MyListings /></ProtectedRoute>}
           />
           <Route
             path="/subscribe"
-            element={<ProtectedRoute><Subscribe /></ProtectedRoute>}
+            element={<ProtectedRoute denyAdmin><Subscribe /></ProtectedRoute>}
           />
           <Route
             path="/wishlist"
-            element={<ProtectedRoute><Wishlist /></ProtectedRoute>}
+            element={<ProtectedRoute denyAdmin><Wishlist /></ProtectedRoute>}
           />
           <Route
             path="/admin"

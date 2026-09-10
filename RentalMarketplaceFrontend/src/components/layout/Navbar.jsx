@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useSubscription } from "../../context/SubscriptionContext";
 import { useTranslation } from "react-i18next";
 import ListPropertyLink from "../ListPropertyLink";
 import LanguageToggle from "../LanguageToggle";
@@ -10,7 +11,30 @@ const initials = (name = "") =>
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { isSubscribed, subscription } = useSubscription();
   const { t } = useTranslation();
+
+  // What each role can actually reach, decided once here so the menu, the
+  // navbar CTA and the routes cannot disagree.
+  //
+  // An administrator gets oversight only: no listing, no booking, and so no
+  // wishlist or subscription either — a menu that offers a page the server
+  // will refuse is worse than no menu at all.
+  //
+  // Owner pages hang off the subscription rather than the role, because that
+  // is what actually decides whether the page has anything on it.
+  const isAdmin = user?.role === "Admin";
+  const canRent = !isAdmin;
+
+  // Owner pages show while the subscription is active, and go on showing after
+  // it lapses. expiresAt is null for someone who has never subscribed and set
+  // for someone whose subscription ran out, which is exactly the difference:
+  // a renter who never listed does not need these links, but a lapsed owner
+  // still has listings and may have a renter waiting on an answer. Hiding
+  // Booking requests from them would strand that renter, and the page itself
+  // stays reachable for the same reason.
+  const hasEverSubscribed = subscription?.expiresAt != null;
+  const canOwn = !isAdmin && (isSubscribed || hasEverSubscribed);
   const [open, setOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const menuRef = useRef(null);
@@ -72,7 +96,7 @@ export default function Navbar() {
 
         <Link to="/" className="nav-logo" aria-label={t("nav.homeAria")}>
           <div className="nav-logo-badge">
-            <img src="/logo.svg" alt="Baytek" className="logo-svg" />
+            <img src="/logo.svg" alt="Beytak" className="logo-svg" />
           </div>
         </Link>
 
@@ -80,7 +104,10 @@ export default function Navbar() {
           <LanguageToggle />
           {/* Shown to guests too — the click is what explains the requirement,
               and sending them to login is more use than hiding the button. */}
-          <ListPropertyLink className="btn btn-outline nav-cta" />
+          {/* Hidden from admins entirely. For a signed-out visitor or an
+              unsubscribed owner it stays — the click is the paywall funnel,
+              and it explains the requirement rather than hiding it. */}
+          {!isAdmin && <ListPropertyLink className="btn btn-outline nav-cta" />}
 
           {user ? (
             <div className="account" ref={menuRef}>
@@ -108,13 +135,23 @@ export default function Navbar() {
                   </div>
 
                   <div className="account-menu-list">
-                    <ListPropertyLink role="menuitem" />
-                    <Link to="/my-listings" role="menuitem">{t("nav.myListings")}</Link>
-                    <Link to="/subscribe" role="menuitem">{t("nav.subscription")}</Link>
-                    <Link to="/my-bookings" role="menuitem">{t("nav.myBookings")}</Link>
-                    <Link to="/wishlist" role="menuitem">{t("nav.wishlist")}</Link>
-                    <Link to="/requests" role="menuitem">{t("nav.bookingRequests")}</Link>
-                    {user.role === "Admin" && (
+                    {!isAdmin && <ListPropertyLink role="menuitem" />}
+                    {canOwn && (
+                      <>
+                        <Link to="/my-listings" role="menuitem">{t("nav.myListings")}</Link>
+                        <Link to="/requests" role="menuitem">{t("nav.bookingRequests")}</Link>
+                      </>
+                    )}
+                    {!isAdmin && (
+                      <Link to="/subscribe" role="menuitem">{t("nav.subscription")}</Link>
+                    )}
+                    {canRent && (
+                      <>
+                        <Link to="/my-bookings" role="menuitem">{t("nav.myBookings")}</Link>
+                        <Link to="/wishlist" role="menuitem">{t("nav.wishlist")}</Link>
+                      </>
+                    )}
+                    {isAdmin && (
                       <Link to="/admin" role="menuitem">{t("nav.adminDashboard")}</Link>
                     )}
                   </div>
