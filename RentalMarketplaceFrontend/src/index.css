@@ -565,25 +565,52 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .prose p { color: var(--text-muted); }
 .prose strong { color: var(--text); font-weight: 600; }
 
-/* ── Stats ─────────────────────────────────────────────────────── */
-.grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.25rem; }
-.stat {
-  padding: 1.1rem 1.2rem;
-  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
-}
-.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); line-height: 1.1; }
-.stat-label { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
+/* ── Steps ─────────────────────────────────────────────────────── */
+/* One numbered card system, not two. About carried .feature and .value-card
+   side by side — near-identical cards, a 30px circle against a 40px square,
+   "1" against "01" — for two sections that turned out to be the same four
+   points stated twice. Near-identical is worse than identical: the reader
+   hunts for a distinction that is not there.
 
-/* ── Steps / values ────────────────────────────────────────────── */
-.grid-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.6rem; }
-.feature-num {
+   Explicit track counts rather than auto-fit. The set is always four, and
+   auto-fit landed on three tracks at 768 and again at 1024, stranding the
+   fourth card alone on a second row. Four, two, one — never three. */
+.steps-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.6rem; margin: 0; padding: 0; list-style: none;
+}
+@media (max-width: 1023px) { .steps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 599px)  { .steps-grid { grid-template-columns: 1fr; gap: 1.25rem; } }
+
+.step-card { display: flex; flex-direction: column; }
+.step-num {
   width: 30px; height: 30px; margin-bottom: .7rem;
   display: flex; align-items: center; justify-content: center;
-  background: var(--primary-soft); color: var(--primary);
-  border-radius: 50%; font-size: .8rem; font-weight: 700;
+  background: var(--primary-soft);
+  /* --primary on --primary-soft measures 4.45:1 — just under the 4.5 that
+     text this size needs. The darker shade clears it comfortably. */
+  color: var(--primary-hover);
+  border-radius: 50%; font-size: var(--fs-sm); font-weight: 700;
 }
-.feature h3 { margin-bottom: .25rem; }
-.feature p { margin: 0; color: var(--text-muted); font-size: .88rem; }
+.step-card h3 { margin-bottom: .3rem; font-size: var(--fs-md); }
+.step-card p { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.55; }
+
+/* The promise the step rests on. Separated by a rule rather than given its
+   own card, so it reads as the footnote to the step instead of a rival to
+   it — which is exactly what the old guarantees section became. */
+/* A panel pinned to the bottom, not a rule under the text.
+
+   A horizontal rule only looks right when it lines up across the row, and it
+   cannot here: the cards are equal height but the headings and the promises
+   are not, so whichever end you anchor to, the other drifts. A panel has no
+   such problem — every card is the same height and the panel is pushed to the
+   bottom, so they all finish on the same line and the varying heights read as
+   content rather than as a mistake. */
+.step-card .step-promise {
+  margin-top: auto; padding: .7rem .8rem;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted);
+}
 
 /* ── About Us page styling ─────────────────────────────────────── */
 .about-hero-grid {
@@ -628,31 +655,9 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   color: var(--primary);
 }
 
-.about-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin: 1.25rem 0 1.5rem;
-}
-
-.about-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .35rem .75rem;
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: .8rem;
-  font-weight: 600;
-  color: var(--text);
-}
-.about-pill .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--primary);
-}
+/* The button needs air under the paragraphs now that the pill row that used
+   to sit between them is gone. */
+.about-hero-grid .btn { margin-top: 1.4rem; }
 
 /* Cities Showcase Grid */
 .about-cities-grid {
@@ -713,9 +718,21 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   flex-direction: column;
   flex: 1;
 }
+/* The count sits beside the name, not under the prose, because it is the fact
+   that qualifies everything the paragraph goes on to claim. These cards used
+   to describe a portfolio for cities holding a single listing. */
+.city-card-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: .6rem; margin-bottom: .35rem;
+}
 .city-card-body h3 {
-  font-size: 1.15rem;
-  margin-bottom: .35rem;
+  font-size: var(--fs-lg);
+  margin: 0;
+}
+.city-card-count {
+  flex: none; font-size: var(--fs-2xs); font-weight: 600;
+  letter-spacing: var(--track-wide); text-transform: uppercase;
+  color: var(--text-muted); white-space: nowrap;
 }
 .city-card-body p {
   color: var(--text-muted);
@@ -777,51 +794,32 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   color: var(--text);
 }
 
-/* Values Grid Upgrade */
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.4rem;
+/* ── About: who built it ───────────────────────────────────────── */
+/* The page had six sections of product marketing and no line saying who made
+   it, which is the one thing an About page is for. Prose on one side, the
+   checkable facts on the other. */
+.about-credits {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; align-items: start;
 }
-.value-card {
-  padding: 1.4rem;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-}
-.value-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius);
-  background: var(--primary-soft);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Holds a numeral now rather than an emoji, so it wants the display face and
-     tabular weight — an emoji sat at 1.2rem, a two-digit number needs less. */
-  font-family: var(--display);
-  font-size: var(--fs-sm); font-weight: 800;
-  letter-spacing: var(--track-wide);
-  margin-bottom: .8rem;
-}
-.value-card h3 {
-  font-size: var(--fs-md);
-  margin-bottom: .4rem;
-}
+.about-credits h2 { margin-bottom: .6rem; }
+.about-credits p { color: var(--text-muted); }
 
-/* The figures close the guarantees section rather than occupying a section of
-   their own — four numbers did not warrant their own band. */
-.about-stats {
-  margin-top: 2.5rem; padding-top: 2rem;
-  border-top: 1px solid var(--border);
+.about-facts {
+  margin: 0; padding: 1.3rem 1.4rem;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
 }
-.value-card p {
-  font-size: .88rem;
-  color: var(--text-muted);
-  margin: 0;
-  line-height: 1.5;
+.about-facts > div { padding: .6rem 0; border-bottom: 1px solid var(--border); }
+.about-facts > div:first-child { padding-top: 0; }
+.about-facts > div:last-child { padding-bottom: 0; border-bottom: none; }
+.about-facts dt {
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--track-wide);
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: .15rem;
 }
+.about-facts dd { margin: 0; font-size: var(--fs-sm); color: var(--text); }
+.about-facts a { color: var(--primary); font-weight: 600; }
+.about-facts a:hover { text-decoration: underline; }
+
+@media (max-width: 767px) { .about-credits { grid-template-columns: 1fr; gap: 1.5rem; } }
 
 @media (max-width: 900px) {
   .about-hero-grid { grid-template-columns: 1fr; gap: 1.8rem; }

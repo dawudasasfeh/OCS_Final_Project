@@ -1,35 +1,59 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ListPropertyLink from "../components/ListPropertyLink";
+import { getCityCounts } from "../api/houses";
+import { IconArrow } from "../components/icons";
 import { useTranslation } from "react-i18next";
 
-/* Only the non-text parts live here now — the numbers a marker could check,
-   the images and the query strings. Every label and paragraph moved into the
-   translation files, so About reads the same way in both languages. */
-const STAT_VALUES = ["12", "0%", "3", "20 JOD"];
-
-const REGION_META = [
-  { img: "/about/amman-apartments.jpg", link: "/houses?city=Amman" },
-  { img: "/about/salt-heritage.jpg", link: "/houses?city=Salt" },
-  { img: "/about/aqaba-coastal.jpg", link: "/houses?city=Aqaba" },
+/**
+ * The page used to make four points and state each of them three times: a row
+ * of pills, then four "how it works" steps, then four "guarantees" that were
+ * the same four steps re-worded, then a stat strip repeating two of them again.
+ * Twelve cards for four ideas, which is why it read as noise rather than as an
+ * argument. The steps and the guarantees are now one set of four — each step
+ * says what you do and what the system promises while you do it.
+ *
+ * Keyed by city name, not by array position. The old version joined
+ * REGION_META[i] to the translated regions[i], so adding a city to one file and
+ * forgetting the other threw on undefined.img.
+ */
+const REGIONS = [
+  { city: "Amman", img: "/about/amman-apartments.jpg" },
+  { city: "Salt", img: "/about/salt-heritage.jpg" },
+  { city: "Aqaba", img: "/about/aqaba-coastal.jpg" },
 ];
 
 export default function About() {
   const { t } = useTranslation();
-
   const steps = t("about.steps", { returnObjects: true });
-  const guarantees = t("about.guarantees", { returnObjects: true });
-  const statLabels = t("about.stats", { returnObjects: true });
-  const regions = t("about.regions", { returnObjects: true });
+
+  // Real counts, not prose. The cards used to describe "Ottoman stone houses on
+  // the slopes below the old town" for a city holding one listing, and the gap
+  // between the promise and the click is what made the page feel hollow. A card
+  // that admits it has one property is trustworthy; one that implies a
+  // portfolio is not.
+  const [counts, setCounts] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    getCityCounts()
+      .then((c) => { if (!cancelled) setCounts(c); })
+      .catch(() => { if (!cancelled) setCounts({}); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const countLabel = (city) => {
+    if (counts === null) return " ";            // no flicker before it lands
+    const n = counts[city] ?? 0;
+    return n === 0 ? t("about.regionEmpty") : t("about.regionCount", { count: n });
+  };
 
   return (
     <>
-      {/* 1 ── Header ─────────────────────────────────────────────── */}
+      {/* 1 ── What this is ───────────────────────────────────────── */}
       <section className="page-head">
         <div className="container">
           <h1>{t("about.title")}</h1>
-          <p>
-            {t("about.intro")}
-          </p>
+          <p>{t("about.intro")}</p>
         </div>
       </section>
 
@@ -39,21 +63,8 @@ export default function About() {
           <div className="about-hero-grid">
             <div>
               <h2>{t("about.whyTitle")}</h2>
-
-              <p className="muted">
-                {t("about.whyP1")}
-              </p>
-
-              <p className="muted">
-                {t("about.whyP2")}
-              </p>
-
-              <div className="about-pills">
-                <span className="about-pill"><span className="dot" /> {t("about.pillNoCommission")}</span>
-                <span className="about-pill"><span className="dot" /> {t("about.pillDirect")}</span>
-                <span className="about-pill"><span className="dot" /> {t("about.pillServerDates")}</span>
-                <span className="about-pill"><span className="dot" /> {t("about.pillCash")}</span>
-              </div>
+              <p className="muted">{t("about.whyP1")}</p>
+              <p className="muted">{t("about.whyP2")}</p>
 
               <Link to="/houses" className="btn btn-primary">
                 {t("about.browse")}
@@ -64,6 +75,7 @@ export default function About() {
               <img
                 src="/about/amman-living.jpg"
                 alt={t("about.imgAlt")}
+                width="1000" height="671"
               />
               <div className="about-img-badge">
                 <strong>{t("about.badgeTitle")}</strong>
@@ -74,7 +86,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* 3 ── How it works ───────────────────────────────────────── */}
+      {/* 3 ── How it works — the steps and the promises, together ── */}
       <section className="section section-alt">
         <div className="container">
           <div className="section-head">
@@ -82,78 +94,95 @@ export default function About() {
             <p className="muted">{t("about.howSub")}</p>
           </div>
 
-          <div className="grid-features">
+          <ol className="steps-grid">
             {steps.map((step, i) => (
-              <div className="feature" key={step.h}>
-                <div className="feature-num">{i + 1}</div>
-                <h3>{step.h}</h3>
-                <p>{step.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4 ── What the platform guarantees ───────────────────────── */}
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <h2>{t("about.guaranteesTitle")}</h2>
-            <p className="muted">
-              {t("about.guaranteesSub")}
-            </p>
-          </div>
-
-          <div className="values-grid">
-            {guarantees.map((g, i) => (
-              <div className="value-card" key={g.h}>
+              <li className="step-card" key={step.h}>
                 {/* A numeral rather than an emoji: emoji render as flat
                     dingbats on Windows and coloured art on phones, so the same
                     card looked like two different designs. */}
-                <div className="value-icon">{String(i + 1).padStart(2, "0")}</div>
-                <h3>{g.h}</h3>
-                <p>{g.p}</p>
-              </div>
+                <span className="step-num" aria-hidden="true">{i + 1}</span>
+                <h3>{step.h}</h3>
+                <p>{step.p}</p>
+                <p className="step-promise">{step.promise}</p>
+              </li>
             ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 4 ── Where you can rent ─────────────────────────────────── */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <h2>{t("about.regionsTitle")}</h2>
+            <p className="muted">{t("about.regionsSub")}</p>
           </div>
 
-          <div className="grid-stats about-stats">
-            {STAT_VALUES.map((value, i) => (
-              <div className="stat" key={value}>
-                <div className="stat-value">{value}</div>
-                <div className="stat-label">{statLabels[i]}</div>
-              </div>
-            ))}
+          <div className="about-cities-grid">
+            {REGIONS.map(({ city, img }) => {
+              const name = t(`city.${city}`, { defaultValue: city });
+              return (
+                <article className="city-card" key={city}>
+                  <div className="city-card-thumb">
+                    <img src={img} alt={t("about.regionAlt", { city: name })}
+                         width="800" height="597" loading="lazy" />
+                    <span className="city-card-tag">{t(`about.regions.${city}.tag`)}</span>
+                  </div>
+                  <div className="city-card-body">
+                    <div className="city-card-head">
+                      <h3>{name}</h3>
+                      <span className="city-card-count">{countLabel(city)}</span>
+                    </div>
+                    <p>{t(`about.regions.${city}.desc`)}</p>
+                    <Link to={`/houses?city=${encodeURIComponent(city)}`} className="city-card-link">
+                      {t("about.seePropertiesIn", { city: name })} <IconArrow size={15} />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* 5 ── Where you can rent ─────────────────────────────────── */}
+      {/* 5 ── Who built it ───────────────────────────────────────── */}
+      {/* The page had no "about" in it — six sections of product marketing and
+          not one line saying who made this or why. This is the section an
+          About page exists for. */}
       <section className="section section-alt">
         <div className="container">
-          <div className="section-head">
-            <h2>{t("about.regionsTitle")}</h2>
-            <p className="muted">
-              {t("about.regionsSub")}
-            </p>
-          </div>
+          <div className="about-credits">
+            <div>
+              <h2>{t("about.builtTitle")}</h2>
+              <p className="muted">{t("about.builtP1")}</p>
+              <p className="muted">{t("about.builtP2")}</p>
+            </div>
 
-          <div className="about-cities-grid">
-            {regions.map((r, i) => (
-              <article className="city-card" key={r.city}>
-                <div className="city-card-thumb">
-                  <img src={REGION_META[i].img} alt={t("about.regionAlt", { city: r.city })} />
-                  <span className="city-card-tag">{r.tag}</span>
-                </div>
-                <div className="city-card-body">
-                  <h3>{r.city}</h3>
-                  <p>{r.desc}</p>
-                  <Link to={REGION_META[i].link} className="city-card-link">
-                    {t("about.seePropertiesIn", { city: r.city })} →
-                  </Link>
-                </div>
-              </article>
-            ))}
+            <dl className="about-facts">
+              <div>
+                <dt>{t("about.factStudent")}</dt>
+                <dd>Dawud Asasfeh</dd>
+              </div>
+              <div>
+                <dt>{t("about.factCourse")}</dt>
+                <dd>{t("about.factCourseValue")}</dd>
+              </div>
+              <div>
+                <dt>{t("about.factStack")}</dt>
+                <dd className="ltr">
+                  ASP.NET Core (.NET 10) · React 19 + Vite · SQL Server · EF Core
+                </dd>
+              </div>
+              <div>
+                <dt>{t("about.factSource")}</dt>
+                <dd>
+                  <a className="ltr" href="https://github.com/dawudasasfeh/OCS_Final_Project"
+                     target="_blank" rel="noopener noreferrer">
+                    github.com/dawudasasfeh
+                  </a>
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
       </section>
@@ -163,9 +192,7 @@ export default function About() {
         <div className="container">
           <div className="about-banner">
             <h2>{t("about.closeTitle")}</h2>
-            <p>
-              {t("about.closeText")}
-            </p>
+            <p>{t("about.closeText")}</p>
             <div className="about-banner-actions">
               <Link to="/houses" className="btn btn-primary">{t("about.browse")}</Link>
               {/* The same gated component the navbar uses, so a signed-out

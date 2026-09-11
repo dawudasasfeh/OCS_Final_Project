@@ -559,87 +559,69 @@
   },
   "about": {
     "title": "About Beytak",
-    "intro": "A rental marketplace built for one market rather than adapted to it — where a listing means the same thing every time, and the person on the other end is the owner.",
+    "intro": "Beytak is a rental marketplace for Jordan. Owners list apartments, houses, villas and studios; renters book them by the week, the month or the year — dealing with the owner directly, with no agency in between.",
     "whyTitle": "Renting here is harder than it should be",
     "whyP1": "Finding a home in Jordan means trawling Facebook groups and classified ads where no two listings describe the same things. Half omit the floor, most omit the area, and the ones that look right turn out to be taken. A broker wants a month's rent to make introductions, and the dates you agreed by phone were quietly promised to somebody else.",
     "whyP2": "Beytak fixes the parts of that a platform can actually fix. Every listing carries the same fields. Availability is enforced by the server rather than remembered by a person. The price you agree is the price stored. And the introduction costs nothing, because owners pay a small subscription instead of taking a cut of your rent.",
-    "pillNoCommission": "No commission",
-    "pillDirect": "Direct owner contact",
-    "pillServerDates": "Server-held dates",
-    "pillCash": "Cash & CliQ friendly",
-    "browse": "Browse properties",
-    "imgAlt": "A furnished apartment in Amman with the city visible through the window",
+    "imgAlt": "A furnished living room looking out over Amman",
     "badgeTitle": "Weekly, monthly or yearly",
     "badgeText": "One platform for a fortnight in Aqaba and a year in Abdoun.",
+    "browse": "Browse properties",
     "howTitle": "How it works",
-    "howSub": "Four steps from searching to keys in hand.",
+    "howSub": "Four steps, and what the system holds to at each one.",
     "steps": [
       {
         "h": "Search on facts",
-        "p": "Filter by city, property type, rental period, bedrooms, price and furnishing. Every listing carries the same structured details, so two flats can actually be compared."
+        "p": "Filter by city, property type, rental period, bedrooms, price and furnishing, then compare what comes back.",
+        "promise": "Area, floor, building age and furnishing are required fields, not optional prose — which is what makes two flats comparable instead of a wall of adverts."
       },
       {
-        "h": "See what is free",
-        "p": "Each listing shows the dates already taken before you pick yours, including the gap an owner keeps between tenants. No guessing, no request refused after the fact."
+        "h": "See what is really free",
+        "p": "Every listing shows the dates already taken before you pick yours, including the gap an owner keeps between tenants.",
+        "promise": "Availability is settled by the server, not by the calendar in your browser. The same rule that draws the calendar refuses the booking, so it can never offer a date it would then reject."
       },
       {
-        "h": "Request and confirm",
-        "p": "Choose a start date and a duration; we work out the end date and the total. The owner reviews the request, and their number appears once they confirm."
+        "h": "Request, and get a real answer",
+        "p": "Choose a start date and a duration; the end date and the total are worked out for you. The owner reviews it, and their number appears once they confirm.",
+        "promise": "A booking stores its total the moment it is created. An owner raising their price later changes nothing about a booking already made."
       },
       {
         "h": "Settle it directly",
-        "p": "Pay the owner however you both agree — cash, CliQ, bank transfer or card. Beytak records that it happened and takes nothing from it."
+        "p": "Pay the owner however you both agree — cash, CliQ, bank transfer or card. Beytak records that it happened and takes nothing from it.",
+        "promise": "Owners pay a flat monthly subscription to list. Renters pay Beytak nothing, and the rent never passes through us."
       }
-    ],
-    "guaranteesTitle": "What the platform guarantees",
-    "guarantees": [
-      {
-        "h": "One listing, one shape",
-        "p": "Area in m², floor, building age, furnishing and turnover days are required fields, not optional prose. That is what makes a search result comparable instead of a wall of adverts."
-      },
-      {
-        "h": "Dates cannot collide",
-        "p": "Availability is settled by the server, not the calendar in the browser. The same rule that draws the calendar refuses the booking, so it can never offer a date it would then reject."
-      },
-      {
-        "h": "The agreed price holds",
-        "p": "A booking stores its total the moment it is created. An owner raising their price later changes nothing about a booking already made."
-      },
-      {
-        "h": "Contact, not middlemen",
-        "p": "Owners pay a flat monthly subscription to list. Renters pay Beytak nothing, and the rent never passes through us — you deal with the owner directly."
-      }
-    ],
-    "stats": [
-      "Cities across Jordan",
-      "Commission on rent",
-      "Rental periods",
-      "Per month to list"
     ],
     "regionsTitle": "Where you can rent",
-    "regions": [
-      {
-        "city": "Amman",
-        "tag": "Capital living",
-        "desc": "Modern apartments in Abdoun, Dabouq and Khalda, student studios around University Street, and older flats with character in Jabal Al Weibdeh."
-      },
-      {
-        "city": "Salt & Jerash",
-        "tag": "Heritage & hills",
-        "desc": "Ottoman stone houses on the slopes below the old town, hillside terraces with valley views, and quiet village homes within reach of the ruins."
-      },
-      {
-        "city": "Aqaba",
-        "tag": "On the Red Sea",
-        "desc": "Sea-view apartments and short-stay flats by the week, minutes from the public beach and the souq, for a season or a fortnight."
-      }
-    ],
-    "regionAlt": "Property in {{city}}, Jordan",
+    "regionsSub": "Twelve governorate seats are searchable. These three are where the listings are today — the count on each card is live.",
+    "regionAlt": "Property in {{city}}",
     "seePropertiesIn": "See properties in {{city}}",
+    "regionCount_one": "{{count}} property",
+    "regionCount_other": "{{count}} properties",
+    "regionEmpty": "None yet",
+    "regions": {
+      "Amman": {
+        "tag": "Capital living",
+        "desc": "Apartments across Abdoun, Dabouq and Khalda, student studios near University Street, and older flats with character in Jabal Al Weibdeh."
+      },
+      "Salt": {
+        "tag": "Heritage & hills",
+        "desc": "Ottoman stone houses on the slopes below the old town, within an hour of Amman."
+      },
+      "Aqaba": {
+        "tag": "On the Red Sea",
+        "desc": "Short-stay flats by the week, minutes from the public beach and the souq."
+      }
+    },
+    "builtTitle": "Who built this",
+    "builtP1": "Beytak is the final project of Dawud Asasfeh at Orange Coding School — a full-stack build rather than a mock-up, with a real database, real authentication and rules enforced on the server rather than in the browser.",
+    "builtP2": "The design decision it is built around is a single booking model: one record carries a start date, an end date and a duration type, so a one-week stay in Aqaba and a one-year lease in Amman are the same thing to the system. Owners are charged a flat subscription rather than a commission, which is why nothing the renter pays ever passes through the platform.",
+    "factStudent": "Student",
+    "factCourse": "Course",
+    "factCourseValue": "Orange Coding School — Final Project",
+    "factStack": "Built with",
+    "factSource": "Source",
     "closeTitle": "Find your next home in Jordan",
-    "closeText": "Search apartments, villas, houses and studios by the week, the month or the year — or list your own property and reach renters directly.",
-    "guaranteesSub": "Four rules the code enforces, not four things we hope people do.",
-    "regionsSub": "Listings across the kingdom, from the capital to the coast."
+    "closeText": "Search apartments, villas, houses and studios by the week, the month or the year — or list your own property and reach renters directly."
   },
   "pager": {
     "label": "Pagination",
