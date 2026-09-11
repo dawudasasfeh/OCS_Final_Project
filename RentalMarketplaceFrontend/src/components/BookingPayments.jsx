@@ -106,6 +106,17 @@ export default function BookingPayments({ booking, side }) {
         </span>
       </div>
 
+      {/* The sentence above says 30000 of 35000; the bar says it without
+          arithmetic. Capped at 100 so an overpayment cannot draw past the
+          track, and aria-hidden because the sentence beside it is already the
+          accessible version. */}
+      <div className="pay-progress" aria-hidden="true">
+        <div
+          className={paid >= booking.totalPrice ? "pay-progress-fill full" : "pay-progress-fill"}
+          style={{ width: `${Math.min(100, Math.round((paid / booking.totalPrice) * 100))}%` }}
+        />
+      </div>
+
       {error && <p className="error-text">{error}</p>}
 
       {payments.length > 0 && (
@@ -177,13 +188,13 @@ export default function BookingPayments({ booking, side }) {
                 {saving ? t("booking.recording") : t("booking.recordPayment")}
               </button>
               <button className="btn btn-outline" type="button" onClick={() => setOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </form>
         ) : (
           <button className="btn btn-outline pay-add" type="button" onClick={() => setOpen(true)}>
-            Record a payment
+            {t("booking.recordPayment")}
           </button>
         )
       )}

@@ -419,7 +419,14 @@
     "total": "Total",
     "renter": "Renter",
     "owner": "Owner",
-    "phoneOnceConfirmed": "phone shown once confirmed"
+    "phoneOnceConfirmed": "phone shown once confirmed",
+    "sub": "Requests you have sent, soonest first. The owner's number is on every booking — yours is shared with them only once they confirm.",
+    "tabAll": "All",
+    "tabPending": "Awaiting reply",
+    "tabConfirmed": "Confirmed",
+    "tabPast": "Past",
+    "searchPlaceholder": "Search by property, city or owner",
+    "noMatch": "No bookings match that."
   },
   "requests": {
     "title": "Booking requests",
@@ -437,7 +444,13 @@
     "sub": "Requests for your properties.",
     "waiting_one": "{{count}} waiting for your answer.",
     "waiting_other": "{{count}} waiting for your answer.",
-    "confirmingShares": "Confirming shares your phone number with the renter, and theirs with you."
+    "confirmingShares": "Confirming shares your phone number with the renter, and theirs with you.",
+    "tabAll": "All",
+    "tabPending": "Needs answer",
+    "tabConfirmed": "Confirmed",
+    "tabClosed": "Closed",
+    "searchPlaceholder": "Search by renter, property or phone",
+    "noMatch": "No requests match that."
   },
   "wishlist": {
     "title": "Saved properties",

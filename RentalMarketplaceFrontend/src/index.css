@@ -1574,6 +1574,93 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .form-actions .btn { flex: 1; }
 }
 
+/* ── List toolbar: tabs + search ───────────────────────────────── */
+.list-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .75rem; margin-bottom: 1.1rem;
+}
+
+/* A segmented control rather than a row of buttons: the tabs are one choice,
+   and a shared border says so where four separate outlines would not. */
+.filter-tabs {
+  display: inline-flex; flex-wrap: wrap;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-alt); padding: 3px; gap: 2px;
+}
+.filter-tab {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .38rem .7rem; border: 0; border-radius: 4px;
+  background: none; color: var(--text-muted);
+  font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.filter-tab:hover { color: var(--text); }
+.filter-tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* The count is the half of the tab that carries information when nobody
+   clicks it — "Needs answer 0" says the work is done. */
+.filter-tab-count {
+  min-width: 1.25rem; padding: 0 .3rem; border-radius: 999px;
+  background: var(--border); color: var(--text-muted);
+  font-size: var(--fs-2xs); font-variant-numeric: tabular-nums; text-align: center;
+}
+.filter-tab.active .filter-tab-count { background: var(--primary); color: #fff; }
+
+.list-search { position: relative; flex: 1 1 15rem; max-width: 22rem; }
+.list-search .input { padding-inline-start: 2.1rem; min-height: 38px; font-size: var(--fs-sm); }
+.list-search-icon {
+  position: absolute; inset-inline-start: .65rem; top: 50%; translate: 0 -50%;
+  color: var(--text-light); pointer-events: none;
+}
+
+/* ── Booking cards: the facts, ranked ──────────────────────────── */
+/* Dates and money on one line, the money weighted like every other price
+   on the site. They used to be two thirds of a dl whose third column was a
+   phone number, all three set at the same size. */
+.booking-figures {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: .35rem 1.2rem; margin: 0 0 .55rem;
+}
+.booking-when {
+  display: inline-flex; align-items: center; gap: .35rem; margin: 0;
+  font-size: var(--fs-sm); color: var(--text);
+}
+.booking-when svg { flex: none; color: var(--text-light); }
+.booking-total { margin: 0; font-size: var(--fs-md); font-weight: 700; color: var(--primary); }
+
+/* The counterparty is someone to contact, so the number is a button rather
+   than a line of text to copy out by hand. */
+.booking-who {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .6rem;
+  padding-top: .55rem; border-top: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+.booking-who-label {
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--track-wide);
+  text-transform: uppercase; color: var(--text-muted);
+}
+.booking-who-name { font-weight: 600; }
+.booking-who-actions { display: inline-flex; gap: .35rem; margin-inline-start: auto; flex-wrap: wrap; }
+.booking-who-actions .btn { gap: .35rem; }
+.booking-who-pending { color: var(--text-muted); margin-inline-start: auto; }
+
+/* A request still waiting on an answer is the only thing on this page that
+   needs the reader to do something, so it is the only card that is marked.
+   An accent on the leading edge rather than a tint: it survives at a glance
+   down a column and costs the card no contrast. */
+.booking-card.needs-answer { border-inline-start: 3px solid var(--pending); }
+
+/* The paid figure, without the arithmetic. */
+.pay-progress {
+  height: 5px; border-radius: 999px; overflow: hidden;
+  background: var(--border); margin-bottom: .6rem;
+}
+.pay-progress-fill {
+  height: 100%; border-radius: inherit;
+  background: var(--pending); transition: width .3s ease;
+}
+.pay-progress-fill.full { background: var(--confirmed); }
+
 /* ── booking payments ──────────────────────────────────────────── */
 .pay-block {
   margin-top: .9rem; padding-top: .8rem;
