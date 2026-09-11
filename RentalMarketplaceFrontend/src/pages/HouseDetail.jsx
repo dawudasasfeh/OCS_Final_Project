@@ -34,6 +34,7 @@ export default function HouseDetail() {
   const [broken, setBroken] = useState(() => new Set());
   const stripRef = useRef(null);
   const [booking, setBooking] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const markBroken = (i) => setBroken((prev) => new Set(prev).add(i));
 
@@ -48,6 +49,7 @@ export default function HouseDetail() {
         if (!cancelled) {
           setHouse(data);
           setActiveImage(0);
+          setDescExpanded(false);
         }
       } catch (err) {
         if (!cancelled) {
@@ -328,7 +330,21 @@ export default function HouseDetail() {
 
             <div className="detail-block">
               <h2>{t("house.description")}</h2>
-              <p className="detail-description" dir="auto">{house.description}</p>
+              <p
+                className={descExpanded ? "detail-description" : "detail-description clamped"}
+                dir="auto"
+              >
+                {house.description}
+              </p>
+              {house.description?.length > 220 && (
+                <button
+                  type="button"
+                  className="desc-toggle"
+                  onClick={() => setDescExpanded((v) => !v)}
+                >
+                  {descExpanded ? t("house.showLess") : t("house.showMore")}
+                </button>
+              )}
             </div>
 
             <div className="detail-block">

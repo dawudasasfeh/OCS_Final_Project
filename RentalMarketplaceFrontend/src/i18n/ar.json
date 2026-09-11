@@ -307,6 +307,8 @@
     "statusNotice": "حالة هذا العقار <1>{{status}}</1>. أنت والإدارة فقط ترونه.",
     "details": "التفاصيل",
     "description": "الوصف",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل",
     "listingInformation": "معلومات الإعلان",
     "area": "المساحة",
     "floor": "الطابق",

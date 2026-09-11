@@ -279,6 +279,8 @@
     "statusNotice": "This listing is <1>{{status}}</1>. Only you and an administrator can see it.",
     "details": "Details",
     "description": "Description",
+    "showMore": "Show more",
+    "showLess": "Show less",
     "listingInformation": "Listing information",
     "area": "Area",
     "floor": "Floor",

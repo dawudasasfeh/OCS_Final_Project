@@ -1030,7 +1030,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   display: flex; align-items: center; justify-content: center;
   color: var(--text-light);
 }
-.gallery-stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .gallery-empty { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; }
 
 /* Over the photograph rather than beside it: a photograph that fills its frame
@@ -1137,6 +1137,15 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .detail-row dd { margin: 0; font-weight: 600; text-align: end; }
 
 .detail-description { white-space: pre-line; color: var(--text-muted); }
+.detail-description.clamped {
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.desc-toggle {
+  margin-top: .4rem; padding: 0; border: none; background: none;
+  color: var(--primary); font-size: .85rem; font-weight: 600; cursor: pointer;
+}
+.desc-toggle:hover, .desc-toggle:focus-visible { text-decoration: underline; }
 
 /* metadata reads quieter than the property facts above it */
 .detail-table-meta .detail-row { background: transparent; border: 1px solid var(--border); font-size: .85rem; }
