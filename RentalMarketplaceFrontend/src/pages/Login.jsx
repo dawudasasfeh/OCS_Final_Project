@@ -12,17 +12,16 @@ import Logo from "../components/Logo";
 // Development convenience only — the block that renders these is wrapped in
 // import.meta.env.DEV, so Vite strips it from a production build.
 //
-// Three accounts, one per side of the subscription gate. Layla owns listings
-// and has bookings against her properties, so a single account covers both
-// renting and owning; Hakam is the same minus an active subscription, which is
-// what makes the paywall visible.
+// Three accounts, one per side of the subscription gate. Layla is an owner with
+// an active subscription, so she can publish; Yazan is a renter who has never
+// subscribed, which is what makes the paywall visible.
 const DEMO_ACCOUNTS = [
   { label: "Admin", email: "admin@beytak.com", password: "Admin123!",
     hint: "Moderation queues: pending listings, testimonials and subscriptions" },
   { label: "User (sub)", email: "layla.haddad@gmail.com", password: "Test123!",
-    hint: "Subscribed · 5 listings · can publish a new one" },
-  { label: "User (unsub)", email: "hakam.zoubi@gmail.com", password: "Test123!",
-    hint: "Never subscribed · blocked from listing · payment awaiting admin" },
+    hint: "Subscribed until Dec · owns listings, and also books and pays as a renter" },
+  { label: "User (unsub)", email: "yazan.husseini@gmail.com", password: "Test123!",
+    hint: "Never subscribed · blocked from listing · books as a renter" },
 ];
 
 export default function Login() {
