@@ -1574,6 +1574,66 @@ textarea.input { resize: vertical; line-height: 1.5; }
   .form-actions .btn { flex: 1; }
 }
 
+/* ── Subscription ──────────────────────────────────────────────── */
+.account-tags { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; margin-top: .25rem; }
+/* Reads as a status, not a button — it is mostly there to be read, and only
+   sometimes to be clicked. */
+.account-sub {
+  padding: .1rem .45rem; border-radius: 999px;
+  background: var(--rejected-bg); color: var(--rejected);
+  font-size: var(--fs-2xs); font-weight: 700;
+  letter-spacing: var(--track-wide); text-transform: uppercase;
+}
+.account-sub:hover { text-decoration: underline; }
+.account-sub.active { background: var(--confirmed-bg); color: var(--confirmed); }
+
+/* Three methods that behave differently from one another, so they are shown
+   together rather than hidden in a closed select. */
+.pay-methods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-bottom: 1.1rem; }
+.pay-method {
+  position: relative; display: flex; flex-direction: column; gap: .15rem;
+  padding: .7rem .8rem; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color .15s ease, background .15s ease;
+}
+.pay-method:hover { border-color: var(--border-strong); }
+.pay-method.selected { border-color: var(--primary); background: var(--primary-soft); }
+/* Clipped rather than hidden, so the radio still takes focus and still reads
+   to a screen reader. */
+.pay-method input {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.pay-method:has(input:focus-visible) { border-color: var(--primary); box-shadow: var(--focus-ring); }
+.pay-method-name { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+.pay-method.selected .pay-method-name { color: var(--primary-hover); }
+.pay-method-note { font-size: var(--fs-2xs); color: var(--text-muted); }
+
+.card-panel {
+  padding: 1.1rem; margin-bottom: 1rem;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface-alt);
+}
+.card-panel .input { background: #fff; }
+.card-demo-notice { font-size: var(--fs-xs); line-height: 1.55; }
+
+/* The details a manual payment is actually sent to. */
+.pay-to {
+  margin: 0 0 1rem; padding: .9rem 1rem;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+}
+.pay-to > div { display: flex; justify-content: space-between; gap: 1rem; padding: .35rem 0; }
+.pay-to > div + div { border-top: 1px solid var(--border); }
+.pay-to dt { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--text-muted); }
+.pay-to dd { margin: 0; font-size: var(--fs-sm); font-weight: 600; }
+
+.notice-good { color: var(--confirmed); background: var(--confirmed-bg); border-color: #BBF7D0; }
+
+@media (max-width: 640px) {
+  .pay-methods { grid-template-columns: 1fr; }
+}
+
 /* ── List toolbar: tabs + search ───────────────────────────────── */
 .list-toolbar {
   display: flex; align-items: center; justify-content: space-between;

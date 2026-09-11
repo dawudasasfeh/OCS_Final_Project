@@ -131,7 +131,26 @@ export default function Navbar() {
                     <div className="account-id">
                       <div className="account-name">{user.name}</div>
                       <div className="account-email">{user.email}</div>
-                      <span className="account-role">{user.role}</span>
+                      <div className="account-tags">
+                        <span className="account-role">{user.role}</span>
+                        {/* Beside the role, because it is the same kind of fact:
+                            what this account is allowed to do. It was only a
+                            line in the menu below, which said nothing about
+                            whether the subscription was actually live — an owner
+                            had to open the page to find out. */}
+                        {!isAdmin && (
+                          <Link
+                            to="/subscribe"
+                            className={isSubscribed ? "account-sub active" : "account-sub"}
+                          >
+                            {isSubscribed
+                              ? t("nav.subActive")
+                              : hasEverSubscribed
+                                ? t("nav.subLapsed")
+                                : t("nav.subInactive")}
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
 
