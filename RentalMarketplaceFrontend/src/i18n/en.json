@@ -353,7 +353,16 @@
     "edit": "Edit",
     "makeMain": "Make main",
     "remove": "Remove",
-    "primaryHint": "The first photo is used on search results and booking cards."
+    "primaryHint": "The first photo is used on search results and booking cards.",
+    "photosUploadOnPublish": "Photos upload when you publish.",
+    "stepProperty": "What renters see first in the search results.",
+    "stepWhere": "Where it is. The exact address is only shared with a renter once you confirm a booking.",
+    "stepRooms": "The facts that make your listing comparable with others.",
+    "stepPrice": "What you charge, and how long the property needs between stays.",
+    "stepPhotos": "The first photo is the one renters see on the card.",
+    "moreDetails": "Add floor, master bedrooms and building size",
+    "stillNeeded_one": "{{count}} field still needed",
+    "stillNeeded_other": "{{count}} fields still needed"
   },
   "myListings": {
     "title": "My listings",

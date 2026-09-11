@@ -7,6 +7,9 @@ import { useAuth } from "../context/AuthContext";
 import { Trans, useTranslation } from "react-i18next";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "../components/FieldError";
+import Autocomplete from "../components/Autocomplete";
+import { neighbourhoodOptions, belongsToCity } from "../utils/neighbourhoods";
+import { JORDAN_CITIES } from "../utils/cities";
 import { getMySubscription } from "../api/subscription";
 
 // These integers are the Domain enums. If any of them is renumbered,
@@ -45,7 +48,11 @@ const AGE_VALUE = {
   TenToTwentyYears: 4, OverTwentyYears: 5,
 };
 
-const CITIES = ["Amman", "Irbid", "Zarqa", "Aqaba", "Salt", "Madaba", "Jerash", "Karak"];
+// Was a private list of eight, while the search offered twelve and the About
+// page advertised twelve — so an owner could not list a property in Ajloun,
+// Mafraq, Tafilah or Ma'an. cities.js exists precisely so the two cannot
+// drift; this file had never been pointed at it.
+const CITIES = JORDAN_CITIES;
 
 const EMPTY = {
   title: "",
@@ -144,6 +151,20 @@ export default function CreateListing() {
   }, [photos]);
 
   function set(field, value) {
+    // A neighbourhood belongs to one city, so moving the city has to drop
+    // it. Left behind, the listing would be saved as Abdoun-in-Aqaba and
+    // then never appear under either.
+    if (field === "city") {
+      setForm((f) => ({
+        ...f,
+        city: value,
+        neighborhood: belongsToCity(value, f.neighborhood) ? f.neighborhood : "",
+      }));
+      clearError("city");
+      clearError("neighborhood");
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [field]: value }));
     clearError(field);
   }
@@ -229,6 +250,12 @@ export default function CreateListing() {
     }
   }
 
+  // The five fields the markup marks required and that can still be blank —
+  // bedrooms, bathrooms, city and the rest all carry defaults, so counting
+  // them would tell the owner they have work left when they do not.
+  const missing = ["title", "description", "address", "price", "areaSqM"]
+    .filter((k) => String(form[k] ?? "").trim() === "").length;
+
   return (
     <div className="container section">
       <h1 className="page-title">{isEdit ? t("listing.editTitle") : t("listing.title")}</h1>
@@ -255,7 +282,11 @@ export default function CreateListing() {
         {error && <p className="error-text">{error}</p>}
 
         <fieldset className="form-block">
-          <legend>{t("listing.legendProperty")}</legend>
+          <legend>
+            <span className="form-step" aria-hidden="true">1</span>
+            {t("listing.legendProperty")}
+          </legend>
+          <p className="form-block-hint">{t("listing.stepProperty")}</p>
 
           <div className="field">
             <label className="label" htmlFor="title">{t("listing.listingTitle")}</label>
@@ -309,7 +340,11 @@ export default function CreateListing() {
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>{t("listing.legendWhere")}</legend>
+          <legend>
+            <span className="form-step" aria-hidden="true">2</span>
+            {t("listing.legendWhere")}
+          </legend>
+          <p className="form-block-hint">{t("listing.stepWhere")}</p>
 
           <div className="field">
             <label className="label" htmlFor="address">{t("listing.address")}</label>
@@ -336,19 +371,114 @@ export default function CreateListing() {
 
             <div className="field">
               <label className="label" htmlFor="neighborhood">{t("listing.neighbourhood")} <span className="optional">{t("listing.optional")}</span></label>
-              <input
-                id="neighborhood" className="input" maxLength={100}
+              {/* The same control the filter bar uses — type to narrow,
+                  pick to commit. It was a free text box, which is why a
+                  neighbourhood could never be translated: there was no
+                  stable value to look a translation up by. */}
+              <Autocomplete
+                id="neighborhood"
+                label={t("listing.neighbourhood")}
                 placeholder={t("listing.neighbourhoodPlaceholder")}
+                options={neighbourhoodOptions(t, form.city)}
                 value={form.neighborhood}
-                onChange={(e) => set("neighborhood", e.target.value)}
+                onChange={(v) => set("neighborhood", v)}
               />
               <FieldError>{errors.neighborhood}</FieldError>
             </div>
           </div>
         </fieldset>
 
+
         <fieldset className="form-block">
-          <legend>{t("listing.legendPrice")}</legend>
+          <legend>
+            <span className="form-step" aria-hidden="true">3</span>
+            {t("listing.legendRooms")}
+          </legend>
+          <p className="form-block-hint">{t("listing.stepRooms")}</p>
+
+          <div className="form-row form-row-3">
+            <div className="field">
+              <label className="label" htmlFor="bedrooms">{t("listing.bedrooms")}</label>
+              <input
+                id="bedrooms" className="input" type="number" min="0" max="50" required
+                value={form.bedrooms}
+                onChange={(e) => set("bedrooms", e.target.value)}
+              />
+              <FieldError>{errors.bedrooms}</FieldError>
+            </div>
+            <div className="field">
+              <label className="label" htmlFor="bathrooms">{t("listing.bathrooms")}</label>
+              <input
+                id="bathrooms" className="input" type="number" min="0" max="50" required
+                value={form.bathrooms}
+                onChange={(e) => set("bathrooms", e.target.value)}
+              />
+              <FieldError>{errors.bathrooms}</FieldError>
+            </div>
+            <div className="field">
+              <label className="label" htmlFor="areaSqM">{t("listing.area")}</label>
+              <input
+                id="areaSqM" className="input" type="number" min="1" max="100000" required
+                placeholder={t("listing.areaPlaceholder")}
+                value={form.areaSqM}
+                onChange={(e) => set("areaSqM", e.target.value)}
+              />
+              <FieldError>{errors.areaSqM}</FieldError>
+            </div>
+          </div>
+
+          {/* Three fields nobody has to fill in, folded away. Open, they made the
+              section look twice as long as the work it actually asks for,
+              which is most of what makes a form feel heavy. */}
+          <details className="more-fields">
+            <summary>{t("listing.moreDetails")}</summary>
+            <div className="form-row form-row-3">
+            <div className="field">
+              <label className="label" htmlFor="masterBedrooms">{t("listing.masterBedrooms")} <span className="optional">{t("listing.optional")}</span></label>
+              <input
+                id="masterBedrooms" className="input" type="number" min="0" max="20"
+                value={form.masterBedrooms}
+                onChange={(e) => set("masterBedrooms", e.target.value)}
+              />
+              <FieldError>{errors.masterBedrooms}</FieldError>
+            </div>
+            <div className="field">
+              <label className="label" htmlFor="floorNumber">{t("listing.floor")} <span className="optional">{t("listing.optional")}</span></label>
+              <input
+                id="floorNumber" className="input" type="number" min="0" max="50"
+                value={form.floorNumber}
+                onChange={(e) => set("floorNumber", e.target.value)}
+              />
+              <FieldError>{errors.floorNumber}</FieldError>
+            </div>
+            <div className="field">
+              <label className="label" htmlFor="apartmentsInBuilding">{t("listing.flatsInBuilding")} <span className="optional">{t("listing.optional")}</span></label>
+              <input
+                id="apartmentsInBuilding" className="input" type="number" min="1" max="500"
+                value={form.apartmentsInBuilding}
+                onChange={(e) => set("apartmentsInBuilding", e.target.value)}
+              />
+              <FieldError>{errors.apartmentsInBuilding}</FieldError>
+            </div>
+          </div>
+          </details>
+
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={form.isFurnished}
+              onChange={(e) => set("isFurnished", e.target.checked)}
+            />
+            <span>{t("listing.furnished")}</span>
+          </label>
+        </fieldset>
+
+        <fieldset className="form-block">
+          <legend>
+            <span className="form-step" aria-hidden="true">4</span>
+            {t("listing.legendPrice")}
+          </legend>
+          <p className="form-block-hint">{t("listing.stepPrice")}</p>
 
           <div className="form-row">
             <div className="field">
@@ -397,81 +527,11 @@ export default function CreateListing() {
         </fieldset>
 
         <fieldset className="form-block">
-          <legend>{t("listing.legendRooms")}</legend>
-
-          <div className="form-row form-row-3">
-            <div className="field">
-              <label className="label" htmlFor="bedrooms">{t("listing.bedrooms")}</label>
-              <input
-                id="bedrooms" className="input" type="number" min="0" max="50" required
-                value={form.bedrooms}
-                onChange={(e) => set("bedrooms", e.target.value)}
-              />
-              <FieldError>{errors.bedrooms}</FieldError>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="bathrooms">{t("listing.bathrooms")}</label>
-              <input
-                id="bathrooms" className="input" type="number" min="0" max="50" required
-                value={form.bathrooms}
-                onChange={(e) => set("bathrooms", e.target.value)}
-              />
-              <FieldError>{errors.bathrooms}</FieldError>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="areaSqM">{t("listing.area")}</label>
-              <input
-                id="areaSqM" className="input" type="number" min="1" max="100000" required
-                placeholder={t("listing.areaPlaceholder")}
-                value={form.areaSqM}
-                onChange={(e) => set("areaSqM", e.target.value)}
-              />
-              <FieldError>{errors.areaSqM}</FieldError>
-            </div>
-          </div>
-
-          <div className="form-row form-row-3">
-            <div className="field">
-              <label className="label" htmlFor="masterBedrooms">{t("listing.masterBedrooms")} <span className="optional">{t("listing.optional")}</span></label>
-              <input
-                id="masterBedrooms" className="input" type="number" min="0" max="20"
-                value={form.masterBedrooms}
-                onChange={(e) => set("masterBedrooms", e.target.value)}
-              />
-              <FieldError>{errors.masterBedrooms}</FieldError>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="floorNumber">{t("listing.floor")} <span className="optional">{t("listing.optional")}</span></label>
-              <input
-                id="floorNumber" className="input" type="number" min="0" max="50"
-                value={form.floorNumber}
-                onChange={(e) => set("floorNumber", e.target.value)}
-              />
-              <FieldError>{errors.floorNumber}</FieldError>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="apartmentsInBuilding">{t("listing.flatsInBuilding")} <span className="optional">{t("listing.optional")}</span></label>
-              <input
-                id="apartmentsInBuilding" className="input" type="number" min="1" max="500"
-                value={form.apartmentsInBuilding}
-                onChange={(e) => set("apartmentsInBuilding", e.target.value)}
-              />
-              <FieldError>{errors.apartmentsInBuilding}</FieldError>
-            </div>
-          </div>
-
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={form.isFurnished}
-              onChange={(e) => set("isFurnished", e.target.checked)}
-            />
-            <span>{t("listing.furnished")}</span>
-          </label>
-        </fieldset>
-
-        <fieldset className="form-block">
-          <legend>{t("listing.legendPhotos")}</legend>
+          <legend>
+            <span className="form-step" aria-hidden="true">5</span>
+            {t("listing.legendPhotos")}
+          </legend>
+          <p className="form-block-hint">{t("listing.stepPhotos")}</p>
 
           <label className="upload-drop">
             <input
@@ -493,8 +553,16 @@ export default function CreateListing() {
                     key={p.preview}
                     className={i === 0 ? "upload-item primary" : "upload-item"}
                   >
-                    <img src={p.preview} alt="" />
-                    {i === 0 && <span className="upload-badge">{t("listing.mainPhoto")}</span>}
+                    {/* The photo and the buttons are separate rows now. The
+                        actions used to be laid over the bottom of the image,
+                        which was survivable in English and not in Arabic:
+                        "جعلها الرئيسية" wraps to two lines at this width, so
+                        the overlay grew until it covered half the picture the
+                        owner was trying to judge. */}
+                    <div className="upload-thumb">
+                      <img src={p.preview} alt="" />
+                      {i === 0 && <span className="upload-badge">{t("listing.mainPhoto")}</span>}
+                    </div>
                     <div className="upload-item-actions">
                       {i !== 0 && (
                         <button type="button" onClick={() => makePrimary(p.preview)}>
@@ -509,18 +577,24 @@ export default function CreateListing() {
                 ))}
               </div>
               <p className="field-hint">
-                {t("listing.primaryHint")}
-                Photos upload when you publish.
+                {t("listing.primaryHint")} {t("listing.photosUploadOnPublish")}
               </p>
             </>
           )}
         </fieldset>
 
-        <div className="form-actions">
+        {/* Pinned, so the way out of a five-section form is never a scroll
+            away, and carrying a count of what is still blank — a disabled
+            button that will not say why is the most common way a long form
+            wastes someone's time. */}
+        <div className="form-actions sticky">
           <button className="btn btn-primary" type="submit" disabled={busy}>
             {busy ? (isEdit ? t("listing.saving") : t("listing.publishing")) : (isEdit ? t("listing.saveChanges") : t("listing.publish"))}
           </button>
           <Link to="/my-listings" className="btn btn-outline">{t("common.cancel")}</Link>
+          {missing > 0 && (
+            <span className="form-remaining">{t("listing.stillNeeded", { count: missing })}</span>
+          )}
         </div>
       </form>
     </div>

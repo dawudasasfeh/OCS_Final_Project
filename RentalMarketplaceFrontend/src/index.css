@@ -1424,7 +1424,9 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1rem; }
 .form-row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-.optional { font-weight: 400; color: var(--text-light); text-transform: none; }
+/* --text-muted: --text-light is 2.54:1 on white, and this is a word the
+   reader has to actually read. */
+.optional { font-weight: 400; color: var(--text-muted); text-transform: none; }
 .field-hint { margin: -.5rem 0 .9rem; font-size: .78rem; color: var(--text-muted); }
 
 /* Sits tight under the field it belongs to, in the same slot .field-hint uses,
@@ -1447,6 +1449,55 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .check { display: flex; align-items: center; gap: .5rem; font-size: .9rem; cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--primary); }
 
+/* ── Listing form: sections, folds, sticky actions ─────────────── */
+/* A number beside each legend. Five sections with no shape to them read as
+   one wall of inputs; numbering them tells the owner how much is left
+   without splitting the form into steps they would have to navigate. */
+.form-block legend { display: flex; align-items: center; gap: .5rem; }
+.form-step {
+  width: 22px; height: 22px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--primary-soft); color: var(--primary-hover);
+  font-size: var(--fs-2xs); font-weight: 700;
+}
+.form-block-hint {
+  margin: -.2rem 0 1rem; font-size: var(--fs-sm); color: var(--text-muted);
+}
+
+.more-fields { margin: 0 0 .9rem; }
+.more-fields summary {
+  display: inline-flex; align-items: center; gap: .35rem;
+  cursor: pointer; width: fit-content;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--primary-hover);
+}
+.more-fields summary:hover { text-decoration: underline; }
+/* display:inline-flex on a summary drops the native marker, which left this
+   looking like a link rather than something that opens. Same chevron the
+   selects use, turned when the section is open. */
+.more-fields summary::-webkit-details-marker { display: none; }
+.more-fields summary::marker { content: ""; }
+.more-fields summary::after {
+  content: ""; width: 11px; height: 8px; flex: none;
+  background: currentColor;
+  -webkit-mask: var(--chevron) no-repeat center / contain;
+          mask: var(--chevron) no-repeat center / contain;
+  transition: transform .15s ease;
+}
+.more-fields[open] summary::after { transform: rotate(180deg); }
+.more-fields[open] summary { margin-bottom: .8rem; }
+
+/* Pinned to the bottom of the viewport. The button was a full scroll away
+   from whichever field the owner was last looking at. */
+.form-actions.sticky {
+  position: sticky; bottom: 0; z-index: 5;
+  align-items: center; flex-wrap: wrap;
+  margin-top: 1.5rem; padding: .8rem 0;
+  background: linear-gradient(to top, var(--bg) 72%, rgba(255, 255, 255, 0));
+}
+.form-remaining {
+  margin-inline-start: auto; font-size: var(--fs-sm); color: var(--text-muted);
+}
+
 .form-actions { display: flex; gap: .6rem; }
 
 /* photo upload */
@@ -1462,16 +1513,31 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .upload-drop-title { font-size: .9rem; font-weight: 600; }
 .upload-drop-hint { font-size: .76rem; color: var(--text-muted); }
 
+/* 150, not 130: the actions sit under the photo now and the Arabic labels
+   need the width to stay on one line. */
 .upload-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: .6rem; margin-top: .9rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .7rem; margin-top: .9rem;
 }
 .upload-item {
-  position: relative; aspect-ratio: 4/3; overflow: hidden;
+  display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-alt);
 }
-.upload-item.primary { border-color: var(--primary); border-width: 2px; }
-.upload-item img { width: 100%; height: 100%; object-fit: cover; }
+/* The ring moves to a box-shadow so a 2px border cannot shift the card a
+   pixel out of line with the ones beside it. */
+.upload-item.primary { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+/* The image is taken out of the flow so it cannot decide how tall the frame
+   is. aspect-ratio only holds while the box is not sized by its content, and
+   an <img> at height:100% inside an auto-height parent is exactly that
+   circularity — which is why a portrait screenshot stretched its card to
+   three times the height of the ones beside it. Same pattern .house-thumb
+   already uses. */
+.upload-thumb { position: relative; aspect-ratio: 4/3; flex: none; overflow: hidden; }
+.upload-item img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
 
 /* .field-hint carries a negative top margin to sit tight under a .field;
    after the photo grid that pulls it up into the thumbnails. */
@@ -1484,18 +1550,24 @@ textarea.input { resize: vertical; line-height: 1.5; }
   font-size: .64rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
 }
 
+/* A strip under the photo rather than a layer over it. Always visible, so it
+   works on a touch screen where there is no hover to reveal anything. */
 .upload-item-actions {
-  position: absolute; inset: auto 0 0 0;
-  display: flex; gap: .3rem; padding: .3rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, .65));
+  display: flex; gap: 1px; background: var(--border);
+  border-top: 1px solid var(--border);
 }
 .upload-item-actions button {
-  flex: 1; padding: .2rem; cursor: pointer;
-  background: rgba(255, 255, 255, .92); color: var(--text);
-  border: none; border-radius: 3px;
-  font: inherit; font-size: .7rem; font-weight: 600;
+  flex: 1; padding: .4rem .3rem; cursor: pointer; white-space: nowrap;
+  background: #fff; color: var(--text-muted);
+  border: none; font: inherit; font-size: var(--fs-2xs); font-weight: 600;
+  transition: background .15s ease, color .15s ease;
 }
-.upload-item-actions button:hover { background: #fff; color: var(--primary); }
+.upload-item-actions button:hover { background: var(--surface-alt); color: var(--primary); }
+.upload-item-actions button:focus-visible {
+  outline: none; background: var(--primary-soft); color: var(--primary-hover);
+}
+/* Removing a photo is the destructive one, so it reads as such on hover. */
+.upload-item-actions button:last-child:hover { color: var(--rejected); }
 
 @media (max-width: 767px) {
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
