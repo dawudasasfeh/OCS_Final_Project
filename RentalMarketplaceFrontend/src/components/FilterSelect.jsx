@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { IconCaret } from "./icons";
 
 /**
  * A dropdown that is actually ours.
@@ -127,7 +128,7 @@ export default function FilterSelect({
         aria-label={hideLabel ? label : undefined}
       >
         <span className="fs-value">{selected ? selected.label : placeholder}</span>
-        <span className="fs-caret" aria-hidden="true" />
+        <IconCaret className="fs-caret" size={16} />
       </button>
 
       {open && (
@@ -140,7 +141,7 @@ export default function FilterSelect({
               placeholder={`Search ${label.toLowerCase()}…`}
               value={query}
               onChange={(e) => { setQuery(e.target.value); setActive(0); }}
-              aria-label={`Search ${label}`}
+              aria-label={t("common.searchField", { label })}
             />
           )}
 

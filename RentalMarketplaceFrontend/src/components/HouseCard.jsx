@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconBeds, IconBaths, IconArea } from "./icons";
 import { Link } from "react-router-dom";
 import { imageUrl } from "../utils/images";
 import WishlistButton from "./WishlistButton";
@@ -27,10 +28,12 @@ export default function HouseCard({ house: h }) {
           {t(`city.${h.city}`, { defaultValue: h.city })}{h.neighborhood ? ` · ${h.neighborhood}` : ""}
         </p>
         <h3 className="house-title" dir="auto">{h.title}</h3>
+        {/* The three facts a renter scans for. With an icon each they can be
+            picked out without reading, which is the whole job of a card. */}
         <div className="house-meta">
-          <span>{t("common.beds", { count: h.bedrooms })}</span>
-          <span>{t("common.baths", { count: h.bathrooms })}</span>
-          <span>{t("common.sqm", { value: h.areaSqM })}</span>
+          <span><IconBeds size={15} />{t("common.beds", { count: h.bedrooms })}</span>
+          <span><IconBaths size={15} />{t("common.baths", { count: h.bathrooms })}</span>
+          <span><IconArea size={15} />{t("common.sqm", { value: h.areaSqM })}</span>
         </div>
         <div className="house-foot">
           <span className="house-price">

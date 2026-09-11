@@ -27,6 +27,10 @@
   --rejected: #B91C1C;   --rejected-bg: #FEF2F2;
   --completed: #6B7280;  --completed-bg: #F3F4F6;
 
+  /* One chevron, used by the selects and by any disclosure that needs to
+     point the same way. */
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+
   --radius: 6px;
   --radius-lg: 10px;
   --focus-ring: 0 0 0 3px rgba(212, 42, 42, .18);
@@ -302,7 +306,7 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 }
 .account-avatar.lg { width: 38px; height: 38px; font-size: .88rem; }
 
-.account-caret { font-size: .7rem; color: var(--text-muted); }
+.account-caret { flex: none; color: var(--text-muted); }
 
 .account-menu {
   position: absolute; top: calc(100% + .5rem); inset-inline-end: 0;
@@ -520,6 +524,10 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   overflow: hidden;
 }
 .house-meta { display: flex; flex-wrap: wrap; gap: .7rem; font-size: .82rem; color: var(--text-muted); margin-bottom: .8rem; }
+/* Each fact is an icon plus its number, so the pair must never break across
+   a line — inline-flex keeps them together and the row wraps between facts. */
+.house-meta span { display: inline-flex; align-items: center; gap: .28rem; }
+.house-meta svg { flex: none; color: var(--text-light); }
 .house-foot {
   margin-top: auto; padding-top: .7rem; border-top: 1px solid var(--border);
   display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; flex-wrap: wrap;
@@ -838,8 +846,8 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .contact-icon {
   width: 34px; height: 34px; flex: none;
   display: flex; align-items: center; justify-content: center;
-  background: var(--primary-soft); color: var(--primary);
-  border-radius: var(--radius); font-size: .95rem;
+  background: var(--primary-soft); color: var(--primary-hover);
+  border-radius: var(--radius);
 }
 
 .notice {
@@ -911,12 +919,11 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 
 .fs-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.fs-caret {
-  flex: none; width: 9px; height: 9px; margin-inline-end: .1rem;
-  border-right: 1.6px solid var(--text-light); border-bottom: 1.6px solid var(--text-light);
-  transform: translateY(-2px) rotate(45deg);
-}
-.fs-btn[aria-expanded="true"] .fs-caret { transform: translateY(2px) rotate(-135deg); }
+/* A drawn chevron rather than two rotated borders. The old one was a square
+   with two edges turned 45°, which meant its stroke thickened at the corner
+   and never quite matched the icons beside it. */
+.fs-caret { flex: none; color: var(--text-light); transition: transform .15s ease; }
+.fs-btn[aria-expanded="true"] .fs-caret { transform: rotate(180deg); }
 
 .fs-pop {
   position: absolute; z-index: 40; top: calc(100% + 4px); inset-inline-start: 0;
@@ -968,8 +975,8 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   border: 1px solid var(--border-strong); border-radius: 999px;
 }
 .chip:hover { color: var(--primary); border-color: var(--primary); }
-.chip span { font-size: .95rem; line-height: 1; color: var(--text-light); }
-.chip:hover span { color: var(--primary); }
+.chip svg { flex: none; color: var(--text-light); }
+.chip:hover svg { color: var(--primary); }
 
 /* Desktop shows the panel permanently, so the toggle is mobile-only. */
 .filter-toggle { display: none; }
@@ -1055,8 +1062,6 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
    pinned to the left edge would be the one meaning "forward". */
 .gallery-nav.prev { inset-inline-start: 12px; }
 .gallery-nav.next { inset-inline-end: 12px; }
-/* One chevron drawn once, pointed by the stylesheet. */
-.gallery-nav.prev svg { transform: scaleX(-1); }
 
 .gallery-counter {
   position: absolute; inset-inline-end: 12px; bottom: 12px;
@@ -1167,7 +1172,9 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   width: 100%; font-family: inherit; letter-spacing: .02em;
   display: flex; align-items: center; justify-content: center; gap: .65rem;
 }
-.phone-icon { font-size: 1.65rem; line-height: 1; flex: none; }
+/* Held a ☎ character sized by font-size; it holds an SVG now, so it is a
+   flex box that centres whatever it is given. */
+.phone-icon { flex: none; display: inline-flex; align-items: center; }
 .phone-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; }
 .phone-text strong { font-weight: 600; }
 .phone-text small { font-size: .72rem; font-weight: 400; opacity: .85; letter-spacing: 0; }
@@ -1561,8 +1568,11 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 /* On the detail page the heart sits beside the title, not over an image. */
 .wish-btn-lg {
-  position: static; width: 40px; height: 40px; flex: none; font-size: 1.25rem;
+  position: static; width: 40px; height: 40px; flex: none;
 }
+/* The detail-page heart is on a bigger button, so it gets a bigger glyph —
+   set here rather than by a second size prop at the call site. */
+.wish-btn-lg svg { width: 22px; height: 22px; }
 
 .detail-title-row {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -2203,8 +2213,6 @@ body:has(.auth-split) .footer { display: none; }
   display: inline-flex; align-items: flex-end; justify-content: center;
   min-width: 22px; padding-bottom: .35rem; color: var(--text-light);
 }
-.pager-chevron { flex: none; }
-.pager-chevron.back { transform: scaleX(-1); }
 
 /* "3 / 9" replaces the numbers on a phone. Nine tap targets do not fit across
    320px without each becoming too small to hit reliably. */
@@ -2275,13 +2283,21 @@ body:has(.auth-split) .footer { display: none; }
 }
 
 /* ── Right-to-left ──────────────────────────────────────────────── */
-/* Every chevron on the site is the same path pointing right, turned by the
-   stylesheet. In Arabic "next" points left, so the whole set flips — and the
-   ones already flipped for "back" flip themselves upright again. */
-:root.rtl .pager-chevron { transform: scaleX(-1); }
-:root.rtl .pager-chevron.back { transform: none; }
-:root.rtl .gallery-nav svg { transform: scaleX(-1); }
-:root.rtl .gallery-nav.prev svg { transform: none; }
+/* Chevrons and arrows are the only icons whose meaning depends on the
+   reading direction: "next" points right in English and left in Arabic.
+   Those carry .icon-dir from the icons module and all mirror together, so
+   no component has to know which way round it is. Everything else — a
+   heart, an envelope, a bed — means the same thing in both and must not be
+   touched, which is why this is one opt-in class rather than a blanket
+   flip of every svg. */
+:root.rtl .icon-dir { transform: scaleX(-1); }
+
+/* The one physical property left in the sheet, and it had to be: there is no
+   logical form of background-position. padding-inline-end already moves the
+   chevron clearance to the left in Arabic, but the chevron itself stayed
+   pinned right — sitting on top of the option text, with 2.1rem of empty
+   space on the other side. */
+:root.rtl select.input { background-position: left .75rem center; }
 /* The counter carries .ltr so "1 / 6" keeps Latin digits and reads left to
    right in both languages. That also makes its own inline-end resolve to the
    right edge, so the position has to be mirrored back by hand — the text

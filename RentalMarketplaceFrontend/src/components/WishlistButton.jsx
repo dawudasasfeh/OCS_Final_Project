@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
+import { IconHeart } from "./icons";
+import { useTranslation } from "react-i18next";
 
 /**
  * The heart. Hidden from a listing's own owner, since saving your own property
  * is refused by the API anyway.
  */
 export default function WishlistButton({ houseId, ownerId, className = "" }) {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { ids, toggle } = useWishlist();
     const navigate = useNavigate();
@@ -34,10 +37,10 @@ export default function WishlistButton({ houseId, ownerId, className = "" }) {
             className={`wish-btn ${saved ? "saved" : ""} ${className}`}
             onClick={handleClick}
             aria-pressed={saved}
-            aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
-            title={saved ? "Saved" : "Save to wishlist"}
+            aria-label={saved ? t("common.removeFromWishlist") : t("common.saveToWishlist")}
+            title={saved ? t("common.saved") : t("common.saveToWishlist")}
         >
-            {saved ? "♥" : "♡"}
+            <IconHeart filled={saved} size={18} />
         </button>
     );
 }

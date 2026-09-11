@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import WishlistButton from "../components/WishlistButton";
 import BookingForm from "../components/BookingForm";
 import { Trans, useTranslation } from "react-i18next";
+import { IconPrev, IconNext, IconPhone, IconChat } from "../components/icons";
 
 
 const initials = (name = "") =>
@@ -224,10 +225,7 @@ export default function HouseDetail() {
                   onClick={() => step(-1)}
                   aria-label={t("house.previousImage")}
                 >
-                  <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
-                    <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor"
-                          strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <IconPrev size={19} />
                 </button>
 
                 <button
@@ -235,10 +233,7 @@ export default function HouseDetail() {
                   onClick={() => step(1)}
                   aria-label={t("house.nextImage")}
                 >
-                  <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
-                    <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor"
-                          strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <IconNext size={19} />
                 </button>
 
                 {/* Latin digits in both languages, like every other number on
@@ -355,7 +350,7 @@ export default function HouseDetail() {
                     <div className="phone-btn phone-empty">{t("house.noPhone")}</div>
                   ) : user ? (
                     <a href={`tel:${phone}`} className="btn btn-primary phone-btn">
-                      <span className="phone-icon" aria-hidden="true">&#9742;</span>
+                      <span className="phone-icon"><IconPhone size={20} /></span>
                       <span className="phone-text">
                         <strong>{phone}</strong>
                       </span>
@@ -365,7 +360,7 @@ export default function HouseDetail() {
                       to={`/login?returnTo=/houses/${house.id}`}
                       className="btn btn-primary phone-btn"
                     >
-                      <span className="phone-icon" aria-hidden="true">&#9742;</span>
+                      <span className="phone-icon"><IconPhone size={20} /></span>
                       <span className="phone-text">
                         <strong>{phone}</strong>
                         <small>{t("house.signInForNumber")}</small>
@@ -383,7 +378,7 @@ export default function HouseDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <span className="phone-icon" aria-hidden="true">&#128172;</span>
+                      <span className="phone-icon"><IconChat size={20} /></span>
                       <span className="phone-text"><strong>{t("house.chatWhatsapp")}</strong></span>
                     </a>
                   )}

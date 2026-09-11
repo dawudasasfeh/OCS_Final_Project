@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useSubscription } from "../../context/SubscriptionContext";
 import { useTranslation } from "react-i18next";
 import ListPropertyLink from "../ListPropertyLink";
+import { IconCaret } from "../icons";
 import LanguageToggle from "../LanguageToggle";
 
 const initials = (name = "") =>
@@ -120,7 +121,7 @@ export default function Navbar() {
                 aria-label={t("nav.accountMenu")}
               >
                 <span className="account-avatar">{initials(user.name)}</span>
-                <span className="account-caret" aria-hidden="true">▾</span>
+                <IconCaret className="account-caret" size={15} />
               </button>
 
               {open && (

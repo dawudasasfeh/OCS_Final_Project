@@ -6,6 +6,7 @@ import HouseCard from "../components/HouseCard";
 import FilterSelect from "../components/FilterSelect";
 import Autocomplete from "../components/Autocomplete";
 import Pagination from "../components/Pagination";
+import { IconClose } from "../components/icons";
 import { cityOptions } from "../utils/cities";
 import { useTranslation } from "react-i18next";
 
@@ -304,7 +305,7 @@ export default function Houses() {
                   <button key={c.key} type="button" className="chip"
                           onClick={() => setFilter(c.key, "")}
                           aria-label={t("houses.removeFilter", { label: c.label })}>
-                    {c.label}<span aria-hidden="true">×</span>
+                    {c.label}<IconClose size={14} />
                   </button>
                 ))}
                 <button type="button" className="link-btn" onClick={clearAll}>{t("houses.clearAll")}</button>

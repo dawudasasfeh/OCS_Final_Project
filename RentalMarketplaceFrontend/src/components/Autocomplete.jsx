@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { IconClose } from "./icons";
 
 /**
  * A text box you type into, with suggestions under it.
@@ -116,10 +117,10 @@ export default function Autocomplete({
         <button
           type="button"
           className="ac-clear"
-          aria-label={`Clear ${label}`}
+          aria-label={t("common.clearField", { label })}
           onClick={() => { onChange(""); setText(""); setOpen(false); }}
         >
-          ×
+          <IconClose size={15} />
         </button>
       )}
 

@@ -17,7 +17,13 @@
     "baths_other": "{{count}} baths",
     "results_one": "{{count}} property found",
     "results_other": "{{count}} properties found",
-    "sqm": "{{value}} m²"
+    "sqm": "{{value}} m²",
+    "saveToWishlist": "Save to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "saved": "Saved",
+    "clearField": "Clear {{label}}",
+    "searchField": "Search {{label}}",
+    "dismiss": "Dismiss"
   },
   "lang": {
     "switchTo": "Switch to {{language}}",
@@ -222,7 +228,9 @@
     "requestedBySomeoneElse": "Requested by someone else",
     "booked": "Booked",
     "turnoverGap_one": "Turnover gap — the owner keeps {{count}} day between stays",
-    "turnoverGap_other": "Turnover gap — the owner keeps {{count}} days between stays"
+    "turnoverGap_other": "Turnover gap — the owner keeps {{count}} days between stays",
+    "legendRequested": "Requested",
+    "legendTurnover": "Turnover"
   },
   "duration": {
     "week_one": "{{count}} week",

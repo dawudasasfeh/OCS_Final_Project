@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconMail, IconPhone, IconPlace, IconClock } from "../components/icons";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createTestimonial } from "../api/testimonials";
@@ -11,10 +12,10 @@ import { useTranslation } from "react-i18next";
 // Address and hours are translated; the email and phone are literals that must
 // not be, since they are what a reader copies or dials.
 const DETAILS = [
-  { icon: "✉", labelKey: "contact.email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
-  { icon: "☎", labelKey: "contact.phone", value: "+962 7 9000 0000", href: "tel:+962790000000" },
-  { icon: "⌂", labelKey: "contact.office", valueKey: "contact.officeValue" },
-  { icon: "◷", labelKey: "contact.hours", valueKey: "contact.hoursValue" },
+  { Icon: IconMail, labelKey: "contact.email", value: "support@beytak.jo", href: "mailto:support@beytak.jo" },
+  { Icon: IconPhone, labelKey: "contact.phone", value: "+962 7 9000 0000", href: "tel:+962790000000" },
+  { Icon: IconPlace, labelKey: "contact.office", valueKey: "contact.officeValue" },
+  { Icon: IconClock, labelKey: "contact.hours", valueKey: "contact.hoursValue" },
 ];
 
 const MIN = 20;
@@ -132,7 +133,7 @@ export default function Contact() {
 
             {DETAILS.map((d) => (
               <div className="contact-item" key={d.labelKey}>
-                <span className="contact-icon" aria-hidden="true">{d.icon}</span>
+                <span className="contact-icon"><d.Icon size={17} /></span>
                 <div>
                   <div className="contact-item-label">{t(d.labelKey)}</div>
                   <div className="contact-item-value">

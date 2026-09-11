@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { IconPrev, IconNext } from "./icons";
 
 /**
  * Which page numbers to draw.
@@ -53,18 +54,6 @@ export function usePaged(items, pageSize) {
   return { items: slice, page: safe, totalPages, setPage, total: items.length };
 }
 
-/** A chevron drawn rather than typed, so it flips with the reading direction. */
-function Chevron({ back }) {
-  return (
-    <svg
-      className={back ? "pager-chevron back" : "pager-chevron"}
-      viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"
-    >
-      <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor"
-            strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /**
  * One pager for the whole site, whether the pages come from the server or from
@@ -90,7 +79,7 @@ export default function Pagination({ page, totalPages, onChange, label }) {
         onClick={() => go(page - 1)} disabled={page === 1}
         aria-label={t("pager.previousPage")}
       >
-        <Chevron back />
+        <IconPrev size={16} />
         <span className="pager-step-text">{t("pager.prev")}</span>
       </button>
 
@@ -126,7 +115,7 @@ export default function Pagination({ page, totalPages, onChange, label }) {
         aria-label={t("pager.nextPage")}
       >
         <span className="pager-step-text">{t("pager.next")}</span>
-        <Chevron />
+        <IconNext size={16} />
       </button>
     </nav>
   );

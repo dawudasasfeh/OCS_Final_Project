@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { IconPrev, IconNext } from "./icons";
 import { addDays, parseDay, toIso, todayIso } from "../utils/date";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
@@ -133,7 +134,7 @@ export default function AvailabilityCalendar({
           disabled={atFloor}
           aria-label={t("calendar.prevMonth")}
         >
-          ‹
+          <IconPrev size={17} />
         </button>
         <span className="cal-month">{MONTH_LABEL(cursor)}</span>
         <button
@@ -142,7 +143,7 @@ export default function AvailabilityCalendar({
           onClick={() => shift(1)}
           aria-label={t("calendar.nextMonth")}
         >
-          ›
+          <IconNext size={17} />
         </button>
       </div>
 
@@ -190,9 +191,9 @@ export default function AvailabilityCalendar({
       </div>
 
       <div className="cal-legend">
-        <span><i className="cal-key cal-confirmed" /> Booked</span>
-        <span><i className="cal-key cal-pending" /> Requested</span>
-        {turnoverDays > 0 && <span><i className="cal-key cal-turnover" /> Turnover</span>}
+        <span><i className="cal-key cal-confirmed" /> {t("calendar.booked")}</span>
+        <span><i className="cal-key cal-pending" /> {t("calendar.legendRequested")}</span>
+        {turnoverDays > 0 && <span><i className="cal-key cal-turnover" /> {t("calendar.legendTurnover")}</span>}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const ToastContext = createContext(null);
 
@@ -9,6 +10,9 @@ const LIFETIME = 4500;
 const DEDUPE_MS = 800;
 
 export function ToastProvider({ children }) {
+  // Named tr, not t: the toast map below already binds t to each toast, and a
+  // translation function called t would be shadowed inside that block.
+  const { t: tr } = useTranslation();
   const [toasts, setToasts] = useState([]);
   // Timers are kept so a manually dismissed toast does not leave one running,
   // and so they can all be dropped if the provider unmounts.
@@ -72,7 +76,7 @@ export function ToastProvider({ children }) {
               type="button"
               className="toast-close"
               onClick={() => dismiss(t.id)}
-              aria-label="Dismiss"
+              aria-label={tr("common.dismiss")}
             >
               ×
             </button>

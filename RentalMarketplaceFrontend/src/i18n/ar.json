@@ -29,7 +29,13 @@
     "results_few": "{{count}} عقارات",
     "results_many": "{{count}} عقارًا",
     "results_other": "{{count}} عقار",
-    "sqm": "{{value}} م²"
+    "sqm": "{{value}} م²",
+    "saveToWishlist": "أضف إلى المحفوظات",
+    "removeFromWishlist": "أزل من المحفوظات",
+    "saved": "محفوظ",
+    "clearField": "مسح {{label}}",
+    "searchField": "ابحث في {{label}}",
+    "dismiss": "إغلاق"
   },
   "lang": {
     "switchTo": "التبديل إلى {{language}}",
@@ -238,7 +244,9 @@
     "turnoverGap_two": "فاصل — يترك المالك يومين بين الحجوزات",
     "turnoverGap_few": "فاصل — يترك المالك {{count}} أيام بين الحجوزات",
     "turnoverGap_many": "فاصل — يترك المالك {{count}} يومًا بين الحجوزات",
-    "turnoverGap_other": "فاصل — يترك المالك {{count}} يوم بين الحجوزات"
+    "turnoverGap_other": "فاصل — يترك المالك {{count}} يوم بين الحجوزات",
+    "legendRequested": "مطلوب",
+    "legendTurnover": "فاصل"
   },
   "duration": {
     "week_zero": "بدون أسابيع",
