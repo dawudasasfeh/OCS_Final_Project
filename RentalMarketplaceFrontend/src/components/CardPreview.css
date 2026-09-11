@@ -1,0 +1,396 @@
+/* ─────────────────────────────────────────────────────────────────
+   Beytak — CardPreview component styles
+   Uses design tokens from src/index.css (:root palette)
+   ───────────────────────────────────────────────────────────────── */
+
+.card-preview-wrapper {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 1.25rem;
+  container-type: inline-size;
+}
+
+.card-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  transform-style: preserve-3d;
+  /* Reduced motion default: instant swap, no transition */
+  transition: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card-preview {
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.card-preview.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-preview-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  user-select: none;
+}
+
+/* Subtle gloss reflection sheen */
+.card-preview-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%);
+  pointer-events: none;
+}
+
+/* ──────────────── Front Face ──────────────── */
+
+.card-preview-front {
+  transform: rotateY(0deg) translateZ(1px);
+  background:
+    radial-gradient(ellipse 70% 60% at 85% 15%, rgba(212, 42, 42, 0.42) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 15% 95%, rgba(176, 31, 31, 0.28) 0%, transparent 60%),
+    linear-gradient(135deg, var(--heading) 0%, #151921 50%, rgba(212, 42, 42, 0.35) 130%);
+  padding: 1.35rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-preview-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Chip glyph: CSS rectangle with inner grid circuitry */
+.card-preview-chip {
+  width: 38px;
+  height: 28px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.card-preview-chip-inner {
+  position: absolute;
+  inset: 3px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.card-preview-chip-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.card-preview-chip-line.horizontal {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.card-preview-chip-line.vertical {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+/* Card Number */
+.card-preview-number {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.15rem 0 0.85rem;
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  font-size: clamp(1rem, 5.2cqi, 1.35rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #FFFFFF;
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  text-align: left;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.card-preview-group {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.card-preview-digit {
+  font-weight: 600;
+}
+
+.card-preview-bullet {
+  opacity: 0.42;
+  font-weight: 400;
+}
+
+/* Footer row */
+.card-preview-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.card-preview-col-name {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-preview-label {
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.card-preview-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.card-preview-name.is-muted {
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 500;
+}
+
+.card-preview-col-end {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
+  flex-shrink: 0;
+}
+
+.card-preview-col-expiry {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.card-preview-expiry {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #FFFFFF;
+  line-height: 1.2;
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Brand mark: two overlapping circles */
+.card-preview-brand {
+  position: relative;
+  width: 38px;
+  height: 24px;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.card-preview-circle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  top: 0;
+}
+
+.card-preview-circle.circle-1 {
+  left: 0;
+  background: var(--primary);
+  opacity: 0.88;
+}
+
+.card-preview-circle.circle-2 {
+  right: 0;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* Subtle variations by first digit */
+.card-preview-brand[data-brand="mastercard"] .card-preview-circle.circle-1 {
+  background: var(--primary);
+  opacity: 0.95;
+}
+.card-preview-brand[data-brand="mastercard"] .card-preview-circle.circle-2 {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.card-preview-brand[data-brand="visa"] .card-preview-circle.circle-1 {
+  background: rgba(255, 255, 255, 0.7);
+}
+.card-preview-brand[data-brand="visa"] .card-preview-circle.circle-2 {
+  background: var(--primary);
+  opacity: 0.9;
+}
+
+.card-preview-brand[data-brand="amex"] .card-preview-circle.circle-1 {
+  background: var(--primary-hover);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  top: 1px;
+}
+.card-preview-brand[data-brand="amex"] .card-preview-circle.circle-2 {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  top: 1px;
+}
+
+/* ──────────────── Back Face ──────────────── */
+
+.card-preview-back {
+  transform: rotateY(180deg) translateZ(1px);
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 90%, rgba(212, 42, 42, 0.35) 0%, transparent 65%),
+    linear-gradient(135deg, var(--heading) 0%, #151921 70%, rgba(176, 31, 31, 0.35) 130%);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-preview-magstripe {
+  width: 100%;
+  height: 42px;
+  background: #000000;
+  margin-top: 1.25rem;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+
+.card-preview-back-body {
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.card-preview-signature-row {
+  width: 100%;
+}
+
+.card-preview-signature-strip {
+  width: 100%;
+  height: 38px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(229, 231, 235, 0.9),
+    rgba(229, 231, 235, 0.9) 4px,
+    rgba(255, 255, 255, 0.95) 4px,
+    rgba(255, 255, 255, 0.95) 8px
+  );
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+.card-preview-cvc-box {
+  background: var(--surface);
+  color: var(--heading);
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  text-align: right;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.card-preview-digit-cvc {
+  font-weight: 700;
+}
+
+.card-preview-bullet-cvc {
+  opacity: 0.4;
+  font-weight: 400;
+}
+
+.card-preview-back-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-preview-back-holo {
+  width: 32px;
+  height: 22px;
+  border-radius: 3px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(212, 42, 42, 0.3) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-preview-back-hint {
+  font-size: 0.5625rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}
+
+/* ──────────────── RTL Override ──────────────── */
+
+.rtl .card-preview-number,
+:root.rtl .card-preview-number,
+.rtl .card-preview-expiry,
+:root.rtl .card-preview-expiry,
+.rtl .card-preview-cvc-box,
+:root.rtl .card-preview-cvc-box {
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  text-align: left;
+}
+
+.rtl .card-preview-cvc-box,
+:root.rtl .card-preview-cvc-box {
+  text-align: right;
+}

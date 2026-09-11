@@ -8,6 +8,7 @@ import { useToast } from "../context/ToastContext";
 import { useSubscription } from "../context/SubscriptionContext";
 import { formatDay } from "../utils/date";
 import FieldError from "../components/FieldError";
+import CardPreview from "../components/CardPreview";
 
 /**
  * Values are Domain/Enums/PaymentMethod.cs.
@@ -85,6 +86,7 @@ export default function Subscribe() {
   // administrator can match against a statement.
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvc: "" });
   const [cardErrors, setCardErrors] = useState({});
+  const [cardFlipped, setCardFlipped] = useState(false);
 
   const chosen = METHODS.find((m) => m.value === Number(method));
 
@@ -144,6 +146,7 @@ export default function Subscribe() {
       });
 
       setCard({ number: "", name: "", expiry: "", cvc: "" });
+      setCardFlipped(false);
       setNote("");
 
       // Driven by what the API returns rather than by which button was pressed,
@@ -247,6 +250,13 @@ export default function Subscribe() {
                     checkout, in a project with no payment gateway behind it,
                     has to say what it is — and what it does not keep. */}
                 <p className="notice card-demo-notice">{t("subscribe.cardDemo")}</p>
+                <CardPreview
+                  number={card.number}
+                  name={card.name}
+                  expiry={card.expiry}
+                  cvc={card.cvc}
+                  flipped={cardFlipped}
+                />
 
                 <div className="field">
                   <label className="label" htmlFor="cardNumber">{t("subscribe.cardNumber")}</label>
@@ -291,6 +301,8 @@ export default function Subscribe() {
                       maxLength={4} placeholder="123"
                       value={card.cvc}
                       onChange={(e) => setCardField("cvc", digits(e.target.value).slice(0, 4))}
+                      onFocus={() => setCardFlipped(true)}
+                      onBlur={() => setCardFlipped(false)}
                     />
                     <FieldError>{cardErrors.cvc}</FieldError>
                   </div>
