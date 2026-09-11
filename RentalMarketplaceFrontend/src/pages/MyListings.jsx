@@ -8,6 +8,7 @@ import { imageUrl } from "../utils/images";
 import ListPropertyLink from "../components/ListPropertyLink";
 import Pagination, { usePaged } from "../components/Pagination";
 import { useToast } from "../context/ToastContext";
+import { IconBeds, IconBaths, IconArea } from "../components/icons";
 
 const spaced = (s = "") => s.replace(/([a-z])([A-Z])/g, "$1 $2");
 
@@ -62,30 +63,45 @@ function ListingCard({ house: h, onAvailabilityChange }) {
           )}
         </div>
 
-        <p className="booking-sub">
-          {h.neighborhood ? `${h.neighborhood}, ` : ""}{h.city} · {spaced(h.propertyType)}
+        {/* City and property type were printed raw here, so an Arabic reader
+            saw "Amman · Studio" in Latin on an otherwise Arabic page. Every
+            other card on the site already looks these up; this one was
+            missed. The neighbourhood is still free text in the database, so
+            it stays in whatever language the owner typed. */}
+        <p className="booking-sub" dir="auto">
+          {h.neighborhood ? <>{t(`neighborhood.${h.neighborhood}`, { defaultValue: h.neighborhood })}, </> : ""}
+          {t(`city.${h.city}`, { defaultValue: h.city })} ·{" "}
+          {t(`propertyType.${h.propertyType.charAt(0).toLowerCase()}${h.propertyType.slice(1)}`, { defaultValue: spaced(h.propertyType) })}
         </p>
 
-        <dl className="booking-facts">
-          <div>
-            <dt>{t("myListings.price")}</dt>
-            <dd><strong>{h.price} JOD</strong> / {h.priceUnit.toLowerCase()}</dd>
-          </div>
-          <div>
-            <dt>{t("myListings.property")}</dt>
-            <dd>{t("admin.propertySummary", { beds: h.bedrooms, baths: h.bathrooms, area: h.areaSqM })}</dd>
-          </div>
-          <div>
-            <dt>{t("myListings.listed")}</dt>
-            <dd>{formatDay(h.createdAt.slice(0, 10))}</dd>
-          </div>
-        </dl>
-
+        {/* A rejection is the one thing on this card the owner has to act on,
+            so it sits under the badge that announced it rather than below the
+            facts where it used to. */}
         {note && <p className="listing-note">{note}</p>}
 
+        {/* The three facts used to be a dl of equal columns, which gave the
+            publication date the same weight as the price. An owner scanning
+            this page is looking for the price and the status; the date is the
+            last thing they need. */}
+        <div className="listing-figures">
+          <p className="listing-price">
+            {h.price} {t("common.jod")}{" "}
+            <span>{t("card.perUnit", { unit: t(`period.${h.priceUnit.toLowerCase()}`, { defaultValue: h.priceUnit.toLowerCase() }) })}</span>
+          </p>
+          <div className="house-meta listing-specs">
+            <span><IconBeds size={15} />{t("common.beds", { count: h.bedrooms })}</span>
+            <span><IconBaths size={15} />{t("common.baths", { count: h.bathrooms })}</span>
+            <span><IconArea size={15} />{t("common.sqm", { value: h.areaSqM })}</span>
+          </div>
+        </div>
+
+        <p className="listing-listed">
+          {t("myListings.listedOn", { date: formatDay(h.createdAt.slice(0, 10)) })}
+        </p>
+
         <div className="booking-actions">
+          <Link to={`/houses/${h.id}/edit`} className="btn btn-primary">{t("listing.edit")}</Link>
           <Link to={`/houses/${h.id}`} className="btn btn-outline">{t("myListings.viewListing")}</Link>
-          <Link to={`/houses/${h.id}/edit`} className="btn btn-outline">{t("listing.edit")}</Link>
           <button type="button" className="btn btn-outline" onClick={toggleAvailability} disabled={busy}>
             {h.isAvailable ? t("myListings.delist") : t("myListings.relist")}
           </button>

@@ -1628,6 +1628,21 @@ textarea.input { resize: vertical; line-height: 1.5; }
   font-size: .8rem; color: var(--text-muted);
 }
 
+/* ── My listings: the owner's own card ─────────────────────────── */
+/* Price, specs and date used to be three equal columns of a dl, which said
+   the publication date matters as much as the rent. It does not. */
+.listing-figures {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: .5rem 1.1rem; margin-bottom: .3rem;
+}
+.listing-price { margin: 0; font-size: var(--fs-md); font-weight: 700; color: var(--primary); }
+.listing-price span { font-size: var(--fs-sm); font-weight: 400; color: var(--text-muted); }
+/* Reuses .house-meta so the specs read identically to the public card. */
+.listing-specs { margin-bottom: 0; }
+/* --text-muted, not --text-light: the lighter grey measures 2.54:1 on white,
+   which fails AA for text this small. */
+.listing-listed { margin: 0 0 .2rem; font-size: var(--fs-2xs); color: var(--text-muted); }
+
 .booking-actions { display: flex; gap: .5rem; margin-top: .9rem; }
 .booking-actions .btn { padding: .45rem .95rem; font-size: .84rem; }
 

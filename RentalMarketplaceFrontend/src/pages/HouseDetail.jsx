@@ -158,7 +158,7 @@ export default function HouseDetail() {
   const listingInfo = [
     [t("house.reference"), reference(house.id)],
     [t("house.listedOn"), formatDate(house.createdAt)],
-    [t("house.location"), `${house.neighborhood ? house.neighborhood + ", " : ""}${t(`city.${house.city}`, { defaultValue: house.city })}`],
+    [t("house.location"), `${house.neighborhood ? t(`neighborhood.${house.neighborhood}`, { defaultValue: house.neighborhood }) + ", " : ""}${t(`city.${house.city}`, { defaultValue: house.city })}`],
   ];
 
   return (
@@ -169,7 +169,7 @@ export default function HouseDetail() {
           <span className="sep">›</span>
           <Link to="/houses">{t("nav.properties")}</Link>
           <span className="sep">›</span>
-          <Link to={`/houses?city=${encodeURIComponent(house.city)}`}>{house.city}</Link>
+          <Link to={`/houses?city=${encodeURIComponent(house.city)}`}>{t(`city.${house.city}`, { defaultValue: house.city })}</Link>
           <span className="sep">›</span>
           <span className="current">{house.title}</span>
         </nav>
@@ -274,7 +274,7 @@ export default function HouseDetail() {
             </div>
             <p className="detail-location">
               {house.address}
-              {house.neighborhood ? `, ${house.neighborhood}` : ""}, {house.city}
+              {house.neighborhood ? <>, {t(`neighborhood.${house.neighborhood}`, { defaultValue: house.neighborhood })}</> : ""}, {t(`city.${house.city}`, { defaultValue: house.city })}
             </p>
 
             <div className="spec-bar">

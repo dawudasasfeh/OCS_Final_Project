@@ -8,6 +8,7 @@ import Autocomplete from "../components/Autocomplete";
 import Pagination from "../components/Pagination";
 import { IconClose } from "../components/icons";
 import { cityOptions } from "../utils/cities";
+import { neighbourhoodOptions } from "../utils/neighbourhoods";
 import { useTranslation } from "react-i18next";
 
 // Values stay the integers the API filters on; only the label is translated.
@@ -84,6 +85,10 @@ export default function Houses() {
     const next = new URLSearchParams(searchParams);
     if (value === "" || value == null) next.delete(key);
     else next.set(key, value);
+    // Changing the city invalidates any neighbourhood already chosen —
+    // ?city=Aqaba&neighborhood=Abdoun matches nothing and reads as a
+    // broken search rather than an impossible one.
+    if (key === "city") next.delete("neighborhood");
     next.delete("page");
     setSearchParams(next, { replace: true });
   }
@@ -178,6 +183,7 @@ export default function Houses() {
 
   const chips = [];
   if (get("city")) chips.push({ key: "city", label: t(`city.${get("city")}`, { defaultValue: get("city") }) });
+  if (get("neighborhood")) chips.push({ key: "neighborhood", label: t(`neighborhood.${get("neighborhood")}`, { defaultValue: get("neighborhood") }) });
   if (get("propertyType")) chips.push({ key: "propertyType", label: labelOf(TYPES, get("propertyType")) });
   if (get("priceUnit")) chips.push({ key: "priceUnit", label: labelOf(PERIODS, get("priceUnit")) });
   if (get("bedrooms")) chips.push({ key: "bedrooms", label: labelOf(BEDROOMS, get("bedrooms")) });
@@ -222,11 +228,27 @@ export default function Houses() {
               <label className="filter-label" htmlFor="f-city">{t("houses.city")}</label>
               <Autocomplete
                 id="f-city" label={t("houses.city")} placeholder={t("houses.anyCity")}
+                emptyText={t("select.noMatchingCity")}
                 options={cityOptions(t, cityCounts)}
                 value={get("city")}
                 onChange={(v) => setFilter("city", v)}
               />
             </div>
+
+            {/* Only once a city is chosen. A list mixing Abdoun with
+                Aqaba's districts asks the reader to know which belongs
+                where, which is the platform's job, not theirs. */}
+            {get("city") && (
+              <div className="filter-field">
+                <label className="filter-label" htmlFor="f-hood">{t("houses.neighbourhood")}</label>
+                <Autocomplete
+                  id="f-hood" label={t("houses.neighbourhood")} placeholder={t("houses.anyNeighbourhood")}
+                  options={neighbourhoodOptions(t, get("city"))}
+                  value={get("neighborhood")}
+                  onChange={(v) => setFilter("neighborhood", v)}
+                />
+              </div>
+            )}
 
             <FilterSelect
               id="f-type" label={t("houses.type")} placeholder={t("houses.anyType")}

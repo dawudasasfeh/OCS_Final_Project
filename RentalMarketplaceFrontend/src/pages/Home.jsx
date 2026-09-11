@@ -185,6 +185,7 @@ export default function Home() {
                 id="hero-city"
                 label={t("houses.city")}
                 placeholder={t("home.searchPlaceholder")}
+                emptyText={t("select.noMatchingCity")}
                 options={cityOptions(t, cityCounts)}
                 value={city}
                 onChange={setCity}

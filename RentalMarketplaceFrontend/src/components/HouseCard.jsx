@@ -25,7 +25,7 @@ export default function HouseCard({ house: h }) {
 
       <div className="house-body">
         <p className="house-city" dir="auto">
-          {t(`city.${h.city}`, { defaultValue: h.city })}{h.neighborhood ? ` · ${h.neighborhood}` : ""}
+          {t(`city.${h.city}`, { defaultValue: h.city })}{h.neighborhood ? <> · {t(`neighborhood.${h.neighborhood}`, { defaultValue: h.neighborhood })}</> : ""}
         </p>
         <h3 className="house-title" dir="auto">{h.title}</h3>
         {/* The three facts a renter scans for. With an icon each they can be

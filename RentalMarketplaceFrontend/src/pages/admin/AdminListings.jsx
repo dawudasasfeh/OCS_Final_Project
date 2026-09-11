@@ -36,7 +36,7 @@ export default function AdminListings() {
             </div>
 
             <p className="booking-sub">
-              {h.neighborhood ? `${h.neighborhood}, ` : ""}
+              {h.neighborhood ? <>{t(`neighborhood.${h.neighborhood}`, { defaultValue: h.neighborhood })}, </> : ""}
               {t(`city.${h.city}`, { defaultValue: h.city })} ·{" "}
               {t(`propertyType.${h.propertyType.charAt(0).toLowerCase()}${h.propertyType.slice(1)}`, { defaultValue: spaced(h.propertyType) })}
             </p>

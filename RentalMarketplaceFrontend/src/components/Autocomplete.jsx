@@ -24,6 +24,10 @@ export default function Autocomplete({
   onChange,
   options,
   placeholder = "",
+  // Was hardcoded to "no matching city" inside a component that is now also
+  // the neighbourhood picker. A shared control must not know what it is
+  // listing.
+  emptyText,
 }) {
   const { t } = useTranslation();
   const [text, setText] = useState("");
@@ -127,7 +131,7 @@ export default function Autocomplete({
       {open && (
         <div className="fs-pop ac-pop">
           <ul className="fs-list" role="listbox" ref={listRef} aria-label={label}>
-            {matches.length === 0 && <li className="fs-empty">{t("select.noMatchingCity")}</li>}
+            {matches.length === 0 && <li className="fs-empty">{emptyText ?? t("select.noMatch")}</li>}
 
             {matches.map((o, i) => (
               <li key={o.value}>
