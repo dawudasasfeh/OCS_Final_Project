@@ -68,12 +68,19 @@ public class PaymentService : IPaymentService
         if (user is null)
             return Result<PaymentDto>.Fail("Account not found.");
 
+        // Card is the one method with nothing for an administrator to actually
+        // check — there is no card processor behind it, so there is no
+        // statement to match against a manual reference the way CliQ and bank
+        // transfer need. It settles itself.
+        var isCard = dto.Method == PaymentMethod.Card;
+
         var payment = new Payment
         {
-            Amount = SubscriptionPrice,     
+            Amount = SubscriptionPrice,
             Purpose = PaymentPurpose.SubscriptionPayment,
             Method = dto.Method,
-            Status = PaymentStatus.Pending,
+            Status = isCard ? PaymentStatus.Confirmed : PaymentStatus.Pending,
+            ConfirmedAt = isCard ? DateTime.UtcNow : null,
             ReferenceNote = dto.ReferenceNote?.Trim(),
             CreatedAt = DateTime.UtcNow,
             PayerId = payerId,
@@ -82,6 +89,13 @@ public class PaymentService : IPaymentService
 
         await _uow.Payments.AddAsync(payment);
         await _uow.SaveChangesAsync();
+
+        if (isCard)
+        {
+            var granted = await _subscriptions.GrantAsync(payerId);
+            if (!granted.Succeeded)
+                return Result<PaymentDto>.Fail(granted.Error!);
+        }
 
         payment.Payer = user;
 
