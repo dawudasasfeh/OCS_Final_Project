@@ -313,6 +313,8 @@
     "floor": "Floor",
     "flatsInBuilding": "Flats in building",
     "daysBetweenStays": "Days needed between stays",
+    "rentedByTheHint": "Renters book in this unit only. A monthly listing cannot be booked by the week.",
+    "daysBetweenStaysHint": "Cleaning and handover. Bookings closer together than this are refused automatically.",
     "choosePhotos": "Choose photos",
     "photoHint": "JPG, PNG or WEBP · up to 5 MB each",
     "notSpecified": "Not specified",

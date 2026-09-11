@@ -141,8 +141,22 @@ export default function HouseDetail() {
   const enumLabel = (ns, value) =>
     value ? t(`${ns}.${String(value).charAt(0).toLowerCase() + String(value).slice(1)}`, { defaultValue: spaced(value) }) : value;
 
+  // BuildingAge is the one enum whose translation keys ("ageUnder1", "age1to5"…,
+  // set by CreateListing.jsx's BUILDING_AGES) don't follow the lowercase-first
+  // convention enumLabel relies on, so it gets its own lookup.
+  const BUILDING_AGE_KEYS = {
+    UnderOneYear: "listing.ageUnder1",
+    OneToFiveYears: "listing.age1to5",
+    FiveToTenYears: "listing.age5to10",
+    TenToTwentyYears: "listing.age10to20",
+    OverTwentyYears: "listing.ageOver20",
+  };
+  const buildingAgeLabel = house.buildingAge
+    ? t(BUILDING_AGE_KEYS[house.buildingAge] ?? "", { defaultValue: spaced(house.buildingAge) })
+    : null;
+
   const details = [
-    [t("house.buildingAge"), house.buildingAge ? spaced(house.buildingAge) : null],
+    [t("house.buildingAge"), buildingAgeLabel],
     [t("house.rentalPeriod"), enumLabel("period", house.priceUnit)],
     [t("house.propertyType"), enumLabel("propertyType", house.propertyType)],
     [t("house.floor"), house.floorNumber],
@@ -296,7 +310,7 @@ export default function HouseDetail() {
               </div>
               <div className="spec">
                 <span className="spec-label">{t("house.type")}</span>
-                <span className="spec-value">{spaced(house.propertyType)}</span>
+                <span className="spec-value">{enumLabel("propertyType", house.propertyType)}</span>
               </div>
             </div>
 

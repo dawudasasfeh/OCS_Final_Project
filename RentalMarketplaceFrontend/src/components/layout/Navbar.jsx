@@ -132,7 +132,9 @@ export default function Navbar() {
                       <div className="account-name">{user.name}</div>
                       <div className="account-email">{user.email}</div>
                       <div className="account-tags">
-                        <span className="account-role">{user.role}</span>
+                        <span className="account-role">
+                          {user.role === "Admin" ? t("admin.roleAdmin") : t("admin.roleUser")}
+                        </span>
                         {/* Beside the role, because it is the same kind of fact:
                             what this account is allowed to do. It was only a
                             line in the menu below, which said nothing about

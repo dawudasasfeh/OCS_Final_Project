@@ -506,10 +506,7 @@ export default function CreateListing() {
             </div>
           </div>
 
-          <p className="field-hint">
-            Renters book in this unit only. A monthly listing cannot be booked by
-            the week.
-          </p>
+          <p className="field-hint">{t("listing.rentedByTheHint")}</p>
 
           <div className="field">
             <label className="label" htmlFor="turnoverDays">{t("listing.daysBetweenStays")}</label>
@@ -519,10 +516,7 @@ export default function CreateListing() {
               onChange={(e) => set("turnoverDays", e.target.value)}
             />
             <FieldError>{errors.turnoverDays}</FieldError>
-            <p className="field-hint">
-              Cleaning and handover. Bookings closer together than this are refused
-              automatically.
-            </p>
+            <p className="field-hint">{t("listing.daysBetweenStaysHint")}</p>
           </div>
         </fieldset>
 
