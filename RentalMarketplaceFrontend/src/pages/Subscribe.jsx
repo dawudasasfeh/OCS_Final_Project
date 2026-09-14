@@ -103,7 +103,7 @@ export default function Subscribe() {
   useEffect(() => {
     let cancelled = false;
     load()
-      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("subscribe.couldNotLoad"))); })
+      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("subscribe.couldNotLoad"), t)); })
       .finally(() => { if (!cancelled) setBusy(false); });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,7 +160,7 @@ export default function Subscribe() {
       refreshSubscription();
       await load();
     } catch (err) {
-      const message = getErrorMessage(err, t("subscribe.couldNotRecord"));
+      const message = getErrorMessage(err, t("subscribe.couldNotRecord"), t);
       setError(message);
       toast.error(message);
     } finally {

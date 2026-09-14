@@ -22,7 +22,7 @@ export default function Wishlist() {
         const data = await getWishlist();
         if (!cancelled) setHouses(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, t("wishlist.couldNotLoad")));
+        if (!cancelled) setError(getErrorMessage(err, t("wishlist.couldNotLoad"), t));
       } finally {
         if (!cancelled) setLoading(false);
       }

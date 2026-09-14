@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Inline field validation built on the constraints already declared in the
@@ -15,40 +16,40 @@ import { useCallback, useState } from "react";
 
 // Not every field has a visible label — the payment row is laid out with
 // placeholders — so fall back through the other things that name a field before
-// giving up on "This field".
-const labelFor = (el) => {
+// giving up on the generic "This field".
+const labelFor = (el, t) => {
   const label = el.id && el.form?.querySelector(`label[for="${CSS.escape(el.id)}"]`);
   return (
     label?.textContent?.replace(/\s*\*$/, "").trim() ||
     el.getAttribute("aria-label") ||
     el.placeholder ||
-    "This field"
+    t("validation.thisField")
   );
 };
 
-export function messageFor(el) {
+export function messageFor(el, t) {
   const v = el.validity;
-  const name = labelFor(el);
+  const name = labelFor(el, t);
 
-  if (v.valueMissing) return `${name} is required.`;
+  if (v.valueMissing) return t("validation.fieldRequired", { field: name });
 
   // A custom title is written for the human; prefer it over anything generic.
-  if (v.patternMismatch) return el.title || `${name} is not in the expected format.`;
+  if (v.patternMismatch) return el.title || t("validation.patternMismatch", { field: name });
 
   if (v.typeMismatch) {
-    if (el.type === "email") return "Enter a valid email address, like name@example.com.";
-    if (el.type === "url") return "Enter a valid web address.";
-    return `${name} is not valid.`;
+    if (el.type === "email") return t("validation.emailInvalid");
+    if (el.type === "url") return t("validation.urlInvalid");
+    return t("validation.fieldInvalid", { field: name });
   }
 
-  if (v.tooShort) return `${name} must be at least ${el.minLength} characters.`;
-  if (v.tooLong) return `${name} must be ${el.maxLength} characters or fewer.`;
-  if (v.rangeUnderflow) return `${name} must be ${el.min} or more.`;
-  if (v.rangeOverflow) return `${name} must be ${el.max} or less.`;
-  if (v.stepMismatch) return `${name} must be a whole number.`;
-  if (v.badInput) return `${name} is not a valid number.`;
+  if (v.tooShort) return t("validation.tooShort", { field: name, min: el.minLength });
+  if (v.tooLong) return t("validation.tooLong", { field: name, max: el.maxLength });
+  if (v.rangeUnderflow) return t("validation.rangeUnderflow", { field: name, min: el.min });
+  if (v.rangeOverflow) return t("validation.rangeOverflow", { field: name, max: el.max });
+  if (v.stepMismatch) return t("validation.stepMismatch", { field: name });
+  if (v.badInput) return t("validation.badInput", { field: name });
 
-  return `${name} is not valid.`;
+  return t("validation.fieldInvalid", { field: name });
 }
 
 /**
@@ -56,6 +57,7 @@ export function messageFor(el) {
  * inputs names and every input already needs an id to pair with its label.
  */
 export function useFieldErrors() {
+  const { t } = useTranslation();
   const [errors, setErrors] = useState({});
 
   const validate = useCallback((form) => {
@@ -63,7 +65,7 @@ export function useFieldErrors() {
 
     for (const el of form.elements) {
       if (!el.id || el.disabled || el.type === "submit" || el.type === "button") continue;
-      if (!el.checkValidity()) found[el.id] = messageFor(el);
+      if (!el.checkValidity()) found[el.id] = messageFor(el, t);
     }
 
     setErrors(found);
@@ -74,7 +76,8 @@ export function useFieldErrors() {
     if (first) form.querySelector(`#${CSS.escape(first)}`)?.focus();
 
     return Object.keys(found).length === 0;
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   // Clear one field's message as soon as it is edited; re-reporting on every
   // keystroke would flag a field as wrong while it is still being typed.

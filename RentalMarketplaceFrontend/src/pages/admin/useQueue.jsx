@@ -23,7 +23,7 @@ export function useQueue(load, onChanged, pageSize = 8) {
     try {
       setItems(await load());
     } catch (err) {
-      setError(getErrorMessage(err, t("admin.couldNotLoadQueue")));
+      setError(getErrorMessage(err, t("admin.couldNotLoadQueue"), t));
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export function useQueue(load, onChanged, pageSize = 8) {
       toast.success(success);
       onChanged?.();
     } catch (err) {
-      const message = getErrorMessage(err, failure);
+      const message = getErrorMessage(err, failure, t);
       setError(message);
       toast.error(message);
     } finally {

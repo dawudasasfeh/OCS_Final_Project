@@ -33,7 +33,7 @@ export default function AdminUsers() {
     try {
       setUsers(await getAdminUsers());
     } catch (err) {
-      setError(getErrorMessage(err, t("admin.couldNotLoadUsers")));
+      setError(getErrorMessage(err, t("admin.couldNotLoadUsers"), t));
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function AdminUsers() {
       await load();
       toast.success(success);
     } catch (err) {
-      const message = getErrorMessage(err, failure);
+      const message = getErrorMessage(err, failure, t);
       setError(message);
       toast.error(message);
     } finally {

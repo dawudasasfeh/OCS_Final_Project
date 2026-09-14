@@ -131,7 +131,7 @@ export default function CreateListing() {
           turnoverDays: h.turnoverDays ?? 2,
         });
       })
-      .catch((err) => setError(getErrorMessage(err, t("house.couldNotLoad"))))
+      .catch((err) => setError(getErrorMessage(err, t("house.couldNotLoad"), t)))
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
@@ -243,7 +243,7 @@ export default function CreateListing() {
       toast.success(isEdit ? t("listing.updated") : t("listing.created"));
       navigate(`/houses/${saved.id}`, { replace: true });
     } catch (err) {
-      const message = getErrorMessage(err, isEdit ? t("listing.couldNotUpdate") : t("listing.couldNotCreate"));
+      const message = getErrorMessage(err, isEdit ? t("listing.couldNotUpdate") : t("listing.couldNotCreate"), t);
       setError(message);
       toast.error(message);
       setBusy(false);

@@ -147,7 +147,7 @@ export default function Houses() {
         });
         if (!cancelled) setPage(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, t("houses.couldNotLoad")));
+        if (!cancelled) setError(getErrorMessage(err, t("houses.couldNotLoad"), t));
       } finally {
         if (!cancelled) setLoading(false);
       }

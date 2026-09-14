@@ -56,7 +56,7 @@ export default function HouseDetail() {
           setError(
             err?.response?.status === 404
               ? t("house.unavailable")
-              : getErrorMessage(err, t("house.couldNotLoad"))
+              : getErrorMessage(err, t("house.couldNotLoad"), t)
           );
         }
       } finally {

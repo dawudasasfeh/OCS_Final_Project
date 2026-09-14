@@ -92,18 +92,6 @@ public class BookingService : IBookingService
 
         return Map(booking, booking.Status == BookingStatus.Confirmed);
     }
-    /// <summary>
-    /// The caller's own bookings, with the owner's phone number on all of them.
-    ///
-    /// This is deliberately NOT gated on Confirmed, unlike GetRequestsAsync.
-    /// HouseService.GetByIdAsync already hands the owner's full number to any
-    /// signed-in visitor, so a renter can read it off the listing page whatever
-    /// their booking's status — hiding it here withheld nothing and only made
-    /// the two pages disagree.
-    ///
-    /// The owner's view stays gated, because the renter's number is not public
-    /// anywhere: there the gate is real.
-    /// </summary>
     public async Task<IReadOnlyList<BookingDto>> GetMineAsync(string renterId) {
         var bookings = await _uow.Bookings.GetForRenterAsync(renterId);
         return bookings.Select(b => Map(b, includeContacts: true)).ToList();
@@ -188,16 +176,7 @@ public class BookingService : IBookingService
         return Result<BookingDto>.Ok(Map(booking, booking.Status == BookingStatus.Confirmed));
     }
 
-    /// <summary>
-    /// BookingStatus.Completed is never written to the database — nothing
-    /// sweeps past bookings. Deriving it here means a stay whose dates have
-    /// passed reads as finished instead of sitting on "Confirmed" forever,
-    /// without a background job or a migration. The stored status is untouched,
-    /// so the overlap check and the owner's confirm/reject flow are unaffected.
-    ///
-    /// EndDate is the checkout day and is exclusive, so the stay is over once
-    /// today has reached it.
-    /// </summary>
+   
     private static string StatusOf(Booking b) =>
         b.Status == BookingStatus.Confirmed &&
         b.EndDate <= DateOnly.FromDateTime(DateTime.UtcNow)

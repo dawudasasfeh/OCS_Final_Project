@@ -38,7 +38,7 @@ export default function BookingRequests() {
         const data = await getBookingRequests();
         if (!cancelled) setBookings(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, t("requests.couldNotLoad")));
+        if (!cancelled) setError(getErrorMessage(err, t("requests.couldNotLoad"), t));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -56,7 +56,7 @@ export default function BookingRequests() {
       setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
       toast.success(success);
     } catch (err) {
-      const message = getErrorMessage(err, failure);
+      const message = getErrorMessage(err, failure, t);
       setError(message);
       toast.error(message);
     } finally {

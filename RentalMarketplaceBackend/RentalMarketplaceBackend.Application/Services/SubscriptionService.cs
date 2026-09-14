@@ -79,14 +79,9 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task<IReadOnlyList<AdminUserDto>> GetAllForAdminAsync()
     {
-        // Listing counts come from one grouped query rather than a count per
-        // user — thirteen accounts today, but a per-row query is the kind of
-        // thing that is fine until it is not.
+
         var listingCounts = await _uow.Houses.CountByOwnerAsync();
 
-        // ToList, not ToListAsync: this layer deliberately does not reference
-        // EF Core, so the async LINQ extensions are not available here — the
-        // persistence detail stays behind the repository boundary.
         var users = _userManager.Users.ToList();
         var rows = new List<AdminUserDto>(users.Count);
 
@@ -108,9 +103,6 @@ public class SubscriptionService : ISubscriptionService
             });
         }
 
-        // Active first, then lapsed — someone whose subscription ran out is the
-        // row an admin is most likely looking for after the active ones — then
-        // everyone else, alphabetically inside each group.
         return rows
             .OrderByDescending(r => r.IsActive)
             .ThenByDescending(r => r.ExpiresAt.HasValue)

@@ -5,10 +5,6 @@ namespace RentalMarketplaceBackend.Application.Interfaces.Services;
 
 public interface IBookingService
 {
-    /// <summary>
-    /// FR-9.4.2 — isAdmin is a refusal, not a privilege. The role exists for
-    /// oversight, so an administrator does not take part in bookings.
-    /// </summary>
     Task<Result<BookingDto>> CreateAsync(BookingCreateDto dto, string renterId, bool isAdmin = false);
 
     Task<BookingDto?> GetByIdAsync(int id, string requesterId, bool isAdmin = false);

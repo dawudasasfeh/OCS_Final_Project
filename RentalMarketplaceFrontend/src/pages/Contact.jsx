@@ -40,7 +40,7 @@ export default function Contact() {
 
     const text = content.trim();
     if (text.length < MIN) {
-      setFieldError("content", `Please write at least ${MIN} characters.`);
+      setFieldError("content", t("validation.tooShort", { field: t("contact.yourTestimonial"), min: MIN }));
       return;
     }
 
@@ -49,9 +49,9 @@ export default function Contact() {
       await createTestimonial(text);
       setContent("");
       setSent(true);
-      toast.success("Thank you. Your testimonial is waiting for review.");
+      toast.success(t("contact.thanks"));
     } catch (err) {
-      const message = getErrorMessage(err, "Could not submit your testimonial. Please try again.");
+      const message = getErrorMessage(err, t("contact.couldNotSubmit"), t);
       setError(message);
       toast.error(message);
     } finally {

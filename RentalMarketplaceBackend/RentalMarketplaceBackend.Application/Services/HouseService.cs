@@ -64,12 +64,6 @@ public class HouseService : IHouseService
         if (owner is null)
             return Result<HouseDto>.Fail("Account not found.");
 
-        // FR-9.4.2 — the Admin role is oversight only. An admin who published a
-        // listing would be the person who approves it, which is the one
-        // separation this system exists to keep: an owner cannot approve their
-        // own listing, a renter cannot confirm their own payment. Exempting the
-        // admin from the fee was the earlier answer and it was the wrong one —
-        // it made the moderator a seller.
         if (isAdmin)
             return Result<HouseDto>.Fail("Administrators cannot publish listings.");
 
@@ -113,13 +107,6 @@ public class HouseService : IHouseService
 
     }
 
-    /// <summary>
-    /// FR-2.7 / FR-2.10 — an owner edits their own listing, and only their own.
-    ///
-    /// Ownership is read from the token by the controller and compared here, so
-    /// the request body cannot claim it. HouseUpdateDto has no OwnerId and no
-    /// Status field at all, which is why neither needs validating away.
-    /// </summary>
     public async Task<Result<HouseDto>> UpdateAsync(int id, HouseUpdateDto dto, string requesterId)
     {
         var house = await _uow.Houses.GetWithDetailsAsync(id);
@@ -147,11 +134,6 @@ public class HouseService : IHouseService
         house.BuildingAge = dto.BuildingAge;
         house.TurnoverDays = dto.TurnoverDays;
 
-        // An edited listing goes back into the queue. Otherwise an owner could
-        // get a modest flat approved and then rewrite it into something else,
-        // and moderation would have approved a listing that no longer exists.
-        // A rejected listing returns to Pending for the opposite reason: the
-        // edit is how an owner answers the rejection.
         if (house.Status != ListingStatus.Pending)
             house.Status = ListingStatus.Pending;
 
@@ -159,18 +141,6 @@ public class HouseService : IHouseService
 
         return Result<HouseDto>.Ok(HouseMapper.Map(house, includeContent: true));
     }
-
-    /// <summary>
-    /// FR-2.8 — take a property off the market without deleting it.
-    ///
-    /// Existing bookings are deliberately untouched. Delisting says "no new
-    /// requests", not "the stays I already agreed are off" — those are a
-    /// commitment to a renter and are cancelled through the booking, not by
-    /// withdrawing the listing underneath them.
-    ///
-    /// Status is untouched too: an approved listing that is delisted is still
-    /// approved, and relisting it should not send it back through moderation.
-    /// </summary>
     public async Task<Result<HouseDto>> SetAvailabilityAsync(int id, bool isAvailable, string requesterId)
     {
         var house = await _uow.Houses.GetWithDetailsAsync(id);

@@ -45,7 +45,7 @@ export default function BookingPayments({ booking, side }) {
     getBookingPayments(booking.id)
       .then((data) => { if (!cancelled) setPayments(data); })
       .catch((err) => {
-        if (!cancelled) setError(getErrorMessage(err, t("booking.couldNotLoadPayments")));
+        if (!cancelled) setError(getErrorMessage(err, t("booking.couldNotLoadPayments"), t));
       })
       .finally(() => { if (!cancelled) setLoading(false); });
 
@@ -76,7 +76,7 @@ export default function BookingPayments({ booking, side }) {
       setNote("");
       setOpen(false);
     } catch (err) {
-      setError(getErrorMessage(err, t("booking.couldNotRecord")));
+      setError(getErrorMessage(err, t("booking.couldNotRecord"), t));
     } finally {
       setSaving(false);
     }
@@ -89,7 +89,7 @@ export default function BookingPayments({ booking, side }) {
       const updated = await action(id);
       setPayments((prev) => prev.map((p) => (p.id === id ? updated : p)));
     } catch (err) {
-      setError(getErrorMessage(err, failure));
+      setError(getErrorMessage(err, failure, t));
     } finally {
       setBusyId(null);
     }

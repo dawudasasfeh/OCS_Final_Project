@@ -54,7 +54,7 @@ export default function Login() {
       await login(email, password);
       navigate(returnTo, { replace: true });
     } catch (err) {
-      const message = getErrorMessage(err, t("auth.invalidCredentials"));
+      const message = getErrorMessage(err, t("auth.invalidCredentials"), t);
       setError(message);
       toast.error(message);
     } finally {

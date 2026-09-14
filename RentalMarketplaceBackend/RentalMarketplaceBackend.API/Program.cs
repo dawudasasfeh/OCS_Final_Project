@@ -27,6 +27,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
+
 builder.Services.AddCors(o => o.AddPolicy("react", p => p
     .WithOrigins("http://localhost:5173", "http://localhost:5174")
     .AllowAnyHeader()

@@ -37,7 +37,7 @@ export default function MyBookings() {
         const data = await getMyBookings();
         if (!cancelled) setBookings(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, t("bookings.couldNotLoad")));
+        if (!cancelled) setError(getErrorMessage(err, t("bookings.couldNotLoad"), t));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -55,7 +55,7 @@ export default function MyBookings() {
       setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
       toast.success(t("bookings.cancelled"));
     } catch (err) {
-      const message = getErrorMessage(err, t("bookings.couldNotCancel"));
+      const message = getErrorMessage(err, t("bookings.couldNotCancel"), t);
       setError(message);
       toast.error(message);
     } finally {

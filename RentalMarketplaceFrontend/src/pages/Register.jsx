@@ -50,7 +50,7 @@ export default function Register() {
       await register(dto);
       navigate("/");
     } catch (err) {
-      setError(getErrorMessage(err, t("auth.registrationFailed")));
+      setError(getErrorMessage(err, t("auth.registrationFailed"), t));
     } finally {
       setBusy(false);
     }

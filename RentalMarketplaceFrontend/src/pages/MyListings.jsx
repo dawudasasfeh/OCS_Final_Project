@@ -36,7 +36,7 @@ function ListingCard({ house: h, onAvailabilityChange }) {
       onAvailabilityChange(updated);
       toast.success(updated.isAvailable ? t("myListings.relisted") : t("myListings.delisted"));
     } catch (err) {
-      toast.error(getErrorMessage(err, t("myListings.couldNotChange")));
+      toast.error(getErrorMessage(err, t("myListings.couldNotChange"), t));
     } finally {
       setBusy(false);
     }
@@ -125,7 +125,7 @@ export default function MyListings() {
         const data = await getMyHouses();
         if (!cancelled) setHouses(data);
       } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err, t("myListings.couldNotLoad")));
+        if (!cancelled) setError(getErrorMessage(err, t("myListings.couldNotLoad"), t));
       } finally {
         if (!cancelled) setLoading(false);
       }

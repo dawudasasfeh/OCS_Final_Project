@@ -68,10 +68,6 @@ public class PaymentService : IPaymentService
         if (user is null)
             return Result<PaymentDto>.Fail("Account not found.");
 
-        // Card is the one method with nothing for an administrator to actually
-        // check — there is no card processor behind it, so there is no
-        // statement to match against a manual reference the way CliQ and bank
-        // transfer need. It settles itself.
         var isCard = dto.Method == PaymentMethod.Card;
 
         var payment = new Payment

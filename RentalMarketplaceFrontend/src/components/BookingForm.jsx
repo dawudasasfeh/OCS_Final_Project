@@ -108,7 +108,7 @@ export default function BookingForm({ house }) {
       setCreated(booking);
       toast.success(t("booking.sentNote"));
     } catch (err) {
-      const message = getErrorMessage(err, t("booking.couldNotSend"));
+      const message = getErrorMessage(err, t("booking.couldNotSend"), t);
       setError(message);
       toast.error(message);
     } finally {
