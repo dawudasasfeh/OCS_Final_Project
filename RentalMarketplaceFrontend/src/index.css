@@ -1199,7 +1199,10 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 /* Held a ☎ character sized by font-size; it holds an SVG now, so it is a
    flex box that centres whatever it is given. */
 .phone-icon { flex: none; display: inline-flex; align-items: center; }
-.phone-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; }
+/* Centred, not start-aligned: the number is shorter than the "sign in to see
+   it" line under it, and aligned to the start it sat pushed against one edge
+   of the button instead of over the middle of the line below. */
+.phone-text { display: flex; flex-direction: column; align-items: center; text-align: center; line-height: 1.25; }
 .phone-text strong { font-weight: 600; }
 .phone-text small { font-size: .72rem; font-weight: 400; opacity: .85; letter-spacing: 0; }
 
