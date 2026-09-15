@@ -434,32 +434,35 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 }
 
 
-/* ── Search panel ──────────────────────────────────────────────── */
-.search-tabs { display: flex; max-width: 780px; margin: 0 auto; }
+/* ── Hero search ───────────────────────────────────────────────── */
+.hs-wrap { max-width: 960px; margin: 0 auto; }
 
-.search-tab {
-  flex: 1 1 0; max-width: 130px;
-  padding: .6rem 0;
-  background: rgba(255, 255, 255, .78);
-  border: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  font: inherit; font-size: .88rem; font-weight: 600; color: var(--text-muted);
-  cursor: pointer; transition: background .15s, color .15s;
+/* One bar — location, type, period, budget, then the button — with a small
+   label on each cell, the same as the filter bar on the listings page, so
+   the two read as one control. White on the photo, text colour reset from
+   the hero's white. */
+.hs {
+  display: flex; align-items: flex-end; gap: .6rem;
+  padding: .8rem;
+  background: #fff; color: var(--text); text-align: start;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
 }
-.search-tab:hover { color: var(--text); }
-.search-tab.active { background: #fff; color: var(--primary); }
+.hs-fields {
+  flex: 1; min-width: 0;
+  display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: .6rem;
+}
+.hs-field { display: flex; flex-direction: column; gap: .2rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+.hs .ac-input, .hs .fs-btn { min-height: 44px; font-size: .92rem; }
+.hs .ac-input { padding-inline-end: 2rem; }
+.hs-foot { display: flex; }
+.hs-go { min-height: 44px; padding-inline: 1.2rem; gap: .45rem; white-space: nowrap; }
 
-.search-card {
-  max-width: 780px; margin: 0 auto;
-  padding: 1.15rem;
-  background: #fff;
-  border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  text-align: start;
-}
+/* The phone sheet's furniture, and the chips it shows in place of the
+   dropdowns. Off everywhere the bar is in use. */
+.hs-head, .hs-clear, .hs-sheet-only, .hs-trigger { display: none; }
 
-.search-types {
-  display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .85rem;
-}
+.type-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
 
 /* A segmented control, not a list of radio buttons. The native dots were the
    loudest "this is a form" signal on the page, sitting in the middle of the
@@ -494,7 +497,6 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   border-color: var(--primary); box-shadow: var(--focus-ring);
 }
 
-.search-row { display: grid; grid-template-columns: 1fr auto; gap: .6rem; }
 
 /* ── Autocomplete: a text box with suggestions under it ────────────
    Shares the popup styling with FilterSelect so the two read as one family,
@@ -514,10 +516,25 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 
 .ac-pop { left: 0; right: 0; width: auto; }
 
-/* The hero control is bigger than the one in the filter bar — it is the main
-   call to action on the page, and it has to sit level with the Find button. */
-.search-row .ac-input { min-height: 42px; font-size: .92rem; }
-.search-row .fs-pop { max-width: none; }
+/* Quick links under the search to the cities with the most listings. Glass
+   on the photo rather than white, so they read as secondary to the bar. */
+.hs-popular {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: .4rem; margin-top: .9rem;
+}
+.hs-popular-label { font-size: var(--fs-xs); font-weight: 600; color: rgba(255, 255, 255, .85); }
+.hs-popular-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .3rem .75rem; border-radius: 999px;
+  font-size: var(--fs-xs); font-weight: 600; color: #fff;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .35);
+  backdrop-filter: blur(4px);
+  transition: background .15s;
+}
+.hs-popular-chip:hover { background: rgba(255, 255, 255, .26); }
+.hs-popular-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.hs-popular-count { font-size: .7rem; font-weight: 500; opacity: .8; }
+.hs .fs-pop { max-width: none; }
 
 /* ── House cards ───────────────────────────────────────────────── */
 /* auto-FILL, not auto-fit: empty tracks are kept, so a single result
@@ -2135,7 +2152,7 @@ body:has(.auth-split) .footer { display: none; }
 /* ── Large desktop ≥1400px ─────────────────────────────────────── */
 @media (min-width: 1400px) {
   :root { --container: 1280px; --gutter: 32px; --section-y: 64px; }
-  .search-tabs, .search-card { max-width: 860px; }
+  .hs-wrap { max-width: 1040px; }
 }
 
 /* ── Wide desktop ≥1680px ──────────────────────────────────────────
@@ -2222,6 +2239,11 @@ body:has(.auth-split) .footer { display: none; }
 
   /* The bar keeps the burger, the logo and one account control. Listing and
      language move into the drawer, below the page links. */
+  .hs { flex-direction: column; align-items: stretch; }
+  .hs-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hs-place { grid-column: 1 / -1; }
+  .hs-go { width: 100%; justify-content: center; }
+
   .nav-actions .nav-list-link,
   .nav-actions .nav-lang { display: none; }
 
@@ -2295,10 +2317,56 @@ body:has(.auth-split) .footer { display: none; }
   .hero { min-height: 400px; padding: 90px 0 80px; }
   .hero h1 { margin-bottom: 1.2rem; }
 
-  .search-tab { padding: .5rem 0; font-size: .84rem; }
-  .search-types { grid-template-columns: repeat(2, 1fr); }
-  .search-row { grid-template-columns: 1fr; }
-  .search-row .btn { width: 100%; }
+  /* One field in the hero; the form itself becomes a full-screen sheet
+     (moved to <body> by HeroSearch when open, so nothing can sit over it). */
+  .hs-trigger {
+    display: flex; align-items: center; gap: .65rem;
+    width: 100%; min-height: 54px; padding: 0 1.1rem;
+    font: inherit; font-size: .95rem; color: var(--text-light); text-align: start;
+    background: #fff; border: none; border-radius: 999px; box-shadow: var(--shadow-lg);
+    cursor: pointer;
+  }
+  .hs-trigger svg { flex: none; color: var(--primary); }
+  .hs-trigger-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hs-trigger-text.has-value { color: var(--text); font-weight: 600; }
+  .hs-trigger:focus-visible { outline: none; box-shadow: var(--focus-ring), var(--shadow-lg); }
+
+  .hs { display: none; }
+  .hs.open {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0;
+    position: fixed; inset: 0; z-index: 100;
+    padding: env(safe-area-inset-top, 0) 0 0;
+    border-radius: 0; box-shadow: none;
+  }
+  .hs.open .hs-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem .75rem .75rem 1rem; border-bottom: 1px solid var(--border);
+  }
+  .hs-title { margin: 0; font-size: var(--fs-lg); }
+  /* Focus lands here when the sheet opens; it is a landing point, not a control. */
+  .hs-title:focus { outline: none; }
+  .hs-close {
+    width: 44px; height: 44px; display: grid; place-items: center;
+    color: var(--text); background: none; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .hs-close:hover { background: var(--surface-alt); }
+  .hs.open .hs-fields {
+    flex: 1; display: flex; flex-direction: column; gap: 1.3rem;
+    padding: 1.1rem 1rem; overflow-y: auto;
+  }
+  .hs.open .hs-bar-only { display: none; }
+  .hs.open .hs-sheet-only { display: flex; }
+  .hs.open .hs-foot {
+    gap: .6rem; padding: .8rem 1rem calc(.8rem + env(safe-area-inset-bottom, 0));
+    background: #fff; border-top: 1px solid var(--border);
+  }
+  .hs.open .hs-clear { display: inline-flex; }
+  .hs.open .hs-go { flex: 1; justify-content: center; }
+  /* Three chips a row: "All" plus four types sits as three and two. A group
+     of four (the periods) takes one row instead, rather than three and a
+     lone chip stretched across the next. */
+  .type-chip { flex: 1 1 calc(33.333% - .3rem); min-width: 0; }
+  .type-chips-4 .type-chip { flex-basis: calc(25% - .3rem); }
 
   /* Two per row rather than one. A single full-width card meant three swipes
      to see three properties; two lets you compare without scrolling. The card
@@ -2336,11 +2404,6 @@ body:has(.auth-split) .footer { display: none; }
   .nav-signin { width: 40px; padding: 0; justify-content: center; }
   .nav-signin-label { display: none; }
 
-  .search-card { padding: .9rem; }
-  /* .search-types became a flex row when the radios turned into a segmented
-     control, so the old grid override did nothing. Two per row fits a phone. */
-  .type-chip { flex: 1 1 calc(50% - .2rem); }
-  .search-tab { font-size: var(--fs-sm); }
 
   /* Two columns, not one. Four stacked sections made the footer taller than
      the screen it sits under; side by side it is about half the height and

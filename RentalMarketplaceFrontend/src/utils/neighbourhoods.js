@@ -121,3 +121,30 @@ export const neighbourhoodOptions = (t, city) =>
 /** True when this neighbourhood is one the given city actually has. */
 export const belongsToCity = (city, neighbourhood) =>
   !neighbourhood || (NEIGHBOURHOODS[city] ?? []).includes(neighbourhood);
+
+/**
+ * Every city, then every neighbourhood as "Abdoun, Amman", for a search box
+ * that takes either. A neighbourhood's value carries its city
+ * ("Amman|Abdoun"), because the same name can be in two governorates —
+ * Al Karama is in Aqaba and in Salt.
+ *
+ * Neighbourhoods are typedOnly: the list opens on the twelve cities with
+ * their counts, and the neighbourhoods join once something is typed. Each
+ * also matches on its English name, so "abdoun" finds عبدون on an Arabic
+ * page.
+ */
+export const placeOptions = (t, cities) => [
+  ...cities.map((c) => ({ ...c, keywords: c.value })),
+  ...Object.entries(NEIGHBOURHOODS).flatMap(([city, list]) => {
+    const cityLabel = t(`city.${city}`, { defaultValue: city });
+    return list.map((n) => ({
+      value: `${city}|${n}`,
+      label: t("home.placeInCity", {
+        place: t(`neighborhood.${n}`, { defaultValue: n }),
+        city: cityLabel,
+      }),
+      keywords: `${n} ${city}`,
+      typedOnly: true,
+    }));
+  }),
+];

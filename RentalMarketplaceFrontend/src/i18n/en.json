@@ -99,7 +99,7 @@
   },
   "home": {
     "heroTitle": "Find it. Book it. Move in.",
-    "searchPlaceholder": "Search a city — Amman, Irbid, Aqaba…",
+    "searchPlaceholder": "Search a city or neighbourhood — Abdoun, Irbid, Aqaba…",
     "latestTitle": "Latest listings",
     "latestSub": "The most recently published properties.",
     "noneYet": "No properties published yet.",
@@ -109,7 +109,24 @@
     "noTestimonials": "No testimonials yet.",
     "shareYours": "Share yours",
     "addTestimonial": "Add a testimonial",
-    "showBatch": "Show properties {{n}} of {{total}}"
+    "showBatch": "Show properties {{n}} of {{total}}",
+    "anyType": "All",
+    "anyPeriod": "All",
+    "placeLabel": "Location",
+    "placeInCity": "{{place}}, {{city}}",
+    "triggerPrompt": "Where do you want to live?",
+    "searchSheetTitle": "Find a place",
+    "closeSearch": "Close search",
+    "budgetLabel": "Budget",
+    "anyBudget": "Any budget",
+    "budgetUpTo": "Up to {{max}} JOD",
+    "budgetFrom": "{{min}} JOD and up",
+    "budgetRange": "{{min}}–{{max}} JOD",
+    "showCount_one": "Show {{count}} property",
+    "showCount_other": "Show {{count}} properties",
+    "noMatches": "No matches",
+    "explore": "Explore:",
+    "exploreLabel": "Cities with the most listings"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -675,7 +692,8 @@
   },
   "select": {
     "noMatch": "No matches",
-    "noMatchingCity": "No matching city"
+    "noMatchingCity": "No matching city",
+    "noMatchingPlace": "No city or neighbourhood by that name"
   },
   "about": {
     "title": "About Beytak",

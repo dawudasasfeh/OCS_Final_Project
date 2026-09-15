@@ -1,27 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { searchHouses, getCityCounts } from "../api/houses";
 import { getApprovedTestimonials } from "../api/testimonials";
 import { formatDay } from "../utils/date";
 import HouseCard from "../components/HouseCard";
-import Autocomplete from "../components/Autocomplete";
-import { cityOptions } from "../utils/cities";
+import HeroSearch from "../components/HeroSearch";
 import heroImg from "../assets/hero-amman.jpg";
 import { useTranslation } from "react-i18next";
-
-// Labels shown to the user, paired with the enum integers the API filters on.
-const PROPERTY_TYPES = [
-  { value: "1", key: "propertyType.apartment" },
-  { value: "2", key: "propertyType.house" },
-  { value: "3", key: "propertyType.villa" },
-  { value: "4", key: "propertyType.studio" },
-];
-
-const DURATIONS = [
-  { value: "1", key: "period.weekly" },
-  { value: "2", key: "period.monthly" },
-  { value: "3", key: "period.yearly" },
-];
 
 // Four cards on screen, three batches behind them. Twelve is the most the home
 // page can hold without the request becoming its own reason to wait.
@@ -37,13 +22,9 @@ const chunk = (list, size) =>
     list.slice(i * size, i * size + size));
 
 export default function Home() {
-  const [duration, setDuration] = useState("2");
-  const [type, setType] = useState("1");
-  const [city, setCity] = useState("");
   const [latest, setLatest] = useState([]);
   const [cityCounts, setCityCounts] = useState({});
   const [testimonials, setTestimonials] = useState([]);
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   // searchHouses only ever returns approved, available listings, so every card
@@ -128,13 +109,6 @@ export default function Home() {
 
   const shown = batches[batch] ?? [];
 
-  function handleSearch(e) {
-    e.preventDefault();
-    const params = new URLSearchParams({ propertyType: type, priceUnit: duration });
-    if (city) params.set("city", city);
-    navigate(`/houses?${params}`);
-  }
-
   return (
     <>
       {/* 1 ── Title and search ─────────────────────────────────── */}
@@ -142,56 +116,7 @@ export default function Home() {
         <div className="container">
           <h1>{t("home.heroTitle")}</h1>
 
-          <div className="search-tabs">
-            {DURATIONS.map((d) => (
-              <button
-                key={d.value}
-                type="button"
-                className={d.value === duration ? "search-tab active" : "search-tab"}
-                onClick={() => setDuration(d.value)}
-              >
-                {t(d.key)}
-              </button>
-            ))}
-          </div>
-
-          <form className="search-card" onSubmit={handleSearch}>
-            <div className="search-types">
-              {PROPERTY_TYPES.map((pt) => (
-                <label
-                  key={pt.value}
-                  className={pt.value === type ? "type-chip selected" : "type-chip"}
-                >
-                  <input
-                    type="radio"
-                    name="type"
-                    value={pt.value}
-                    checked={pt.value === type}
-                    onChange={(e) => setType(e.target.value)}
-                  />
-                  {t(pt.key)}
-                </label>
-              ))}
-            </div>
-
-            {/* The placeholder used to offer "city or neighbourhood", but
-                handleSearch only ever sent city — the form has never searched
-                neighbourhoods. Still a text box, so typing works as before, but
-                the suggestions mean "Ammann" no longer quietly returns nothing:
-                only a real city is ever committed to the search. */}
-            <div className="search-row">
-              <Autocomplete
-                id="hero-city"
-                label={t("houses.city")}
-                placeholder={t("home.searchPlaceholder")}
-                emptyText={t("select.noMatchingCity")}
-                options={cityOptions(t, cityCounts)}
-                value={city}
-                onChange={setCity}
-              />
-              <button className="btn btn-primary" type="submit">{t("common.find")}</button>
-            </div>
-          </form>
+          <HeroSearch cityCounts={cityCounts} />
         </div>
       </section>
 
