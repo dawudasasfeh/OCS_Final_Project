@@ -2104,6 +2104,30 @@ body:has(.auth-split) .footer { display: none; }
   .search-tabs, .search-card { max-width: 860px; }
 }
 
+/* ── Wide desktop ≥1680px ──────────────────────────────────────────
+   A 24" monitor is 1920px wide, and at 1280 the page sat in a column with
+   320px of nothing down each side. This leaves about 150.
+
+   The card grid goes to exactly four columns rather than auto-fill: at this
+   width auto-fill makes five, and the pages hold twelve cards (listings,
+   wishlist) or four (the home rotator) — five leaves a ragged last row or an
+   empty slot. Four divides both. */
+@media (min-width: 1680px) {
+  :root { --container: 1680px; --gutter: 40px; --section-y: 72px; }
+  .grid-houses { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
+  .gallery-stage { height: clamp(240px, 46vw, 580px); }
+  .hero { min-height: 640px; }
+}
+
+/* ── Ultra-wide ≥2200px (27" 1440p and up) ─────────────────────────
+   Six columns divides twelve too. The rotator keeps four: its batch is four
+   cards, and six tracks would leave two of them empty. */
+@media (min-width: 2200px) {
+  :root { --container: 1880px; }
+  .grid-houses { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .grid-houses.rotator-slide { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 /* ── Small laptop ≤1279px ──────────────────────────────────────── */
 @media (max-width: 1279px) {
   :root { --section-y: 46px; }
