@@ -1,6 +1,7 @@
 import {
   ArrowRight, Bath, BedDouble, Calendar, ChevronDown, ChevronLeft, ChevronRight,
-  Clock, Heart, Mail, MapPin, MessageCircle, Phone, Scaling, Search, Sofa, X,
+  Clock, Globe, Heart, HousePlus, Mail, MapPin, MessageCircle, Phone, Scaling, Search,
+  Sofa, UserRound, X,
 } from "lucide-react";
 
 /**
@@ -62,6 +63,9 @@ export const IconBeds = make(BedDouble);
 export const IconBaths = make(Bath);
 export const IconArea = make(Scaling);
 export const IconFurnished = make(Sofa);
+export const IconGlobe = make(Globe);
+export const IconUser = make(UserRound);
+export const IconListHome = make(HousePlus);
 
 /**
  * The wishlist heart, which is the one icon with two states. Lucide strokes

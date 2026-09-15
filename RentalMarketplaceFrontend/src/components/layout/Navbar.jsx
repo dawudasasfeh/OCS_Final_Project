@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useSubscription } from "../../context/SubscriptionContext";
 import { useTranslation } from "react-i18next";
 import ListPropertyLink from "../ListPropertyLink";
-import { IconCaret } from "../icons";
+import { IconCaret, IconListHome, IconUser } from "../icons";
 import LanguageToggle from "../LanguageToggle";
 
 const initials = (name = "") =>
@@ -90,6 +90,29 @@ export default function Navbar() {
           <li><NavLink to="/houses" className={linkClass}>{t("nav.properties")}</NavLink></li>
           <li><NavLink to="/about" className={linkClass}>{t("nav.about")}</NavLink></li>
           <li><NavLink to="/contact" className={linkClass}>{t("nav.contact")}</NavLink></li>
+
+          {/* Drawer only. On a phone the bar holds the menu, the logo and one
+              account control — anything more crowds the logo — so the rest of
+              what the desktop bar offers lives here, as full-width rows that
+              are easy to hit with a thumb. Hidden on desktop, where the bar
+              has the room. */}
+          {!isAdmin && (
+            <li className="nav-drawer-only nav-drawer-first">
+              <ListPropertyLink className="nav-link nav-drawer-row">
+                <IconListHome size={18} />
+                {t("nav.listProperty")}
+              </ListPropertyLink>
+            </li>
+          )}
+          <li className={isAdmin ? "nav-drawer-only nav-drawer-first" : "nav-drawer-only"}>
+            <LanguageToggle className="nav-link nav-drawer-row" />
+          </li>
+          {!user && (
+            <li className="nav-drawer-only nav-drawer-auth">
+              <Link to="/login" className="btn btn-primary">{t("nav.login")}</Link>
+              <Link to="/register" className="btn btn-outline">{t("nav.register")}</Link>
+            </li>
+          )}
         </ul>
 
         {navOpen && (
@@ -107,14 +130,23 @@ export default function Navbar() {
           </div>
         </Link>
 
+        {/* One filled button at most. There used to be four controls here —
+            language, list a property, log in, register — all boxed, all the
+            same weight, so none of them read as the thing to do. Now listing is
+            a quiet link, language is a small switch, and a guest gets a single
+            Sign in: registering is one link away on that page, which is where
+            people who have no account go looking for it anyway. */}
         <div className="nav-actions">
-          <LanguageToggle />
-          {/* Shown to guests too — the click is what explains the requirement,
-              and sending them to login is more use than hiding the button. */}
-          {/* Hidden from admins entirely. For a signed-out visitor or an
-              unsubscribed owner it stays — the click is the paywall funnel,
-              and it explains the requirement rather than hiding it. */}
-          {!isAdmin && <ListPropertyLink className="btn btn-outline nav-cta" />}
+          {/* Shown to guests and unsubscribed owners too — the click is what
+              explains the requirement, which is more use than hiding it.
+              Never to admins, who cannot list at all. */}
+          {!isAdmin && (
+            <ListPropertyLink className="nav-list-link">
+              <IconListHome size={17} />
+              {t("nav.listProperty")}
+            </ListPropertyLink>
+          )}
+          <LanguageToggle className="nav-lang" />
 
           {user ? (
             <div className="account" ref={menuRef}>
@@ -191,10 +223,12 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <>
-              <Link to="/login" className="btn btn-ghost">{t("nav.login")}</Link>
-              <Link to="/register" className="btn btn-primary">{t("nav.register")}</Link>
-            </>
+            // The label drops away on the narrowest phones, leaving the icon;
+            // the aria-label keeps the name for anyone not reading the screen.
+            <Link to="/login" className="btn btn-primary nav-signin" aria-label={t("nav.login")}>
+              <IconUser size={17} />
+              <span className="nav-signin-label">{t("nav.login")}</span>
+            </Link>
           )}
         </div>
 

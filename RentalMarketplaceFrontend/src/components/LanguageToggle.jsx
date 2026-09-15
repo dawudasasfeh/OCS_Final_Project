@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "../i18n";
+import { IconGlobe } from "./icons";
 
 /**
  * Two languages, so this is a switch rather than a menu — a dropdown holding
@@ -8,6 +9,9 @@ import { LANGUAGES } from "../i18n";
  * The button shows the language it will switch you *to*, never the one you are
  * already reading. Showing the current language is the commoner pattern and the
  * more confusing one: it looks like a label until you click it.
+ *
+ * The globe is what makes it findable without reading either language — it is
+ * the one symbol people look for when a page is in a script they cannot read.
  */
 export default function LanguageToggle({ className = "" }) {
   const { i18n, t } = useTranslation();
@@ -23,9 +27,9 @@ export default function LanguageToggle({ className = "" }) {
       // The label is always in the target language, so a reader who cannot read
       // the current one can still find their way out.
       aria-label={t("lang.switchTo", { language: LANGUAGES[next].native })}
-      lang={next}
     >
-      {LANGUAGES[next].native}
+      <IconGlobe size={16} />
+      <span lang={next}>{LANGUAGES[next].native}</span>
     </button>
   );
 }

@@ -283,6 +283,23 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .nav-logo-sub { font-size: .85rem; font-weight: 600; color: var(--text-muted); font-family: var(--arabic); }
 
 .nav-actions { display: flex; align-items: center; justify-content: flex-end; gap: .7rem; }
+
+/* "List a property" is a link, not a button: the bar's one filled button is
+   Sign in, and two boxed calls to action side by side cancel each other out.
+   The icon is what keeps it from reading as a fifth nav link. */
+.nav-list-link {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .25rem; white-space: nowrap;
+  font-size: .86rem; font-weight: 600; color: var(--text);
+  transition: color .15s;
+}
+.nav-list-link:hover { color: var(--primary); }
+.nav-list-link:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 6px; }
+
+.nav-signin { display: inline-flex; align-items: center; gap: .45rem; }
+
+/* Rows that exist only inside the phone drawer; the tablet block shows them. */
+.nav-drawer-only { display: none; }
 .nav-user { font-size: .88rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
 
 /* ── Account menu ──────────────────────────────────────────────── */
@@ -1373,11 +1390,8 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 1rem; margin-bottom: 1.5rem;
 }
-.nav-cta { min-height: 32px; padding: 0 .8rem; font-size: var(--fs-xs); }
-
 @media (max-width: 767px) {
   .page-bar { flex-direction: column; }
-  .nav-cta { display: none; }
 }
 
 .booking-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -2187,6 +2201,32 @@ body:has(.auth-split) .footer { display: none; }
     .nav-links { transition: none; }
   }
 
+  /* The bar keeps the burger, the logo and one account control. Listing and
+     language move into the drawer, below the page links. */
+  .nav-actions .nav-list-link,
+  .nav-actions .nav-lang { display: none; }
+
+  .nav-links .nav-drawer-only { display: block; }
+  .nav-drawer-first { margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--border); }
+
+  .nav-drawer-row { display: flex; align-items: center; gap: .65rem; width: 100%; }
+  /* The language switch borrows the nav-link row; undo its pill shape. */
+  .nav-links .lang-toggle {
+    min-height: 0; border: none; border-radius: 0;
+    border-inline-start: 3px solid transparent;
+    padding: .85rem 1.2rem; font-size: .95rem; font-weight: 500;
+    color: var(--text); text-align: start;
+  }
+  .nav-links .lang-toggle:hover { background: var(--surface-alt); color: var(--primary); }
+
+  /* A guest's way in, as two full-width buttons at the foot of the list:
+     the drawer is the one place on a phone with room to offer both. */
+  .nav-links .nav-drawer-auth {
+    display: flex; flex-direction: column; gap: .55rem;
+    padding: 1rem 1.2rem; margin-top: .5rem; border-top: 1px solid var(--border);
+  }
+  .nav-drawer-auth .btn { width: 100%; justify-content: center; }
+
   .hero { min-height: 460px; padding: 34px 0 96px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
   /* Even as a bar, six controls stacked on a phone push the listings off the
@@ -2251,6 +2291,11 @@ body:has(.auth-split) .footer { display: none; }
 
 /* ── Small phone ≤480px ────────────────────────────────────────── */
 @media (max-width: 480px) {
+  /* Icon only: beside a centred logo on a 360px screen, the word "Sign in"
+     is what pushes the bar into two lines. The drawer still spells it out. */
+  .nav-signin { width: 40px; padding: 0; justify-content: center; }
+  .nav-signin-label { display: none; }
+
   .search-card { padding: .9rem; }
   /* .search-types became a flex row when the radios turned into a segmented
      control, so the old grid override did nothing. Two per row fits a phone. */
@@ -2319,23 +2364,25 @@ body:has(.auth-split) .footer { display: none; }
   letter-spacing: normal;
 }
 
-/* The language switch. Sized to sit level with the account button rather than
-   the nav links, because it is a control, not a destination. */
+/* The language switch. A quiet control with no outline: it is used once per
+   visit at most, so it should be easy to find — the globe — and easy to
+   ignore. The boxed pill it replaced weighed the same as the real actions. */
 .lang-toggle {
-  min-height: 32px; padding: 0 .7rem;
+  display: inline-flex; align-items: center; gap: .35rem;
+  min-height: 36px; padding: 0 .6rem;
   font: inherit; font-size: var(--fs-xs); font-weight: 600;
-  color: var(--text); background: transparent;
-  border: 1px solid var(--border); border-radius: 999px;
+  color: var(--text-muted); background: transparent;
+  border: 1px solid transparent; border-radius: 999px;
   cursor: pointer; white-space: nowrap;
-  transition: border-color .15s, color .15s;
+  transition: background .15s, color .15s;
 }
-.lang-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.lang-toggle:hover { background: var(--surface-alt); color: var(--text); }
 .lang-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 /* The label is always the *other* language, so it is always the face this page
    is not using — name it explicitly rather than inheriting the page's. */
-.lang-toggle[lang="ar"] { font-family: var(--arabic); }
-.lang-toggle[lang="en"] { font-family: var(--sans); }
+.lang-toggle [lang="ar"] { font-family: var(--arabic); }
+.lang-toggle [lang="en"] { font-family: var(--sans); }
 
 /* A section heading with an action beside it. The button drops under the text
    on a phone rather than squeezing the heading into two words a line. */
