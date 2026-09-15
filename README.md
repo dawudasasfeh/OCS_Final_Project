@@ -5,6 +5,15 @@ Jordanian market, built with ASP.NET Core, Entity Framework Core, SQL Server and
 
 **Student:** Dawud Asasfeh
 
+## Live site
+
+**[beytak.pages.dev](https://beytak.pages.dev)** — Arabic by default, with English from
+the language switch in the header.
+
+The API behind it is at [beytak-api.runasp.net](https://beytak-api.runasp.net/health).
+It runs on a free plan that sleeps when idle, so the first page after a quiet spell
+can take a few seconds to load its listings.
+
 ---
 
 ## Phase 1 deliverables
@@ -148,7 +157,7 @@ folder across restarts and deploys. `/health` answers `200` for uptime checks.
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | the API's address including `/api`, e.g. `https://beytak-api.azurewebsites.net/api` |
+| `VITE_API_URL` | the API's address including `/api`, e.g. `https://beytak-api.runasp.net/api` |
 
 It is read at build time, so changing it means rebuilding. The site is a single-page
 app: the host must serve `index.html` for unknown paths, or refreshing
