@@ -16,7 +16,7 @@ import { IconGlobe } from "./icons";
 export default function LanguageToggle({ className = "" }) {
   const { i18n, t } = useTranslation();
 
-  const current = LANGUAGES[i18n.resolvedLanguage] ? i18n.resolvedLanguage : "en";
+  const current = LANGUAGES[i18n.resolvedLanguage] ? i18n.resolvedLanguage : "ar";
   const next = current === "ar" ? "en" : "ar";
 
   return (

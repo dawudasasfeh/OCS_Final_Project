@@ -26,7 +26,7 @@ export const LANGUAGES = {
  * controls and text selection all flip together.
  */
 export function applyDocumentLanguage(lng) {
-  const code = LANGUAGES[lng] ? lng : "en";
+  const code = LANGUAGES[lng] ? lng : "ar";
   const root = document.documentElement;
   root.lang = code;
   root.dir = LANGUAGES[code].dir;
@@ -40,14 +40,19 @@ i18n
   .use(initReactI18next)
   .init({
     resources: { en: { translation: en }, ar: { translation: ar } },
-    fallbackLng: "en",
+    // Arabic is the site's language. `default` is what a first visit gets, and
+    // a missing Arabic string still shows the English one rather than the raw
+    // key, so a half-finished translation degrades into a readable page.
+    fallbackLng: { ar: ["en"], default: ["ar"] },
     supportedLngs: Object.keys(LANGUAGES),
-    // A missing Arabic string shows the English one rather than the raw key,
-    // so a half-finished translation degrades into a readable page.
     returnEmptyString: false,
     interpolation: { escapeValue: false }, // React escapes already
     detection: {
-      order: ["localStorage", "navigator"],
+      // A choice made with the switch is remembered and always wins. The
+      // browser's own language is deliberately not consulted: this is a
+      // Jordanian site, and an English-language browser is no sign that its
+      // owner would rather read English.
+      order: ["localStorage"],
       lookupLocalStorage: "beytak.lang",
       caches: ["localStorage"],
     },
