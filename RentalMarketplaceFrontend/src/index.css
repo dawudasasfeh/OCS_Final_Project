@@ -2243,6 +2243,21 @@ body:has(.auth-split) .footer { display: none; }
 @media (max-width: 767px) {
   :root { --gutter: 16px; --section-y: 34px; }
 
+  /* The type scale steps down on a phone. The desktop sizes applied at every
+     width, so a listing's h1 stayed 36px on a 390px screen and a long Arabic
+     title broke into four or five lines before any of the listing showed.
+     Scaling the tokens rather than individual headings keeps every level in
+     proportion with the others. */
+  :root {
+    --fs-2xl: 1.625rem;                     /* 26 — h1 */
+    --fs-xl:  1.375rem;                     /* 22 — h2, page titles */
+    --fs-lg:  1.1875rem;                    /* 19 */
+    --fs-hero: clamp(1.75rem, 7.5vw, 2rem); /* 28–32 */
+  }
+  /* A listing's name is a long sentence, not a banner: at page-title size it
+     takes two or three lines instead of dominating the first screen. */
+  .detail-title { font-size: var(--fs-xl); }
+
   .nav-logo-sub { display: none; }
 
   /* Smaller again on a phone, where the bar is the same height but the width
