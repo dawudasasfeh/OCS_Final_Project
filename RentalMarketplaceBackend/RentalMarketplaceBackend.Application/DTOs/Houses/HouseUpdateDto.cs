@@ -6,10 +6,10 @@ namespace RentalMarketplaceBackend.Application.DTOs.Houses;
 /// <summary>
 /// What an owner may change about a listing after it exists.
 ///
-/// Deliberately not HouseCreateDto reused: that one carries ImageUrls, and
-/// images are added through their own endpoint rather than by resubmitting the
-/// whole listing. Sharing the type would also mean every future change to
-/// creation silently became a change to editing.
+/// Deliberately not HouseCreateDto reused: images are added through their own
+/// endpoint rather than by resubmitting the whole listing, and sharing the type
+/// would mean every future change to creation silently became a change to
+/// editing.
 ///
 /// Note what is absent — OwnerId and Status. Neither is the owner's to set:
 /// ownership comes from the token, and status is the moderator's decision. A

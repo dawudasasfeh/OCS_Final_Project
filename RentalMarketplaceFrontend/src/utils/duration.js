@@ -6,6 +6,11 @@ export const DURATION_TYPE = { Weekly: 1, Monthly: 2, Yearly: 3 };
 // needs six, so the counting is left to i18next rather than an "s" on the end.
 export const UNIT_KEY = { Weekly: "week", Monthly: "month", Yearly: "year" };
 
+// The longest single booking per unit. BookingService.MaxDurationCount holds
+// the same numbers and refuses anything past them; this only lets the form
+// say so before the request is sent.
+export const MAX_DURATION_COUNT = { Weekly: 12, Monthly: 24, Yearly: 3 };
+
 // Alias UNIT_NOUN to match what BookingForm.jsx expects
 export const UNIT_NOUN = UNIT_KEY; 
 /**

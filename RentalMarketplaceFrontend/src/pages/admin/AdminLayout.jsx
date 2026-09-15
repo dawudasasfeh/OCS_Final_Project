@@ -14,6 +14,17 @@ const SECTIONS = [
   { to: "users", labelKey: "admin.tabUsers" },
 ];
 
+// A failed count is left absent rather than shown as zero — "no idea" and
+// "nothing waiting" are different, and only one of them is reassuring.
+async function fetchCounts() {
+  const [listings, testimonials, payments] = await Promise.all([
+    getPendingHouses().then((r) => r.length).catch(() => null),
+    getPendingTestimonials().then((r) => r.length).catch(() => null),
+    getPendingPayments().then((r) => r.length).catch(() => null),
+  ]);
+  return { listings, testimonials, payments };
+}
+
 /**
  * The shell for the admin area.
  *
@@ -29,18 +40,16 @@ export default function AdminLayout() {
   const { t } = useTranslation();
   const [counts, setCounts] = useState({});
 
-  // A failed count is left absent rather than shown as zero — "no idea" and
-  // "nothing waiting" are different, and only one of them is reassuring.
+  // Handed to the queues, which call it after each decision.
   const refreshCounts = useCallback(async () => {
-    const [listings, testimonials, payments] = await Promise.all([
-      getPendingHouses().then((r) => r.length).catch(() => null),
-      getPendingTestimonials().then((r) => r.length).catch(() => null),
-      getPendingPayments().then((r) => r.length).catch(() => null),
-    ]);
-    setCounts({ listings, testimonials, payments });
+    setCounts(await fetchCounts());
   }, []);
 
-  useEffect(() => { refreshCounts(); }, [refreshCounts]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchCounts().then((c) => { if (!cancelled) setCounts(c); });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="container section">

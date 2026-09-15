@@ -39,7 +39,16 @@ export default function AdminUsers() {
     }
   }, [t]);
 
-  useEffect(() => { load(); }, [load]);
+  // The first load sets nothing before the answer — loading already starts
+  // true — and drops a reply that lands after the page has been left.
+  useEffect(() => {
+    let cancelled = false;
+    getAdminUsers()
+      .then((rows) => { if (!cancelled) setUsers(rows); })
+      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("admin.couldNotLoadUsers"), t)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [t]);
 
   async function act(user, action, failure, success) {
     setBusyId(user.id);

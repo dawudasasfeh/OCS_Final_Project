@@ -11,8 +11,14 @@ namespace RentalMarketplaceBackend.Infrastructure.Persistence;
 
 public static class DbSeeder
 {
-    private const string DemoPassword = "Test123!";
-    private const string AdminPassword = "Admin123!";
+    // The demo accounts' password is meant to be shared — they exist so a
+    // visitor can try the site. The administrator's is not: it moderates
+    // everything, so outside Development it must come from Seed:AdminPassword.
+    private const string DefaultDemoPassword = "Test123!";
+    private const string DevAdminPassword = "Admin123!";
+
+    /// <summary>Kept in step with FileStorageService.AllowedExtensions.</summary>
+    private static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
     public static async Task SeedAsync(IServiceProvider services)
     {
@@ -45,8 +51,45 @@ public static class DbSeeder
 
         if (data is null) return;
 
+        var adminPassword = config["Seed:AdminPassword"];
+
+        if (string.IsNullOrWhiteSpace(adminPassword))
+        {
+            // Refused before anything is deleted, so a misconfigured reseed
+            // leaves the existing data intact.
+            if (!env.IsDevelopment())
+                throw new InvalidOperationException(
+                    "Seed:Reset is on but Seed:AdminPassword is not set. Set the Seed__AdminPassword environment variable.");
+
+            adminPassword = DevAdminPassword;
+        }
+
+        var passwords = new SeedPasswords(
+            adminPassword,
+            config["Seed:DemoPassword"] is { Length: > 0 } demo ? demo : DefaultDemoPassword);
+
         await ResetAsync(db, userManager);
-        await LoadAsync(data, db, userManager);
+        await LoadAsync(data, db, userManager, ImageStore.For(env, config), passwords);
+    }
+
+    private sealed record SeedPasswords(string Admin, string Demo);
+
+    /// <summary>
+    /// Where listing photographs already sit on disk, and the URL prefix they
+    /// are served under. Both are derived the same way FileStorageService
+    /// derives them, so a seeded image and an uploaded one are indistinguishable.
+    /// </summary>
+    private sealed record ImageStore(string RootOnDisk, string PublicRoot)
+    {
+        public static ImageStore For(IHostEnvironment env, IConfiguration config)
+        {
+            var folder = (config["FileStorage:HouseImagesFolder"] ?? "uploads/houses").Trim('/');
+
+            return new ImageStore(
+                Path.Combine(env.ContentRootPath, "wwwroot",
+                    folder.Replace('/', Path.DirectorySeparatorChar)),
+                "/" + folder);
+        }
     }
 
     /// <summary>
@@ -63,8 +106,19 @@ public static class DbSeeder
         await db.Database.ExecuteSqlRawAsync("DELETE FROM HouseImages");
         await db.Database.ExecuteSqlRawAsync("DELETE FROM Houses");
 
+        // RESEED to 0 is only correct on a table that has already held a row:
+        // there the next insert takes 0 + increment = 1. On a table that has
+        // never been inserted into — a database freshly migrated on a new
+        // machine — the next insert takes the reseed value itself, so ids start
+        // at 0 and every house lands one short of its image folder. A never-used
+        // identity already starts at 1, so it is left alone.
         foreach (var table in new[] { "Payments", "WishlistItems", "Bookings", "Testimonials", "HouseImages", "Houses" })
-            await db.Database.ExecuteSqlRawAsync($"DBCC CHECKIDENT ('{table}', RESEED, 0)");
+            await db.Database.ExecuteSqlRawAsync(
+                $"""
+                 IF EXISTS (SELECT 1 FROM sys.identity_columns
+                            WHERE object_id = OBJECT_ID('{table}') AND last_value IS NOT NULL)
+                     DBCC CHECKIDENT ('{table}', RESEED, 0)
+                 """);
 
         // Identity users go through UserManager so its own tables (roles,
         // claims, logins) are cleaned up with them.
@@ -72,7 +126,9 @@ public static class DbSeeder
             await userManager.DeleteAsync(user);
     }
 
-    private static async Task LoadAsync(SeedData data, AppDbContext db, UserManager<ApplicationUser> userManager)
+    private static async Task LoadAsync(
+        SeedData data, AppDbContext db, UserManager<ApplicationUser> userManager, ImageStore images,
+        SeedPasswords passwords)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -98,7 +154,7 @@ public static class DbSeeder
             }
 
             var result = await userManager.CreateAsync(
-                user, u.Role == "Admin" ? AdminPassword : DemoPassword);
+                user, u.Role == "Admin" ? passwords.Admin : passwords.Demo);
 
             if (!result.Succeeded)
                 throw new InvalidOperationException(
@@ -140,6 +196,40 @@ public static class DbSeeder
 
             db.Houses.Add(house);
             houses[h.Key] = house;
+        }
+
+        await db.SaveChangesAsync();
+
+        // ── house images ─────────────────────────────────────────────
+        // The photographs are already on disk from earlier uploads, one folder
+        // per house id. Identity was reseeded above, so the Nth house in
+        // seed-data.json takes id N and finds the folder its own photos are in.
+        // Nothing is copied or renamed; this only records what is already there.
+        foreach (var house in houses.Values)
+        {
+            var folder = Path.Combine(images.RootOnDisk, house.Id.ToString());
+
+            if (!Directory.Exists(folder))
+                continue;
+
+            // A watermarked .webp is a real photograph of the property. The .jpg
+            // files mixed into the older folders are generic stock, so they sort
+            // last and never become the cover image.
+            var files = Directory.EnumerateFiles(folder)
+                .Where(f => ImageExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+                .OrderBy(f => Path.GetExtension(f).Equals(".webp", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                .ThenBy(Path.GetFileName, StringComparer.Ordinal)
+                .ToList();
+
+            for (var i = 0; i < files.Count; i++)
+            {
+                db.HouseImages.Add(new HouseImage
+                {
+                    HouseId = house.Id,
+                    ImageUrl = $"{images.PublicRoot}/{house.Id}/{Path.GetFileName(files[i])}",
+                    IsPrimary = i == 0,
+                });
+            }
         }
 
         await db.SaveChangesAsync();

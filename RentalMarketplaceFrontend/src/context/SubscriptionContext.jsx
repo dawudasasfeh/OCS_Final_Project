@@ -16,34 +16,52 @@ const SubscriptionContext = createContext(null);
 export function SubscriptionProvider({ children }) {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState(null);
-  // Starts true, not false. The fetch only fires in an effect after the first
-  // render, so a false here means the first render reports "not loading, not
-  // subscribed" — and every gate reading it redirects a paying owner to the
-  // paywall before the answer has even been asked for.
-  const [loading, setLoading] = useState(true);
+  // True whenever someone is signed in and the answer has not arrived yet. The
+  // fetch only fires in an effect after the first render, so starting false
+  // would mean the first render reports "not loading, not subscribed" — and
+  // every gate reading it redirects a paying owner to the paywall before the
+  // answer has even been asked for.
+  const [loading, setLoading] = useState(!!user);
 
+  // A different account, or none, invalidates what is held. Done during render
+  // so the next account never sees the previous one's status for a frame.
+  const userId = user?.id ?? null;
+  const [heldFor, setHeldFor] = useState(userId);
+  if (userId !== heldFor) {
+    setHeldFor(userId);
+    setSubscription(null);
+    setLoading(userId !== null);
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    getMySubscription()
+      .then((s) => { if (!cancelled) setSubscription(s); })
+      // A failed read must not be treated as "subscribed" — leave it null and
+      // let the gate refuse. The server enforces this rule too.
+      .catch(() => { if (!cancelled) setSubscription(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // For a page that has just changed the subscription and wants the new state.
   const refresh = useCallback(async () => {
-    if (!user) {
-      setSubscription(null);
-      setLoading(false);
-      return null;
-    }
+    if (!user) return null;
     setLoading(true);
     try {
       const s = await getMySubscription();
       setSubscription(s);
       return s;
     } catch {
-      // A failed read must not be treated as "subscribed" — leave it null and
-      // let the gate refuse. The server enforces this rule too.
       setSubscription(null);
       return null;
     } finally {
       setLoading(false);
     }
   }, [user]);
-
-  useEffect(() => { refresh(); }, [refresh]);
 
   const value = useMemo(() => ({
     subscription,

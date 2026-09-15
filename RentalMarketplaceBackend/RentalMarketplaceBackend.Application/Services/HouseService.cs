@@ -13,6 +13,12 @@ namespace RentalMarketplaceBackend.Application.Services;
 
 public class HouseService : IHouseService
 {
+    /// <summary>
+    /// Uploads beyond this are refused. Each photo is up to 5 MB of disk, and
+    /// no one browses past thirty. Seeded listings may already hold more.
+    /// </summary>
+    public const int MaxImagesPerListing = 30;
+
     private readonly IUnitOfWork _uow;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IFileStorageService _files;
@@ -92,11 +98,6 @@ public class HouseService : IHouseService
             OwnerId = ownerId,
             Status = ListingStatus.Pending,
             IsAvailable = true,
-            Images = dto.ImageUrls.Select((url, i) => new HouseImage
-            {
-                ImageUrl = url,
-                IsPrimary = i == 0
-            }).ToList()
         };
 
         await _uow.Houses.AddAsync(house);
@@ -179,6 +180,11 @@ public class HouseService : IHouseService
         if (house.OwnerId != requesterId)
             return Result<string>.Fail("You do not own this listing.");
 
+        // Checked before the file is written, so a refused upload leaves nothing
+        // behind on disk.
+        if (house.Images.Count >= MaxImagesPerListing)
+            return Result<string>.Fail("This listing already has the maximum number of photos.");
+
         var saved = await _files.SaveHouseImageAsync(
             houseId, content, fileName, contentType, lengthInBytes);
 
@@ -192,6 +198,10 @@ public class HouseService : IHouseService
             ImageUrl = saved.Data!,
             IsPrimary = house.Images.Count == 0
         });
+
+        // A new photo is new content, reviewed like an edit to the text is. An
+        // approved listing otherwise let its owner add anything, unmoderated.
+        house.Status = ListingStatus.Pending;
 
         await _uow.SaveChangesAsync();
 

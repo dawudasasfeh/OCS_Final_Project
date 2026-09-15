@@ -90,19 +90,29 @@ export default function Subscribe() {
 
   const chosen = METHODS.find((m) => m.value === Number(method));
 
-  async function load() {
-    // Read the subscription from the API, never from user.isSubscribed: that
-    // comes from the JWT and stays stale until the next sign-in.
+  // Read the subscription from the API, never from user.isSubscribed: that
+  // comes from the JWT and stays stale until the next sign-in.
+  async function fetchStatus() {
     const [s, payments] = await Promise.all([getMySubscription(), getMyPayments()]);
+    return {
+      s,
+      pending: payments.find((p) => p.purpose === "SubscriptionPayment" && p.status === "Pending") ?? null,
+    };
+  }
+
+  function apply({ s, pending }) {
     setSub(s);
-    setPending(
-      payments.find((p) => p.purpose === "SubscriptionPayment" && p.status === "Pending") ?? null
-    );
+    setPending(pending);
+  }
+
+  async function load() {
+    apply(await fetchStatus());
   }
 
   useEffect(() => {
     let cancelled = false;
-    load()
+    fetchStatus()
+      .then((status) => { if (!cancelled) apply(status); })
       .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("subscribe.couldNotLoad"), t)); })
       .finally(() => { if (!cancelled) setBusy(false); });
     return () => { cancelled = true; };

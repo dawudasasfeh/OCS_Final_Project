@@ -20,15 +20,15 @@
  */
 export const NEIGHBOURHOODS = {
   Amman: [
-    "Abdoun", "Abu Nseir", "Al Bayader", "Al Kursi", "Al Rabiah", "Dabouq",
-    "Deir Ghbar", "Jabal Al Hussain", "Jabal Al Weibdeh", "Jabal Amman",
-    "Jubaiha", "Khalda", "Marj El Hamam", "7th Circle", "Shafa Badran",
-    "Shmaisani", "Sweileh", "Swefieh", "Tabarbour", "Tla' Al Ali",
-    "Um Uthaina", "Wadi Saqra",
+    "Abdoun", "Abu Nseir", "Al Bayader", "Al Gardens", "Al Kursi", "Al Rabiah",
+    "Dabouq", "Deir Ghbar", "Jabal Al Hussain", "Jabal Al Weibdeh",
+    "Jabal Amman", "Jubaiha", "Khalda", "Marj El Hamam", "Marka",
+    "7th Circle", "Shafa Badran", "Shmaisani", "Sweileh", "Swefieh",
+    "Tabarbour", "Tla' Al Ali", "Um Uthaina", "Wadi Saqra",
   ],
   Irbid: [
-    "Al Barha", "Al Hosn", "Al Naseem", "Al Sareeh", "Bushra", "Hakama",
-    "Idoon", "University Street",
+    "Al Barha", "Al Hay Al Sharqi", "Al Hosn", "Al Naseem", "Al Sareeh",
+    "Bushra", "Hakama", "Idoon", "University Street",
   ],
   Zarqa: [
     "Al Hashemiyya", "Al Jabal Al Abyad", "Awajan", "Birayn", "New Zarqa",

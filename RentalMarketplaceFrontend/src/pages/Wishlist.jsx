@@ -30,7 +30,7 @@ export default function Wishlist() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   // Un-hearting a card removes it here immediately rather than leaving a saved
   // listing on screen with an empty heart. The row is gone on the next load.

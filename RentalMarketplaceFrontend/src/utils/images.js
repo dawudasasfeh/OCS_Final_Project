@@ -8,7 +8,9 @@ import client from "../api/client";
  * relative path would resolve against the wrong origin. This resolves it
  * against the API instead.
  */
-const API_ORIGIN = client.defaults.baseURL.replace(/\/api\/?$/, "");
+// `?? ""` so a build missing VITE_API_URL shows broken images and the error
+// client.js logs, rather than a blank page from a crash at import time.
+const API_ORIGIN = (client.defaults.baseURL ?? "").replace(/\/api\/?$/, "");
 
 export function imageUrl(path) {
   if (!path) return null;

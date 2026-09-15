@@ -45,7 +45,7 @@ export default function MyBookings() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   async function handleCancel(id) {
     setError("");

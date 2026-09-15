@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
@@ -7,20 +8,25 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Houses from "./pages/Houses";
 import HouseDetail from "./pages/HouseDetail";
-import MyBookings from "./pages/MyBookings";
-import BookingRequests from "./pages/BookingRequests";
-import MyListings from "./pages/MyListings";
-import CreateListing from "./pages/CreateListing";
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminListings from "./pages/admin/AdminListings";
-import AdminTestimonials from "./pages/admin/AdminTestimonials";
-import AdminPayments from "./pages/admin/AdminPayments";
-import AdminUsers from "./pages/admin/AdminUsers";
-import Wishlist from "./pages/Wishlist";
-import Subscribe from "./pages/Subscribe";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
+
+// Pages a visitor browsing listings never opens — the signed-in areas, the
+// owner's tools and the whole admin section — are split into their own chunks
+// and fetched on first visit. The public pages above stay in the main bundle,
+// because they are what the first visit is almost always for.
+const MyBookings = lazy(() => import("./pages/MyBookings"));
+const BookingRequests = lazy(() => import("./pages/BookingRequests"));
+const MyListings = lazy(() => import("./pages/MyListings"));
+const CreateListing = lazy(() => import("./pages/CreateListing"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Subscribe = lazy(() => import("./pages/Subscribe"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
+const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
+const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 
 function App() {
   return (

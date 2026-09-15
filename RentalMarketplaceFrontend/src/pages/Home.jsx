@@ -111,9 +111,8 @@ export default function Home() {
 
   // The list can shrink under the index — a listing delisted between two
   // visits is enough — and an index past the end renders nothing at all.
-  useEffect(() => {
-    if (batch >= batches.length) setBatch(0);
-  }, [batch, batches.length]);
+  // Reset during render, so that empty frame is never painted.
+  if (batch > 0 && batch >= batches.length) setBatch(0);
 
   // Focus is a pause too, not just the pointer: someone tabbing through the
   // cards must not have the card under their cursor swapped mid-reach.

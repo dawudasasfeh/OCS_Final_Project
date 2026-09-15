@@ -29,7 +29,17 @@ export function useQueue(load, onChanged, pageSize = 8) {
     }
   }, [load, t]);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  // The first load, and again if the loader changes. Unlike refresh it sets
+  // nothing before the answer — loading already starts true — and it drops a
+  // reply that arrives after the admin has moved to another queue.
+  useEffect(() => {
+    let cancelled = false;
+    load()
+      .then((rows) => { if (!cancelled) setItems(rows); })
+      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, t("admin.couldNotLoadQueue"), t)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [load, t]);
 
   // Acting on a row always removes it from a pending queue, whichever way the
   // decision went — it is no longer pending.

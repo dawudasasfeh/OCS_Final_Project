@@ -75,6 +75,39 @@ export function AuthProvider({ children }){
         setUser(null);
     }
 
+    // The expiry check in decodeUser runs only when a token is read, so a
+    // session that simply outlives its token stayed "signed in" while every
+    // request failed. Two ways out: a timer for the expiry itself, and any
+    // 401 from the API — which also covers a token the server no longer
+    // accepts, such as one signed with a key that has since been rotated.
+    useEffect(() => {
+        if (!user) return;
+
+        const token = localStorage.getItem("token");
+        const exp = token ? jwtDecode(token).exp : undefined;
+        const timer = typeof exp === "number"
+            ? setTimeout(() => { localStorage.removeItem("token"); setUser(null); },
+                         Math.max(0, exp * 1000 - Date.now()))
+            : undefined;
+
+        const interceptor = client.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                // Only when a token was actually sent: a wrong password on the
+                // sign-in form is also a 401, and must not clear anything.
+                if (error?.response?.status === 401 && localStorage.getItem("token")) {
+                    localStorage.removeItem("token");
+                    setUser(null);
+                }
+                return Promise.reject(error);
+            });
+
+        return () => {
+            clearTimeout(timer);
+            client.interceptors.response.eject(interceptor);
+        };
+    }, [user]);
+
     return (
         <AuthContext.Provider value = {{user, login, register,logout}}>
             {children}

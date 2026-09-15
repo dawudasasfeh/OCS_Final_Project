@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { IconPrev, IconNext } from "./icons";
 
@@ -42,9 +42,8 @@ export function usePaged(items, pageSize) {
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const safe = Math.min(page, totalPages);
 
-  useEffect(() => {
-    if (page !== safe) setPage(safe);
-  }, [page, safe]);
+  // Clamped during render, so a shrunken list never paints an empty page.
+  if (page !== safe) setPage(safe);
 
   const slice = useMemo(
     () => items.slice((safe - 1) * pageSize, safe * pageSize),

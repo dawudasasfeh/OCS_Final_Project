@@ -40,6 +40,9 @@ public class BookingService : IBookingService
         if (dto.StartDate < DateOnly.FromDateTime(DateTime.UtcNow))
             return Result<BookingDto>.Fail("Start date cannot be in the past.");
 
+        if (dto.DurationCount > MaxDurationCount(dto.DurationType))
+            return Result<BookingDto>.Fail("That booking is longer than allowed.");
+
         DateOnly? endDate = dto.DurationType switch
         {
             DurationType.Weekly => dto.StartDate.AddDays(dto.DurationCount * 7),
@@ -54,32 +57,66 @@ public class BookingService : IBookingService
         var padStart = dto.StartDate.AddDays(-house.TurnoverDays);
         var padEnd = endDate.Value.AddDays(house.TurnoverDays);
 
-        if(await _uow.Bookings.HasOverlapAsync(house.Id, padStart, padEnd)) 
-            return Result<BookingDto>.Fail("Those dates are not available.");
-
-        var booking = new Booking
+        // Everything from the first read to the insert is one serializable
+        // transaction. A pending request holds its dates, so without this two
+        // simultaneous requests could both see the calendar clear and both land.
+        var bookingId = await _uow.InTransactionAsync(async () =>
         {
-            HouseId = house.Id,
-            RenterId = renterId,
-            StartDate = dto.StartDate,
-            EndDate = endDate.Value,
-            DurationType = dto.DurationType,
-            DurationCount = dto.DurationCount,
-            TotalPrice = house.Price * dto.DurationCount,
-            Status = BookingStatus.Pending,
-            CreatedAt = DateTime.UtcNow
-        };
+            // A pending request blocks the calendar until the owner answers it,
+            // so without a limit one account could hold every date on a listing.
+            if (await _uow.Bookings.CountPendingForRenterAsync(renterId, house.Id) > 0)
+                return Result<int>.Fail("You already have a pending request for this property.");
 
-        await _uow.Bookings.AddAsync(booking);
-        await _uow.SaveChangesAsync();
+            if (await _uow.Bookings.CountPendingForRenterAsync(renterId) >= MaxPendingPerRenter)
+                return Result<int>.Fail("You have too many pending requests. Wait for an owner to answer one first.");
 
-        var saved = await _uow.Bookings.GetWithDetailsAsync(booking.Id);
+            if (await _uow.Bookings.HasOverlapAsync(house.Id, padStart, padEnd))
+                return Result<int>.Fail("Those dates are not available.");
+
+            var booking = new Booking
+            {
+                HouseId = house.Id,
+                RenterId = renterId,
+                StartDate = dto.StartDate,
+                EndDate = endDate.Value,
+                DurationType = dto.DurationType,
+                DurationCount = dto.DurationCount,
+                TotalPrice = house.Price * dto.DurationCount,
+                Status = BookingStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _uow.Bookings.AddAsync(booking);
+            await _uow.SaveChangesAsync();
+
+            return Result<int>.Ok(booking.Id);
+        });
+
+        if (!bookingId.Succeeded)
+            return Result<BookingDto>.Fail(bookingId.Error!);
+
+        var saved = await _uow.Bookings.GetWithDetailsAsync(bookingId.Data);
 
         return Result<BookingDto>.Ok(Map(saved!, includeContacts: false));
-
-
-
     }
+
+    /// <summary>
+    /// A renter's open requests across all listings. Each holds its dates while
+    /// it waits, so this bounds how much of the calendar one account can tie up.
+    /// </summary>
+    public const int MaxPendingPerRenter = 5;
+
+    /// <summary>
+    /// The longest single booking per rental unit: three months of weeks, two
+    /// years of months, three years. Mirrored by BookingForm's number input.
+    /// </summary>
+    public static int MaxDurationCount(DurationType unit) => unit switch
+    {
+        DurationType.Weekly => 12,
+        DurationType.Monthly => 24,
+        DurationType.Yearly => 3,
+        _ => 0,
+    };
 
     public async Task<BookingDto?> GetByIdAsync(int id, string requesterId, bool isAdmin = false)
     {

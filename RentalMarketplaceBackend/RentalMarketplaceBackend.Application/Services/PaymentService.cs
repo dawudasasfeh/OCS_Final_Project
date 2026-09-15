@@ -42,6 +42,21 @@ public class PaymentService : IPaymentService
             return Result<PaymentDto>.Fail(
                 "You can only record a payment once the owner has confirmed the booking.");
 
+        // Pending payments count against the balance too: they are claims the
+        // owner has yet to check, and two of them for the full amount would
+        // otherwise both be accepted. A rejected one frees its amount again.
+        var recorded = (await _uow.Payments.GetForBookingAsync(booking.Id))
+            .Where(p => p.Status != PaymentStatus.Rejected)
+            .Sum(p => p.Amount);
+
+        var outstanding = booking.TotalPrice - recorded;
+
+        if (outstanding <= 0)
+            return Result<PaymentDto>.Fail("This booking is already fully paid.");
+
+        if (dto.Amount > outstanding)
+            return Result<PaymentDto>.Fail("That is more than the outstanding balance on this booking.");
+
         var payment = new Payment
         {
             Amount = dto.Amount,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { IconPrev, IconNext } from "./icons";
 import { addDays, parseDay, toIso, todayIso } from "../utils/date";
 import { useTranslation } from "react-i18next";
@@ -22,7 +22,7 @@ const MONTH_LABEL = (d) =>
  *
  * Occupancy wins over turnover where two intervals are close enough to collide.
  */
-export function buildDayMap(booked, turnoverDays) {
+function buildDayMap(booked, turnoverDays) {
   const map = new Map();
 
   for (const interval of booked) {
@@ -44,27 +44,6 @@ export function buildDayMap(booked, turnoverDays) {
   return map;
 }
 
-/**
- * The first day from `fromIso` that is neither occupied nor inside a turnover
- * gap. The booking form defaults to today, which on a busy listing is often
- * unbookable — landing on a red error before the renter has touched anything
- * reads as the app being broken rather than the date being taken.
- *
- * Falls back to `fromIso` if the listing is solidly booked for a year, in which
- * case the clash message is the honest answer.
- */
-export function firstFreeDay(booked, turnoverDays, fromIso, horizonDays = 365) {
-  const blocked = buildDayMap(booked, turnoverDays);
-  let d = parseDay(fromIso);
-
-  for (let i = 0; i < horizonDays; i++) {
-    const iso = toIso(d);
-    if (!blocked.has(iso)) return iso;
-    d = addDays(d, 1);
-  }
-  return fromIso;
-}
-
 export default function AvailabilityCalendar({
   booked = [],
   turnoverDays = 0,
@@ -80,16 +59,17 @@ export default function AvailabilityCalendar({
 
   // The cursor is seeded once, so when the selected date is moved from outside
   // — the form skipping forward to the first date a stay actually fits — the
-  // grid would stay on the old month with nothing highlighted. Follow it.
-  useEffect(() => {
-    if (!value) return;
-    const d = parseDay(value);
-    setCursor((c) =>
-      c.getFullYear() === d.getFullYear() && c.getMonth() === d.getMonth()
-        ? c
-        : new Date(d.getFullYear(), d.getMonth(), 1)
-    );
-  }, [value]);
+  // grid would stay on the old month with nothing highlighted. Follow it —
+  // during render, so the old month is never painted first.
+  const [followed, setFollowed] = useState(value);
+  if (value !== followed) {
+    setFollowed(value);
+    if (value) {
+      const d = parseDay(value);
+      if (cursor.getFullYear() !== d.getFullYear() || cursor.getMonth() !== d.getMonth())
+        setCursor(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+  }
 
   const dayMap = useMemo(
     () => buildDayMap(booked, turnoverDays),

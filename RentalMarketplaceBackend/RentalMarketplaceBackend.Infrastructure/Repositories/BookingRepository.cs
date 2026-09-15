@@ -17,6 +17,12 @@ public class BookingRepository : GenericRepository<Booking>, IBookingRepository
             b.StartDate < end && start < b.EndDate
             );
 
+    public async Task<int> CountPendingForRenterAsync(string renterId, int? houseId = null) =>
+        await _dbSet.CountAsync(b =>
+            b.RenterId == renterId &&
+            b.Status == BookingStatus.Pending &&
+            (houseId == null || b.HouseId == houseId));
+
     public async Task<Booking?> GetWithDetailsAsync(int id) =>
          await _dbSet.Include(b => b.House!).ThenInclude(h => h.Owner)
                      .Include(b => b.House!).ThenInclude(h => h.Images)

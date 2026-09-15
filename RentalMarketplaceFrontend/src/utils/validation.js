@@ -76,7 +76,6 @@ export function useFieldErrors() {
     if (first) form.querySelector(`#${CSS.escape(first)}`)?.focus();
 
     return Object.keys(found).length === 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
   // Clear one field's message as soon as it is edited; re-reporting on every

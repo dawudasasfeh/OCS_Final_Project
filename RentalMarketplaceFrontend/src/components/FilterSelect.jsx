@@ -71,10 +71,12 @@ export default function FilterSelect({
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
+  // Everything opening involves, done where the opening happens rather than
+  // in an effect reacting to it afterwards: a fresh search, the highlight on
+  // the current value, and a direction that fits.
+  function openMenu() {
     setQuery("");
-    setActive(Math.max(0, shown.findIndex((o) => o.value === value)));
+    setActive(Math.max(0, all.findIndex((o) => o.value === value)));
 
     // Open upwards when there is not enough room below. A dropdown near the
     // bottom of a short window would otherwise run off the screen, and its
@@ -85,9 +87,13 @@ export default function FilterSelect({
       setUp(below < 300 && box.top > below);
     }
 
-    if (searchable) searchRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    setOpen(true);
+  }
+
+  // Focus has to wait for the search box to exist, which is after the render.
+  useEffect(() => {
+    if (open && searchable) searchRef.current?.focus();
+  }, [open, searchable]);
 
   // Keep the highlighted row in view when arrowing past the fold.
   useEffect(() => {
@@ -105,7 +111,7 @@ export default function FilterSelect({
     if (!open) {
       if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        setOpen(true);
+        openMenu();
       }
       return;
     }
@@ -122,7 +128,7 @@ export default function FilterSelect({
         id={id}
         type="button"
         className={value ? "fs-btn has-value" : "fs-btn"}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={hideLabel ? label : undefined}

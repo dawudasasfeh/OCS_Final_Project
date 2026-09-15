@@ -133,7 +133,7 @@ export default function MyListings() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   const live = houses.filter((h) => h.status === "Approved").length;
 

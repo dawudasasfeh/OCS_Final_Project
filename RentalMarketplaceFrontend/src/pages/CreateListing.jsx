@@ -221,12 +221,11 @@ export default function CreateListing() {
         turnoverDays: Number(form.turnoverDays),
       };
 
-      // createHouse wants imageUrls; the update DTO has no such field, because
-      // photos are managed through their own endpoint and resubmitting the
-      // listing must not be able to drop one.
+      // Neither call carries photos: they are managed through their own
+      // endpoint, so resubmitting the listing can neither drop nor inject one.
       const saved = isEdit
         ? await updateHouse(id, payload)
-        : await createHouse({ ...payload, imageUrls: [] });
+        : await createHouse(payload);
 
       // Photos go up after the listing exists, so each one has a house folder
       // to live in. Sequential, so the order chosen is the order stored and the
@@ -255,6 +254,16 @@ export default function CreateListing() {
   // them would tell the owner they have work left when they do not.
   const missing = ["title", "description", "address", "price", "areaSqM"]
     .filter((k) => String(form[k] ?? "").trim() === "").length;
+
+  // Edit mode used to show the empty form while the listing loaded, and
+  // nothing stopped an owner from typing into it just before it was replaced.
+  if (loading) {
+    return (
+      <div className="container section">
+        <p className="muted">{t("house.loading")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container section">

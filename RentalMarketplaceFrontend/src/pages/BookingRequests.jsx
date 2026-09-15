@@ -46,7 +46,7 @@ export default function BookingRequests() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   async function decide(id, action, failure, success) {
     setError("");

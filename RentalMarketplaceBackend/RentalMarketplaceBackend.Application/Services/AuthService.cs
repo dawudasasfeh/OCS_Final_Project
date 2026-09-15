@@ -40,8 +40,21 @@ namespace RentalMarketplaceBackend.Application.Services
         }
         public async Task<AuthResult> LoginAsync(LoginDto dto) { 
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user,dto.Password))
+            if (user == null)
                 return new AuthResult(false, "Invalid Email or Password.", null);
+
+            // Checked before the password, so a locked account stays locked even
+            // when the next guess happens to be right.
+            if (await _userManager.IsLockedOutAsync(user))
+                return new AuthResult(false, "Too many failed sign-in attempts. Try again in 15 minutes.", null);
+
+            if (!await _userManager.CheckPasswordAsync(user, dto.Password))
+            {
+                await _userManager.AccessFailedAsync(user);
+                return new AuthResult(false, "Invalid Email or Password.", null);
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
 
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "User";
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RentalMarketplaceBackend.Application.DTOs.Auth;
 using RentalMarketplaceBackend.Application.Interfaces.Services;
 
@@ -6,6 +7,7 @@ namespace RentalMarketplaceBackend.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

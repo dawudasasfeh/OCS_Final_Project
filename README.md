@@ -90,29 +90,27 @@ abstractions, and Infrastructure supplies the implementations.
 
 ```bash
 cd RentalMarketplaceBackend
-
-# Update the connection string in RentalMarketplaceBackend.API/appsettings.json
-# to point at your SQL Server instance, then:
-
-dotnet ef database update \
-  --project RentalMarketplaceBackend.Infrastructure \
-  --startup-project RentalMarketplaceBackend.API
-
 dotnet run --project RentalMarketplaceBackend.API
 ```
 
 Runs on `https://localhost:7137`. The OpenAPI document is served at
 `/openapi/v1.json` in development.
 
-On first launch `DbSeeder` creates the `Admin` and `User` roles and a default
-administrator account:
+Nothing needs editing first. `appsettings.Development.json` points at
+`.\SQLEXPRESS` — the SQL Server Express instance on whichever machine runs it —
+and carries a development-only signing key. Pending migrations are applied on
+startup, so there is no separate `dotnet ef database update` step.
 
-```
-admin@beytak.com / Admin123!
+The database starts empty apart from the two roles. To load the demo accounts,
+listings, bookings and photos from `seed-data.json`, run once with the reset flag:
+
+```bash
+Seed__Reset=true dotnet run --project RentalMarketplaceBackend.API
 ```
 
-*(A hardcoded seed account is a deliberate convenience for evaluation. Production would
-source these from user-secrets or environment variables.)*
+This **deletes** every listing, booking, payment and user first. In development the
+administrator is `admin@beytak.com` with the development password in `DbSeeder.cs`;
+the demo accounts share `Test123!`.
 
 ### Frontend
 
@@ -122,7 +120,39 @@ npm install
 npm run dev
 ```
 
-Runs on `http://localhost:5173`. The backend CORS policy permits exactly this origin.
+Runs on `http://localhost:5173`. The API address comes from `.env.development`.
+
+---
+
+## Deploying
+
+Nothing secret is in the repository, so a deployed copy is configured entirely
+through environment variables. The backend refuses to start without the first three,
+and says which is missing.
+
+**Backend**
+
+| Variable | Value |
+|---|---|
+| `ConnectionStrings__DefaultConnection` | the production SQL Server connection string |
+| `Jwt__Key` | a random string of 32+ characters, used nowhere else |
+| `Cors__AllowedOrigins__0` | the frontend's address, e.g. `https://beytak.pages.dev` |
+| `Seed__Reset` | `true` for the **first** start only, to load the demo data — then remove it |
+| `Seed__AdminPassword` | required when seeding outside development; must contain upper and lower case, a digit and a symbol |
+| `Seed__DemoPassword` | optional; the demo accounts' password, default `Test123!` |
+
+Uploaded photos are stored under `wwwroot/uploads`, so the host must keep that
+folder across restarts and deploys. `/health` answers `200` for uptime checks.
+
+**Frontend**
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | the API's address including `/api`, e.g. `https://beytak-api.azurewebsites.net/api` |
+
+It is read at build time, so changing it means rebuilding. The site is a single-page
+app: the host must serve `index.html` for unknown paths, or refreshing
+`/houses/5` returns a 404.
 
 ---
 

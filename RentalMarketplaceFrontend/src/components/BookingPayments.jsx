@@ -50,7 +50,7 @@ export default function BookingPayments({ booking, side }) {
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [booking.id]);
+  }, [booking.id, t]);
 
   const paid = payments
     .filter((p) => p.status === "Confirmed")

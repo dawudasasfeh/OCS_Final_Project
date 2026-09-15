@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getWishlist, addToWishlist, removeFromWishlist } from "../api/wishlist";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
@@ -15,13 +16,20 @@ const WishlistContext = createContext(null);
 export function WishlistProvider({ children }) {
     const { user } = useAuth();
     const toast = useToast();
+    const { t } = useTranslation();
     const [ids, setIds] = useState(() => new Set());
 
+    // Another account, or none, must not see the previous one's hearts even
+    // for a frame — so this is cleared during render, not in the effect.
+    const userId = user?.id ?? null;
+    const [heldFor, setHeldFor] = useState(userId);
+    if (userId !== heldFor) {
+        setHeldFor(userId);
+        setIds(new Set());
+    }
+
     useEffect(() => {
-        if (!user) {
-            setIds(new Set());
-            return;
-        }
+        if (!user) return;
 
         let cancelled = false;
 
@@ -55,16 +63,13 @@ export function WishlistProvider({ children }) {
 
         try {
             await (saved ? removeFromWishlist(houseId) : addToWishlist(houseId));
-            toast.success(saved ? "Removed from saved properties." : "Saved.");
+            toast.success(t(saved ? "wishlist.removed" : "wishlist.saved"));
         } catch {
             // The heart springing back is easy to miss, so say what happened.
             undo();
-            toast.error(
-                saved ? "Could not remove that. Please try again."
-                      : "Could not save that. Please try again."
-            );
+            toast.error(t(saved ? "wishlist.couldNotRemove" : "wishlist.couldNotSave"));
         }
-    }, [ids, toast]);
+    }, [ids, toast, t]);
 
     return (
         <WishlistContext.Provider value={{ ids, toggle }}>

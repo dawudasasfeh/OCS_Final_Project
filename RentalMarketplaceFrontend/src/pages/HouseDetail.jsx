@@ -29,12 +29,30 @@ export default function HouseDetail() {
 
   const [house, setHouse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // The failure itself, not its message: translated at render, so switching
+  // language re-words it without having to fetch the listing again.
+  const [loadError, setLoadError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [broken, setBroken] = useState(() => new Set());
   const stripRef = useRef(null);
   const [booking, setBooking] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [descOverflows, setDescOverflows] = useState(false);
+  const descRef = useRef(null);
+
+  // "Show more" only when the four-line clamp actually hides something. The
+  // old length check guessed wrong both ways: a 300-character description in a
+  // wide column fits in four lines, and a short one full of line breaks does
+  // not. Measured while clamped; expanding keeps the last answer.
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el || descExpanded) return;
+
+    const observer = new ResizeObserver(() =>
+      setDescOverflows(el.scrollHeight > el.clientHeight + 1));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [house?.description, descExpanded]);
 
   const markBroken = (i) => setBroken((prev) => new Set(prev).add(i));
 
@@ -43,7 +61,7 @@ export default function HouseDetail() {
 
     async function load() {
       setLoading(true);
-      setError("");
+      setLoadError(null);
       try {
         const data = await getHouse(id);
         if (!cancelled) {
@@ -52,13 +70,7 @@ export default function HouseDetail() {
           setDescExpanded(false);
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(
-            err?.response?.status === 404
-              ? t("house.unavailable")
-              : getErrorMessage(err, t("house.couldNotLoad"), t)
-          );
-        }
+        if (!cancelled) setLoadError(err);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -76,11 +88,15 @@ export default function HouseDetail() {
     );
   }
 
-  if (error || !house) {
+  if (loadError || !house) {
+    const message = !loadError ? t("house.notFound")
+      : loadError.response?.status === 404 ? t("house.unavailable")
+      : getErrorMessage(loadError, t("house.couldNotLoad"), t);
+
     return (
       <div className="container section">
         <div className="empty-state">
-          <p>{error || t("house.notFound")}</p>
+          <p>{message}</p>
           <Link to="/houses" className="btn btn-outline">{t("house.backToProperties")}</Link>
         </div>
       </div>
@@ -331,12 +347,13 @@ export default function HouseDetail() {
             <div className="detail-block">
               <h2>{t("house.description")}</h2>
               <p
+                ref={descRef}
                 className={descExpanded ? "detail-description" : "detail-description clamped"}
                 dir="auto"
               >
                 {house.description}
               </p>
-              {house.description?.length > 220 && (
+              {(descOverflows || descExpanded) && (
                 <button
                   type="button"
                   className="desc-toggle"

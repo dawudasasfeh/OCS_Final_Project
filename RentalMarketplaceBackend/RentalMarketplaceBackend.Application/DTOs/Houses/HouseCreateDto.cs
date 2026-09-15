@@ -45,5 +45,8 @@ public class HouseCreateDto
     [Range(0, 30)]
     public int TurnoverDays { get; set; } = 2;
 
-    public List<string> ImageUrls { get; set; } = new();
+    // No ImageUrls. Photos arrive through POST /houses/{id}/images, where the
+    // file is checked and stored by the server. A URL field here let a caller
+    // attach any address at all — another site's image, a tracking pixel —
+    // with none of those checks.
 }

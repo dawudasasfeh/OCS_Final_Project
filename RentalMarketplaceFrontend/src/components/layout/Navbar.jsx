@@ -59,8 +59,14 @@ export default function Navbar() {
     };
   }, []);
 
-  // close it whenever the route changes
-  useEffect(() => { setOpen(false); setNavOpen(false); }, [pathname]);
+  // close it whenever the route changes — during render, so the new page is
+  // never painted with the old menu still open over it
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (pathname !== menuPath) {
+    setMenuPath(pathname);
+    setOpen(false);
+    setNavOpen(false);
+  }
 
   return (
     <header className="navbar">

@@ -6,7 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { addDays, endOfStay, formatDay, parseDay, toIso, todayIso } from "../utils/date";
 import AvailabilityCalendar from "./AvailabilityCalendar";
 
-import { DURATION_TYPE, UNIT_KEY, periodLabel } from "../utils/duration";
+import { DURATION_TYPE, MAX_DURATION_COUNT, UNIT_KEY, periodLabel } from "../utils/duration";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -169,7 +169,7 @@ export default function BookingForm({ house }) {
           className="input"
           type="number"
           min="1"
-          max="60"
+          max={MAX_DURATION_COUNT[house.priceUnit] ?? 1}
           value={durationCount}
           onChange={(e) => setDurationCount(e.target.value)}
           required

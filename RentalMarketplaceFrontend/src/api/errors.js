@@ -36,6 +36,14 @@ const STATIC_MESSAGES = {
   "Testimonial not found.": "apiError.testimonialNotFound",
   "Email is already registered.": "apiError.emailRegistered",
   "Invalid Email or Password.": "apiError.invalidLogin",
+  "Too many failed sign-in attempts. Try again in 15 minutes.": "apiError.lockedOut",
+  "That booking is longer than allowed.": "apiError.bookingTooLong",
+  "You already have a pending request for this property.": "apiError.duplicatePending",
+  "You have too many pending requests. Wait for an owner to answer one first.":
+    "apiError.tooManyPending",
+  "This booking is already fully paid.": "apiError.fullyPaid",
+  "That is more than the outstanding balance on this booking.": "apiError.overpayment",
+  "This listing already has the maximum number of photos.": "apiError.tooManyPhotos",
 };
 
 // "This property is rented Weekly only." — the enum name comes through
@@ -95,6 +103,19 @@ export function getErrorMessage(err, fallback, t) {
 
   if (err?.code === "ERR_NETWORK") {
     return t ? t("apiError.networkUnreachable") : "Cannot reach the server. Is the API running?";
+  }
+
+  const status = err?.response?.status;
+
+  // The rate limiter answers with an empty body, so there is no message to map.
+  if (status === 429) {
+    return t ? t("apiError.rateLimited") : "Too many attempts. Wait a minute and try again.";
+  }
+
+  // A 500 carries the exception handler's generic English ProblemDetails
+  // title, which is no more use to a reader than the translated generic line.
+  if (status >= 500) {
+    return fallback ?? (t ? t("apiError.generic") : "Something went wrong. Please try again.");
   }
 
   const data = err?.response?.data;

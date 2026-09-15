@@ -30,21 +30,29 @@ export default function Autocomplete({
   emptyText,
 }) {
   const { t } = useTranslation();
-  const [text, setText] = useState("");
+  const selected = useMemo(
+    () => options.find((o) => o.value === value),
+    [options, value]
+  );
+  const selectedLabel = selected ? selected.label : "";
+
+  const [text, setText] = useState(selectedLabel);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 
   const root = useRef(null);
   const listRef = useRef(null);
 
-  const selected = useMemo(
-    () => options.find((o) => o.value === value),
-    [options, value]
-  );
-
   // Follow the committed value when it changes from outside — clearing a
-  // filter elsewhere has to empty the box too.
-  useEffect(() => { setText(selected ? selected.label : ""); }, [selected]);
+  // filter elsewhere has to empty the box too. Adjusted during render rather
+  // than in an effect, so the box never paints one frame with the old text.
+  // Compared by label, not object, so a parent rebuilding its options array
+  // does not wipe what the user is typing.
+  const [shownLabel, setShownLabel] = useState(selectedLabel);
+  if (selectedLabel !== shownLabel) {
+    setShownLabel(selectedLabel);
+    setText(selectedLabel);
+  }
 
   const matches = useMemo(() => {
     const q = text.trim().toLowerCase();
