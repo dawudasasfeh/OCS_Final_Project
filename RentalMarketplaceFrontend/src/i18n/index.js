@@ -33,6 +33,9 @@ export function applyDocumentLanguage(lng) {
   // A hook for the few rules that cannot be expressed logically, and for
   // switching the body face to the Arabic one.
   root.classList.toggle("rtl", LANGUAGES[code].dir === "rtl");
+  // The tab title follows too. index.html carries the Arabic one, so a first
+  // visit never flashes English before the script runs.
+  document.title = i18n.t("common.pageTitle", { lng: code });
 }
 
 i18n
