@@ -125,14 +125,11 @@ export default function BookingForm({ house }) {
         </p>
         <p className="booking-total">
           <span>{t("booking.total")}</span>
-          <strong>{created.totalPrice} JOD</strong>
+          <strong>{created.totalPrice} {t("common.jod")}</strong>
         </p>
-        <p className="muted booking-note">
-          The owner will confirm or decline. Their phone number appears once the
-          booking is confirmed.
-        </p>
+        <p className="muted booking-note">{t("booking.doneNote")}</p>
         <Link to="/my-bookings" className="btn btn-outline phone-btn">
-          View my bookings
+          {t("booking.viewMyBookings")}
         </Link>
       </div>
     );
@@ -183,15 +180,12 @@ export default function BookingForm({ house }) {
       )}
 
       {overlaps && (
-        <p className="error-text">
-          Those dates run into an existing booking. Pick a different start date
-          or a shorter stay.
-        </p>
+        <p className="error-text">{t("booking.datesClash")}</p>
       )}
 
       <p className="booking-total">
         <span>{t("booking.lineTotal", { period: periodLabel(t, count, house.priceUnit), price: house.price })}</span>
-        <strong>{total} JOD</strong>
+        <strong>{total} {t("common.jod")}</strong>
       </p>
 
       <button

@@ -146,7 +146,9 @@ export default function HouseDetail() {
   // guest holds the masked number, and 079048XXXX would make a dead link.
   const whatsapp = user && phone && /^\d+$/.test(phone)
     ? `https://wa.me/962${phone.replace(/^0/, "")}?text=${encodeURIComponent(
-        `Hello, I saw your listing "${house.title}" (ref BYT${String(house.id).padStart(6, "0")}) on Beytak and would like to ask about it.`
+        // In the reader's language: an Arabic reader messaging a Jordanian
+        // owner should not open the chat with a paragraph of English.
+        t("house.whatsappMessage", { title: house.title, ref: reference(house.id) })
       )}`
     : null;
 

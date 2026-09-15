@@ -7,7 +7,7 @@ import { getErrorMessage } from "../api/errors";
 import { useToast } from "../context/ToastContext";
 import { useFieldErrors } from "../utils/validation";
 import FieldError from "../components/FieldError";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 // Address and hours are translated; the email and phone are literals that must
 // not be, since they are what a reader copies or dials.
@@ -117,7 +117,11 @@ export default function Contact() {
                 </div>
 
                 <p className="muted" style={{ fontSize: ".82rem" }}>
-                  Posting as <strong>{user.name}</strong>.
+                  <Trans
+                    i18nKey="contact.postingAs"
+                    values={{ name: user.name }}
+                    components={{ 1: <strong /> }}
+                  />
                 </p>
 
                 <button className="btn btn-primary" type="submit" disabled={busy}>

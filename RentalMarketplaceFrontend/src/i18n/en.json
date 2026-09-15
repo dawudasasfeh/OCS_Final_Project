@@ -347,6 +347,7 @@
     "turnoverDays_other": "{{count}} days",
     "whatsapp": "WhatsApp",
     "chatWhatsapp": "Chat on WhatsApp",
+    "whatsappMessage": "Hello, I saw your listing \"{{title}}\" (ref {{ref}}) on Beytak and would like to ask about it.",
     "propertyOwner": "Property owner",
     "beforeYouRent": "Before you rent",
     "tipVisit": "Visit the property in person before paying anything.",
@@ -577,7 +578,10 @@
     "unitMonth": "months",
     "unitYear": "years",
     "unitPeriod": "periods",
-    "paidOf": "{{paid}} of {{total}} JOD confirmed"
+    "paidOf": "{{paid}} of {{total}} JOD confirmed",
+    "doneNote": "The owner will confirm or decline. Their phone number appears once the booking is confirmed.",
+    "viewMyBookings": "View my bookings",
+    "datesClash": "Those dates run into an existing booking. Pick a different start date or a shorter stay."
   },
   "admin": {
     "title": "Admin",
@@ -660,7 +664,8 @@
     "intro": "Questions about a listing, a booking or your subscription? Reach us on the details below — or share your experience of using Beytak.",
     "shareIntro": "Tell other renters and owners how Beytak worked for you. Testimonials are reviewed by our team before they appear on the site.",
     "needAccount": "You need an account to leave a testimonial.",
-    "submitted": "Thank you. Your testimonial has been submitted and will appear once it is approved."
+    "submitted": "Thank you. Your testimonial has been submitted and will appear once it is approved.",
+    "postingAs": "Posting as <1>{{name}}</1>."
   },
   "notFound": {
     "title": "We couldn’t find that page",
