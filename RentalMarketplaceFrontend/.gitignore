@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Wrangler (used to deploy to Cloudflare Pages) keeps a local cache here
+.wrangler

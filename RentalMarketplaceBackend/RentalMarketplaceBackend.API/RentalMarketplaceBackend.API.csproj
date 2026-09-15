@@ -4,6 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Workstation GC. ASP.NET Core defaults to the server collector, which
+         keeps a heap per core and holds memory back for throughput. The host
+         caps the app at 256 MB, where that reserve is the difference between
+         running and being recycled. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
