@@ -17,6 +17,25 @@ import { IconClose } from "./icons";
  */
 import { useTranslation } from "react-i18next";
 
+/**
+ * Folds text to the form people actually type. Place names are stored with
+ * their diacritics — "عمّان" has a shadda — and nobody types those, so a
+ * character-for-character match found nothing for "عمان". Also folds the
+ * hamza forms of alef, alef maqsura and ta marbuta, which are routinely typed
+ * interchangeably, and Latin case and accents.
+ */
+const fold = (s) =>
+  s.toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")        // Latin accents
+    .replace(/[ً-ٰٟـ]/g, "")              // tashkeel, tatweel
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه");
+
+/**
+ * Options are { value, label, hint?, keywords?, typedOnly? }. `keywords` is
+ * extra text to match on — the other language's name, say — and `typedOnly`
+ * keeps an option out of the list until something has been typed, so a long
+ * tail of rarely-wanted choices does not bury the common ones.
+ */
 export default function Autocomplete({
   id,
   label,
@@ -55,9 +74,9 @@ export default function Autocomplete({
   }
 
   const matches = useMemo(() => {
-    const q = text.trim().toLowerCase();
-    if (!q) return options;
-    return options.filter((o) => o.label.toLowerCase().includes(q));
+    const q = fold(text.trim());
+    if (!q) return options.filter((o) => !o.typedOnly);
+    return options.filter((o) => fold(`${o.label} ${o.keywords ?? ""}`).includes(q));
   }, [options, text]);
 
   function close({ revert = true } = {}) {
