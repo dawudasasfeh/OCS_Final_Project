@@ -368,12 +368,25 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .account-menu-foot button:hover { background: var(--primary-soft); }
 
 /* ── Hero (search sits inside, vertically centred) ─────────────── */
+/* The photograph's landmark is the Raghadan flag, and the hero is framed
+   around it: the flag flies just under the navbar, the heading sits below
+   it, the city fills the rest. In the 1024x683 photo the flag cloth spans
+   y 225-272 (32.9%-39.8% of its height).
+
+   A plain `cover` + percentage cannot hold that framing, because where the
+   flag lands depends on the hero's width-to-height ratio: the old
+   `center 78%` showed it at 1440px, cut it off above 1680px and hid it
+   behind the heading below 1280px. Instead the flag is placed directly —
+   see ::before, and the tablet and phone blocks for the narrow case. */
 .hero {
   position: relative;
-  min-height: 540px;
+  /* Height grows with width so the photo keeps one shape at every desktop
+     size. The ::before offset relies on it staying under 0.447 x width + 21px,
+     past which the photo would stop short of the hero's bottom edge. */
+  min-height: max(460px, 40vw);
   display: flex;
   align-items: center;
-  padding: 40px 0 150px;
+  padding: 80px 0 110px;
   text-align: center;
   color: #fff;
   overflow: hidden;
@@ -382,12 +395,17 @@ select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text)
 .hero::before {
   content: "";
   position: absolute;
-  inset: -10px;
+  inset: -10px;                      /* room for the blur to fade at the edges */
   background:
     linear-gradient(rgba(20, 22, 25, .48), rgba(20, 22, 25, .60)),
     var(--hero-img, linear-gradient(180deg, #4B5158 0%, #2A2E33 100%));
-  background-size: cover;
-  background-position: center 78%;
+  background-repeat: no-repeat;
+  /* The photo spans the full width, so its height is 0.667 x (width + 20px)
+     and the flag's top sits 21.97vw + 4.4px below the photo's top edge.
+     Shifting the photo up by that much, less 28px, puts the flag 22px below
+     the top of the hero at any desktop width. */
+  background-size: cover, 100% auto;
+  background-position: center, 50% calc(28px - 21.97vw);
   filter: blur(2px);
   z-index: 0;
 }
@@ -2117,7 +2135,6 @@ body:has(.auth-split) .footer { display: none; }
 /* ── Large desktop ≥1400px ─────────────────────────────────────── */
 @media (min-width: 1400px) {
   :root { --container: 1280px; --gutter: 32px; --section-y: 64px; }
-  .hero { min-height: 600px; }
   .search-tabs, .search-card { max-width: 860px; }
 }
 
@@ -2133,7 +2150,6 @@ body:has(.auth-split) .footer { display: none; }
   :root { --container: 1680px; --gutter: 40px; --section-y: 72px; }
   .grid-houses { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
   .gallery-stage { height: clamp(240px, 46vw, 580px); }
-  .hero { min-height: 640px; }
 }
 
 /* ── Ultra-wide ≥2200px (27" 1440p and up) ─────────────────────────
@@ -2230,7 +2246,13 @@ body:has(.auth-split) .footer { display: none; }
   }
   .nav-drawer-auth .btn { width: 100%; justify-content: center; }
 
-  .hero { min-height: 460px; padding: 34px 0 96px; }
+  /* Narrower than about 2:1 the photo cannot span the width and still reach
+     the flag, so it is scaled to 140% of the hero's height instead and
+     aligned to the bottom, which lands the flag near the top; the heading
+     starts below it. 140% x 1.5 is 2.1 x the height, wide enough to cover
+     any hero this block applies to. */
+  .hero { min-height: 460px; padding: 100px 0 96px; }
+  .hero::before { background-size: cover, auto 140%; background-position: center, 50% 100%; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
   /* Even as a bar, six controls stacked on a phone push the listings off the
      first screen, so it collapses behind a button. The applied filters stay
@@ -2270,7 +2292,7 @@ body:has(.auth-split) .footer { display: none; }
   .nav-user { display: none; }
   .btn { padding: 0 .85rem; font-size: .86rem; }
 
-  .hero { min-height: 400px; padding: 28px 0 80px; }
+  .hero { min-height: 400px; padding: 90px 0 80px; }
   .hero h1 { margin-bottom: 1.2rem; }
 
   .search-tab { padding: .5rem 0; font-size: .84rem; }
