@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /my-bookings
+Disallow: /my-listings
+Disallow: /requests
+Disallow: /wishlist
+Disallow: /subscribe
+
+Sitemap: https://beytak.pages.dev/sitemap.xml
