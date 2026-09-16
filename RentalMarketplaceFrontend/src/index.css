@@ -2033,6 +2033,9 @@ textarea.input { resize: vertical; line-height: 1.5; }
   /* The extra pixel is the navbar's border-bottom, which --nav-h does not
      include — without it the split overshoots and the page scrolls by 1px. */
   height: calc(100vh - var(--nav-h) - 1px);
+  /* dvh where supported: on a phone 100vh includes the area behind the
+     browser's toolbar, which hid the bottom of the form. */
+  height: calc(100dvh - var(--nav-h) - 1px);
   overflow: hidden;
 }
 

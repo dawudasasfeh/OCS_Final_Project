@@ -154,6 +154,8 @@
     "haveAccount": "Already have an account?",
     "logInInstead": "Log in",
     "demoAccounts": "Demo accounts",
+    "demoOwner": "Owner (subscribed)",
+    "demoRenter": "Renter",
     "asideLogin": "Pick up where you left off.",
     "asideLoginPoints": [
       "Every booking you have made, with its current status",

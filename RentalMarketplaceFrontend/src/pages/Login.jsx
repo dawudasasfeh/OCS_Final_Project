@@ -9,18 +9,22 @@ import FieldError from "../components/FieldError";
 import AuthLayout from "../components/AuthLayout";
 import Logo from "../components/Logo";
 
-// Development convenience only — the block that renders these is wrapped in
-// import.meta.env.DEV, so Vite strips it from a production build.
+// One-click sign-in for people trying the demo. The owner and the renter are
+// shown on the live site too: they are seeded demo accounts, and a portfolio
+// visitor should not have to hunt for credentials. Admin stays development-only
+// — it can moderate and delete everything, and its live password is a secret,
+// so import.meta.env.DEV strips it from a production build.
 //
-// Three accounts, one per side of the subscription gate. Layla is an owner with
-// an active subscription, so she can publish; Yazan is a renter who has never
-// subscribed, which is what makes the paywall visible.
+// Layla is an owner with an active subscription, so she can publish; Yazan is a
+// renter who has never subscribed, which is what makes the paywall visible.
 const DEMO_ACCOUNTS = [
-  { label: "Admin", email: "admin@beytak.com", password: "Admin123!",
-    hint: "Moderation queues: pending listings, testimonials and subscriptions" },
-  { label: "User (sub)", email: "layla.haddad@gmail.com", password: "Test123!",
-    hint: "Subscribed until Dec · owns listings, and also books and pays as a renter" },
-  { label: "User (unsub)", email: "yazan.husseini@gmail.com", password: "Test123!",
+  ...(import.meta.env.DEV
+    ? [{ labelKey: "auth.demoAdmin", email: "admin@beytak.com", password: "Admin123!",
+         hint: "Moderation queues: pending listings, testimonials and subscriptions" }]
+    : []),
+  { labelKey: "auth.demoOwner", email: "layla.haddad@gmail.com", password: "Test123!",
+    hint: "Subscribed · owns listings, and also books and pays as a renter" },
+  { labelKey: "auth.demoRenter", email: "yazan.husseini@gmail.com", password: "Test123!",
     hint: "Never subscribed · blocked from listing · books as a renter" },
 ];
 
@@ -118,27 +122,23 @@ export default function Login() {
           {t("auth.noAccount")} <Link to="/register">{t("auth.createOne")}</Link>
         </p>
 
-        {/* Below the form, not above it. Six buttons ahead of the email field
-            made the shortcut the first thing on the page — and it is stripped
-            from a production build entirely, so it should never lead. */}
-        {import.meta.env.DEV && (
-          <div className="quick-cred">
-            <span className="quick-cred-label">{t("auth.demoAccounts")}</span>
-            <div className="quick-cred-row">
-              {DEMO_ACCOUNTS.map((a) => (
-                <button
-                  key={a.email}
-                  type="button"
-                  className="quick-cred-btn"
-                  title={`${a.email} — ${a.hint}`}
-                  onClick={() => { setEmail(a.email); setPassword(a.password); }}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
+        {/* Below the form, not above it, so the shortcut never leads. */}
+        <div className="quick-cred">
+          <span className="quick-cred-label">{t("auth.demoAccounts")}</span>
+          <div className="quick-cred-row">
+            {DEMO_ACCOUNTS.map((a) => (
+              <button
+                key={a.email}
+                type="button"
+                className="quick-cred-btn"
+                title={`${a.email} — ${a.hint}`}
+                onClick={() => { setEmail(a.email); setPassword(a.password); clearError("email"); clearError("password"); }}
+              >
+                {t(a.labelKey)}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </form>
     </AuthLayout>
   );

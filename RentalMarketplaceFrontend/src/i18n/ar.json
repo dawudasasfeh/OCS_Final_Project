@@ -170,6 +170,8 @@
     "haveAccount": "لديك حساب بالفعل؟",
     "logInInstead": "سجّل الدخول",
     "demoAccounts": "حسابات تجريبية",
+    "demoOwner": "مالك (مشترك)",
+    "demoRenter": "مستأجر",
     "asideLogin": "تابع من حيث توقفت.",
     "asideLoginPoints": [
       "كل حجز قمت به، مع حالته الحالية",
